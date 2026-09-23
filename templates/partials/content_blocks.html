@@ -1,8 +1,9 @@
   {% for block in custom_blocks if block.type != 'category' or block.posts %}
-  <section class="custom-block custom-{{ block.type }} tone-{{ block.tone }} align-{{ block.align }} width-{{ block.width }}" 
-    {% if block.tone == 'custom' %}style="background: {{ block.background }}"{% endif %}
-    {% if block.foreground %}style="--text-color: {{ block.foreground }}"{% endif %}
-  >
+  {% set appearance = block.appearance|default({}) %}
+  <section class="custom-block custom-{{ block.type }} tone-{{ block.tone }} align-{{ block.align }} width-{{ block.width }}"
+    data-stats-columns="{{ appearance.get('columns', '') }}"
+    data-button-width="{{ appearance.get('width_mode', 'auto') }}"
+    style="{% if block.tone == 'custom' %}background: {{ block.background }};{% endif %}{% if block.foreground %}--text-color: {{ block.foreground }};{% endif %}{% for key, value in appearance.items() %}--block-{{ key|replace('_', '-') }}: {{ value }}{% if value is number and key != 'columns' %}px{% endif %};{% endfor %}">
     {% if block.type == 'heading' %}
       <{{ block.level }}>{{ block.text }}</{{ block.level }}>
     {% elif block.type in ['text', 'legacy_html'] %}
@@ -10,7 +11,12 @@
     {% elif block.type == 'list' %}
       {% set tag = 'ol' if block.ordered else 'ul' %}<{{ tag }}>{% for item in block['items'] %}<li>{{ item }}</li>{% endfor %}</{{ tag }}>
     {% elif block.type == 'table' %}
-      <div class="custom-table-scroll"><table>{% if block.caption %}<caption>{{ block.caption }}</caption>{% endif %}{% for row in block.rows %}{% set first = loop.first %}<tr>{% for cell in row %}{% if first %}<th scope="col">{{ cell }}</th>{% else %}<td>{{ cell }}</td>{% endif %}{% endfor %}</tr>{% endfor %}</table></div>
+      <div class="custom-table-scroll"><table>{% if block.caption %}<caption>{{ block.caption }}</caption>{% endif %}
+        {% for row in block.rows %}{% set row_index = loop.index0 %}{% set first = loop.first %}<tr>
+          {% for cell in row %}{% set cell_style = block.cell_styles[row_index][loop.index0] if block.cell_styles is defined else {} %}
+          {% set cell_tag = 'th' if first else 'td' %}<{{ cell_tag }} {% if first %}scope="col"{% endif %} style="{% if cell_style.background %}background-color: {{ cell_style.background }};{% endif %}{% if cell_style.color %}color: {{ cell_style.color }};{% endif %}">{{ cell }}</{{ cell_tag }}>
+          {% endfor %}</tr>{% endfor %}
+      </table></div>
     {% elif block.type == 'image' and block.url %}
       <figure><img src="{{ block.url }}" alt="{{ block.alt }}" loading="lazy" />{% if block.caption %}<figcaption>{{ block.caption }}</figcaption>{% endif %}</figure>
     {% elif block.type == 'video' and block.video %}

@@ -8,6 +8,43 @@ from urllib.parse import urlsplit, parse_qs
 MAX_DOCUMENT_BYTES = 500_000
 BLOCK_TYPES = {'heading', 'text', 'list', 'table', 'image', 'video', 'button', 'divider', 'category', 'quote', 'callout', 'stats', 'faq', 'legacy_html'}
 
+# Optional presentation settings keep existing documents on their theme defaults.
+APPEARANCE_FIELDS = {
+    'list': {'font_size': (10, 72), 'item_gap': (0, 48)},
+    'table': dict.fromkeys(('cell_background', 'cell_color', 'header_background', 'header_color'), 'color'),
+    'button': {'button_background': 'color', 'button_hover': 'color', 'button_text': 'color',
+               'button_hover_text': 'color', 'font_size': (10, 48), 'width_mode': ('auto', 'full', 'custom'),
+               'width_px': (40, 1200), 'height': (24, 240), 'radius': (0, 120)},
+    'quote': {'font_size': (12, 72), 'attribution_size': (10, 36), 'quote_color': 'color',
+              'attribution_color': 'color', 'border_color': 'color', 'border_width': (0, 12),
+              'font_style': ('normal', 'italic')},
+    'stats': {'value_color': 'color', 'label_color': 'color', 'card_background': 'color',
+              'value_size': (16, 120), 'label_size': (10, 48), 'columns': (1, 4),
+              'gap': (0, 64), 'padding': (0, 64)},
+}
+
+
+def validate_appearance(value, fields):
+    if not isinstance(value, dict):
+        raise ValueError('Invalid appearance settings')
+    result = {}
+    for key, rule in fields.items():
+        if key not in value:
+            continue
+        setting = value[key]
+        if rule == 'color':
+            valid = isinstance(setting, str) and re.fullmatch(r'#[0-9a-fA-F]{6}', setting)
+            if valid:
+                setting = setting.lower()
+        elif isinstance(rule[0], int):
+            valid = type(setting) is int and rule[0] <= setting <= rule[1]
+        else:
+            valid = isinstance(setting, str) and setting in rule
+        if not valid:
+            raise ValueError(f'Invalid appearance setting: {key}')
+        result[key] = setting
+    return result
+
 
 def starter_document(settings, suffix='en'):
     """Editable initial homepage, populated only during first installation."""
@@ -75,8 +112,23 @@ def video_source(value):
     return None
 
 
+def safe_text_url(value):
+    if not isinstance(value, str) or len(value) > 2048:
+        return ''
+    if re.search(r'[\s\x00-\x1f\x7f\\]', value):
+        return ''
+    if re.fullmatch(r'#[A-Za-z][\w:.-]*|mailto:[^\s<>"\\]+|tel:[+0-9().-]+', value):
+        return value
+    return safe_url(value)
+
+
 class InlineHTML(HTMLParser):
-    allowed = {'strong', 'b', 'em', 'i', 'u', 'a', 'br', 'p', 'img'}
+    allowed = {'strong', 'b', 'em', 'i', 'u', 's', 'strike', 'del', 'ins',
+               'sub', 'sup', 'mark', 'small', 'span', 'a', 'br', 'p', 'div', 'img',
+               'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'blockquote', 'pre', 'code',
+               'kbd', 'samp', 'var', 'abbr', 'cite', 'q', 'hr', 'ul', 'ol', 'li',
+               'dl', 'dt', 'dd', 'table', 'caption', 'thead', 'tbody', 'tfoot',
+               'tr', 'th', 'td', 'figure', 'figcaption', 'details', 'summary'}
 
     def __init__(self):
         super().__init__(convert_charrefs=True)
@@ -90,6 +142,43 @@ class InlineHTML(HTMLParser):
         if self.suppressed or tag not in self.allowed:
             return
         attributes = ''
+        values = dict(attrs)
+        # Only bounded presentation values, never arbitrary CSS or event handlers.
+        styles = []
+        for declaration in (values.get('style') or '').split(';'):
+            key, sep, value = declaration.partition(':')
+            key, value = key.strip().lower(), value.strip().lower()
+            if not sep:
+                continue
+            valid = {
+                'text-align': r'left|center|right|justify',
+                'color': r'#[0-9a-f]{3,8}|rgb\(\s*\d{1,3}\s*,\s*\d{1,3}\s*,\s*\d{1,3}\s*\)',
+                'background-color': r'#[0-9a-f]{3,8}|rgb\(\s*\d{1,3}\s*,\s*\d{1,3}\s*,\s*\d{1,3}\s*\)',
+                'font-size': r'(?:[8-9]|[1-6][0-9]|7[0-2])px|smaller|larger',
+                'vertical-align': r'sub|super|baseline',
+                'font-weight': r'normal|bold|[1-9]00',
+                'font-style': r'normal|italic',
+                'text-decoration': r'none|underline|line-through',
+                'font-family': r'serif|sans-serif|monospace',
+                'line-height': r'1|1\.5|2|2\.5|3',
+                'margin-left': r'(?:40|80|120)px',
+            }.get(key)
+            if valid and re.fullmatch(valid, value):
+                styles.append(f'{key}:{value}')
+        if styles:
+            attributes += f' style="{";".join(styles)}"'
+        for key in ('title', 'id'):
+            if values.get(key):
+                attributes += f' {key}="{html.escape(values[key][:500], quote=True)}"'
+        if values.get('dir') in {'ltr', 'rtl', 'auto'}:
+            attributes += f' dir="{values["dir"]}"'
+        for key in ({'colspan', 'rowspan'} if tag in {'td', 'th'} else {'start', 'value'} if tag in {'ol', 'li'} else set()):
+            if re.fullmatch(r'[0-9]{1,3}', values.get(key) or ''):
+                attributes += f' {key}="{values[key]}"'
+        if tag == 'th' and values.get('scope') in {'row', 'col'}:
+            attributes += f' scope="{values["scope"]}"'
+        if tag == 'details' and 'open' in values:
+            attributes += ' open'
         if tag == 'img':
             values = dict(attrs)
             orig_class = (values.get('class') or '').split()
@@ -102,16 +191,18 @@ class InlineHTML(HTMLParser):
             attributes = (f' src="{html.escape(src, quote=True)}" alt="{alt}"'
                           f' class="rich-image rich-image-{align} rich-image-width-{width}" loading="lazy"')
         if tag == 'a':
-            href = safe_url(dict(attrs).get('href', ''))
+            href = safe_text_url(values.get('href', ''))
             if href:
-                attributes = f' href="{html.escape(href, quote=True)}" rel="noopener noreferrer"'
+                attributes += f' href="{html.escape(href, quote=True)}" rel="noopener noreferrer"'
+                if values.get('target') == '_blank':
+                    attributes += ' target="_blank"'
         self.parts.append(f'<{tag}{attributes}>')
-        if tag not in {'br', 'img'}:
+        if tag not in {'br', 'img', 'hr'}:
             self.stack.append(tag)
 
     def handle_startendtag(self, tag, attrs):
         self.handle_starttag(tag, attrs)
-        if tag not in {'br', 'img'}:
+        if tag not in {'br', 'img', 'hr'}:
             self.handle_endtag(tag)
 
     def handle_endtag(self, tag):
@@ -171,6 +262,8 @@ def validate_document(raw):
         fg = item.get('foreground')
         if isinstance(fg, str) and re.fullmatch(r'#[0-9a-fA-F]{6}', fg):
             block['foreground'] = fg.lower()
+        if kind in APPEARANCE_FIELDS and 'appearance' in item:
+            block['appearance'] = validate_appearance(item['appearance'], APPEARANCE_FIELDS[kind])
         if kind == 'category':
             block['category'] = text(item.get('category', ''), 200)
             count = item.get('count', 4)
@@ -217,6 +310,17 @@ def validate_document(raw):
                 raise ValueError('Table rows must have the same number of cells')
             block['rows'] = [[text(cell, 1000) for cell in row] for row in rows]
             block['caption'] = text(item.get('caption', ''), 500)
+            if 'cell_styles' in item:
+                styles = item['cell_styles']
+                if not isinstance(styles, list) or len(styles) != len(rows):
+                    raise ValueError('Invalid table cell styles')
+                block['cell_styles'] = []
+                for row, style_row in zip(rows, styles):
+                    if not isinstance(style_row, list) or len(style_row) != len(row):
+                        raise ValueError('Invalid table cell styles')
+                    block['cell_styles'].append([
+                        validate_appearance(style, {'background': 'color', 'color': 'color'}) for style in style_row
+                    ])
         elif kind in {'image', 'video'}:
             url = text(item.get('url', ''), 2048)
             block['url'] = safe_url(url, media=True)

@@ -8,7 +8,7 @@
 {% endblock %}
 {% block content %}
 {% set selected_mode = 'custom' if request.query_params.get('mode', settings.homepage_mode) == 'custom' else 'feed' %}
-<main id="admin-content" class="admin-settings-page" tabindex="-1">
+<main id="admin-content" class="admin-settings-page full-width-builder" tabindex="-1">
   <div class="admin-settings-container">
     <form id="homepage-form" class="settings-form-v3 homepage-settings-form" method="post" action="/admin/homepage" enctype="multipart/form-data">
       <input type="hidden" name="content_language_code" value="{{ secondary_language.code if secondary_language else '' }}" />

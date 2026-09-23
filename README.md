@@ -209,7 +209,7 @@ Categories, custom links, custom pages, and built-in page links can be assigned 
 
 Open **Content → Custom Page**, enter a title, and select **Create & edit**. The new page starts as a draft and uses the same visual builder as Custom Home and About, including translated blocks, media uploads and cropping, category lists, undo/redo, and desktop/mobile preview.
 
-Set the page title and address, then choose **Show in menu** if you want a link in the public navigation. **Save & publish** saves both the page settings and its content. Published pages are available at `/pages/<address>`. Turning off menu visibility removes the navigation link but keeps the page accessible by its address.
+Homepage, About, custom page, and post editors use the full available admin workspace width. The block palette is 260–320 px wide on desktop and stacks above the canvas on small screens. Set the page title and address, then choose **Show in menu** if you want a link in the public navigation. **Save & publish** saves both the page settings and its content. Published pages are available at `/pages/<address>`. Turning off menu visibility removes the navigation link but keeps the page accessible by its address.
 
 Use the Custom Page list to reopen, view, or delete a page. Deleting a page also removes its automatic navigation link. Each page has its own content and does not change the homepage or About page. Existing databases receive the new page table automatically when the application starts.
 
@@ -263,7 +263,7 @@ Use the **Add a block** palette in the wide left column to insert content after 
 | --- | --- |
 | Category list | Show the latest published items from a selected category. |
 | Heading | Add an H1, H2, or H3 heading. |
-| Text | Add formatted text, emphasis, links, and embedded images with text wrapping. |
+| Text | Compose rich text with headings, lists, tables, quotations, code, links, colors, and embedded images. |
 | List | Add a bulleted or numbered list. |
 | Table | Edit cells, add or remove rows and columns, and supply a caption. |
 | Image | Upload or link an image; add alternative text and a caption. |
@@ -277,7 +277,11 @@ Use the **Add a block** palette in the wide left column to insert content after 
 
 Blocks can be moved up or down, duplicated, and removed. **Undo** and **Redo** restore editor changes within the current editing session.
 
-In a **Text** block, open **Image in text**. Place the cursor where you want the image, upload a PNG/JPEG/WebP (up to 8 MB) or enter an HTTPS/site-upload URL, and add alternative text. Choose **Image left · text right**, **Image right · text left**, or **No wrapping**, plus an image width, then select **Insert / update image**. Click an embedded image to change its settings or remove it. Small screens stack images and text. These controls are shared by Custom Home, About, and Custom Pages; preview and **Save & publish** work as usual.
+A **Text** block has a full-width formatting toolbar directly below Background, Alignment, and Width. Formatting actions use grouped icons with tooltips and accessible labels; content retains its chosen reading width. The toolbar supports: paragraphs and H1–H6 headings; bold, italic, underline, strikethrough, subscript and superscript; nested bulleted/numbered lists and indentation; four-way alignment; quotations and code blocks; inline code, keyboard input, abbreviations, citations and small text; font family, size, text color and highlighting; text direction; definition lists, expandable text, and dividers. Links support HTTP(S), site paths, anchors, email and telephone addresses. Insert tables within the text and use the row/column controls with the cursor in a cell. The table caption and cells are directly editable. Shared Undo/Redo also covers text formatting.
+
+Pasting formatted HTML preserves supported structures and presentation while filtering scripts, unsafe links, event handlers and unsupported styles. The server applies its allowlist again when saving or previewing. Editor, preview and published text use the same typography.
+
+In a **Text** block, open **Image in text**. Place the cursor where you want the image, upload a PNG/JPEG/WebP (up to 8 MB) or enter an HTTPS/site-upload URL, and add alternative text. Choose **Image left · text right**, **Image right · text left**, or **No wrapping**, plus an image width, then select **Insert image into text**. When you edit an existing image’s settings, an **Unapplied changes** badge and a highlighted message appear. Select **Apply image changes** to update the text; a confirmation then reminds you to save the page. Click an embedded image to change its settings or remove it. Small screens stack images and text. These controls are shared by Custom Home, About, and Custom Pages; preview and **Save & publish** work as usual.
 
 Each block provides background, alignment, and width controls:
 
@@ -286,6 +290,18 @@ Each block provides background, alignment, and width controls:
 - **Width:** normal reading width or wide.
 
 The Soft and Accent options use the configured public site palette. Use **Website → Design** to change those site colors.
+
+Additional appearance controls sit below the shared block settings and update the editor immediately:
+
+| Block | Appearance controls |
+| --- | --- |
+| List | Text size (10–72 px) and spacing between items (0–48 px). |
+| Table | Default cell/header background and text colors. Select a cell to override its background/text colors independently; reset cell colors to inherit the table defaults. |
+| Button | Background/text colors, hover/focus background/text colors, text size, corner radius, minimum height (24–240 px), and content-sized, full-width, or custom width (40–1200 px, capped by the available space). Full width fills the block's content area. |
+| Quote | Quote and attribution text sizes/colors, normal or italic text, and line color/thickness (0 hides the line). |
+| Statistics | Value/label colors and sizes, card background/padding, spacing, and 1–4 columns. Small screens stack the cards. |
+
+**Reset appearance** restores theme defaults for that block; individual table-cell overrides have their own reset. Existing blocks retain their defaults until you change a setting. Save and preview preserve these settings for all shared-editor pages and posts.
 
 A **Category list** block supports 1–16 items from any available category, including Blog and Notes. It updates automatically as matching content is published. Use **Preview** to see the current list; card appearance comes from the category card settings described below. An empty or missing source category does not turn the block into an all-content feed.
 
@@ -553,7 +569,7 @@ Review the output before replacing a committed stylesheet: runtime CSS also cont
 
 ### Validation
 
-This checkout contains `scripts/check_admin_changes.py`, which discovers tests in `tests/`, but the `tests/` directory itself is not included. The presence of pytest and Playwright in `requirements.txt` does not establish an included or passing test suite.
+Run `node tests/rich_text_browser.cjs` for isolated Chromium checks of text formatting, headings, lists, table operations, paste filtering, appearance settings, cell colors and responsive toolbar layout (set `CHROMIUM` if needed). Run `python -m unittest discover -s tests` for rich-text server filtering and document round-trip tests. `scripts/check_admin_changes.py` provides a broader test discovery entry point; these focused tests do not replace checking complete application flows.
 
 For documentation and implementation changes, use an isolated installation and check the relevant flows:
 
