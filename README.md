@@ -1,6 +1,6 @@
 # FriPeri
 <p align="center">
-<img height="250" src="static/images/FriPeri_Logo.png"/>
+<img height="250" src="static/images/FriPeri_Logo.png" alt="FriPeri logo" />
 </p>
 
 **A free and simple personal publishing framework.**
@@ -9,29 +9,39 @@ FriPeri is a self-hosted publishing application for personal websites, blogs, no
 
 ## Contents
 
-- [General Information](#general-information)
+- [What Is FriPeri?](#what-is-friperi)
+- [Features](#features)
 - [Installation](#installation)
 - [Detailed Usage](#detailed-usage)
 - [Configuration and Data Storage](#configuration-and-data-storage)
 - [Deployment](#deployment)
 - [Maintenance and Backups](#maintenance-and-backups)
 - [Development](#development)
+- [Contributing and Support](#contributing-and-support)
 - [Troubleshooting](#troubleshooting)
 - [License](#license)
 
-## General Information
+## What Is FriPeri?
 
-### What FriPeri provides
+FriPeri brings content editing, page building, website configuration, and publishing into one application that runs on your own server. It suits personal websites, portfolios, project pages, blogs, and categorized notes. You manage the site in a browser and keep its content in a local SQLite database.
 
-- **Content publishing:** a rich-text editor, drafts, published posts, categories, comma-separated tags, excerpts, and preview images.
+The public website and administration panel are included in the same repository. No external database server, Node.js runtime, frontend build, or hosted editor account is required to run the application.
+
+## Features
+
+- **Content publishing:** a shared visual block editor, drafts, published posts, categories, comma-separated tags, excerpts, and preview images.
 - **Two homepage modes:** Content feed and Custom Home, managed from the same screen.
-- **A visual homepage editor:** headings, formatted text, lists, tables, images, videos, buttons, dividers, and dynamic category lists.
+- **A shared visual editor:** headings, formatted text, lists, tables, images, videos, buttons, dividers, dynamic category lists, quotes, callouts, statistics, and FAQs; undo/redo and desktop/mobile previews.
+- **Standalone pages:** custom pages at `/pages/<address>` and a dedicated About page, using the same editor as posts and the homepage.
 - **Image cropping:** aspect-ratio selection, zoom, dragging, and position sliders for content images and uploaded images in the homepage editor.
 - **Category presentation controls:** individual card colors and date, title, and excerpt visibility settings for each category.
-- **Website customization:** navigation, social links, public site colors, footer text, welcome text, and contact details.
+- **Website customization:** nested navigation with up to five levels, category links, custom links, public site colors, footer text, welcome text, and contact details.
+- **Social profiles:** URLs and visibility controls for 11 supported platforms.
 - **Multilingual content:** English as the primary language, with one optional secondary language and English fallback.
 - **An administration dashboard:** recent content, published and draft totals, category counts, and shortcuts to common tasks.
 - **Browser-based installation:** the first-run form creates the database and administrator account.
+- **Contact inbox:** contact-form submissions stored in SQLite and read from the administration panel.
+- **Backup tools:** create, download, upload, and restore ZIP archives from the admin panel, subject to the storage-path limits described below.
 
 Blog and Notes are categories within the same content system. You can create additional categories and use them in navigation, the content feed, and custom homepage blocks.
 
@@ -41,11 +51,15 @@ FriPeri uses Python, FastAPI, Uvicorn, Jinja2 templates, SQLite, and bundled Jav
 
 Running the application does not require Node.js, a frontend build, an external database server, or a hosted editor service. JavaScript is required for interactive features such as the visual homepage editor, immediate homepage mode switching, and image cropping. Externally linked images and embedded videos still depend on their respective hosts.
 
+### Current scope
+
+This README describes the implementation in this checkout. English is the fixed primary language, with at most one active secondary language. Translation is manual. The application provides administrator login, but no public registration or role-management interface. Contact submissions do not send email. There are no built-in public search, RSS, commenting, or scheduled-publishing screens/routes in this checkout.
+
 ## Installation
 
 ### Requirements
 
-- Python 3.11 or newer, including the `venv` module and pip.
+- Python 3.11 or newer as a starting baseline, including the `venv` module and pip. The pinned packages in `requirements.txt` must also support your chosen interpreter and platform; this checkout does not declare a tested Python-version matrix.
 - A Unix-like environment with Python's `fcntl` module, which the first-run initializer uses for file locking. On Windows, use a Linux environment such as WSL rather than native Windows Python.
 - Write access to the database directory and upload directory.
 - A modern browser for the admin interface.
@@ -79,11 +93,15 @@ python -m pip install -r requirements.txt
 
 ### 4. Start the application
 
+For local HTTP development, disable the session cookie's HTTPS-only flag for this process:
+
 ```bash
-python -m uvicorn main:app --host 127.0.0.1 --port 8000
+SESSION_COOKIE_SECURE=false python -m uvicorn main:app --host 127.0.0.1 --port 8000
 ```
 
 Open **http://127.0.0.1:8000** in your browser. A new installation opens the first-run setup screen.
+
+Use the default `SESSION_COOKIE_SECURE=true` when serving the site over HTTPS. Complete setup locally or through restricted access before exposing a fresh installation publicly.
 
 ### 5. Complete first-run setup
 
@@ -120,31 +138,37 @@ Sign in at `/login`, then open `/admin`. The sidebar groups tools by purpose:
 | Group | Screen | Purpose |
 | --- | --- | --- |
 | Overview | Dashboard | Review recent content, publication totals, and category counts. |
+| Overview | Messages | Read submissions from the contact form. |
 | Content | Content list | Create, edit, and delete posts and notes. |
-| Content | Categories | Create categories and manage their membership structure. |
+| Content | Categories | Create and delete content categories. |
+| Content | Pages | Create and manage standalone pages with the block editor. |
 | Website | Homepage | Choose the homepage mode and edit its settings or blocks. |
+| Website | About | Edit the public About page with the block editor. |
 | Website | Design | Configure public website colors and the footer. |
 | Website | Menu | Configure category navigation and custom links. |
-| Configuration | Settings | Edit site identity, welcome text, social links, login-link visibility, and category card options. |
+| Configuration | Settings | Edit site identity, welcome text, built-in link visibility, and category card options. |
+| Configuration | Social Links | Configure social profile URLs and visibility. |
 | Configuration | Language | Configure the secondary language and custom interface translations. |
-| Overview | Messages | Read submissions from the contact form. |
 | Configuration | Contact Details | Configure contact-page text and the optional contact email address. |
+| Configuration | Backup | Create, download, upload, and restore ZIP backups. |
 
 The navigation collapses on small screens. The admin interface uses its own colors; changing public website colors does not change the admin theme. Interface labels follow the selected language.
 
 ### Creating and Publishing Content
 
 1. Open the content list and choose **New Content**.
-2. Enter the English title, excerpt, and body text.
-3. Use the editor toolbar for formatting, headings, lists, code blocks, links, and tables.
+2. Enter the English title and excerpt.
+3. Build the body with the shared block editor: add headings, formatted text, lists, links, tables, images, and other supported blocks.
 4. Select a category, or leave the content uncategorized.
 5. Add optional tags separated by commas and an optional preview image.
-6. If a secondary language is configured, enable the translation fields and add translated content.
+6. If a secondary language is configured, use the editor's language selector to add its title, excerpt, and blocks.
 7. Choose **Draft** or **Published**, then save using the corresponding action.
 
 Published content appears in its category and in relevant homepage lists. Drafts are excluded from public lists and are not accessible to anonymous visitors through their post URLs. A signed-in administrator can view draft detail pages.
 
 Each post receives a URL derived from its title, such as `/posts/my-first-post`. Open an existing item from the dashboard or content list to edit it. Deleting content removes the post; use a draft when you want to keep the content without publishing it.
+
+For example, create a post titled **Project Update**, choose a **News** category, and add `updates, projects` as tags. Preview it, save it as a draft, then change its status to Published when ready. Existing HTML-based posts are wrapped in a legacy-content block when opened in the current editor; their original body fields remain stored.
 
 ### Selecting and Cropping Images
 
@@ -179,7 +203,7 @@ Deleting a category requires confirmation. Its posts are preserved and become un
 
 ### Custom Pages
 
-**Nested navigation:** In **Website → Menu**, add a custom menu item named **Games** and leave its URL empty to make it a group. In the **Custom pages** section, select **Games** as the parent of **GhostTouch** and **SözcükDizisi**, enable their menu visibility, and save. The published pages will appear inside the Games dropdown. New groups are selectable before saving.
+**Nested navigation:** In **Website → Menu**, add a custom menu item named **Resources** and leave its URL empty to make it a group. In the **Custom pages** section, select **Resources** as the parent of pages such as **Getting Started** and **Project Overview**, enable their menu visibility, and save. The published pages will appear inside the Resources dropdown. New groups are selectable before saving.
 
 Categories, custom links, custom pages, and built-in page links can be assigned to a parent menu. Sort order applies within each group. Up to five levels are supported; circular relationships are rejected. Hidden groups hide their descendants, empty groups are omitted, and deleting a group promotes its direct children to the top level without deleting their pages. Dropdowns support touch and keyboard navigation.
 
@@ -188,6 +212,12 @@ Open **Content → Custom Page**, enter a title, and select **Create & edit**. T
 Set the page title and address, then choose **Show in menu** if you want a link in the public navigation. **Save & publish** saves both the page settings and its content. Published pages are available at `/pages/<address>`. Turning off menu visibility removes the navigation link but keeps the page accessible by its address.
 
 Use the Custom Page list to reopen, view, or delete a page. Deleting a page also removes its automatic navigation link. Each page has its own content and does not change the homepage or About page. Existing databases receive the new page table automatically when the application starts.
+
+### The About Page
+
+Edit `/about` under **Website → About** using the shared block editor, including language versions, media, category lists, and previews. Saving enables the block-based About page. Before that, the application renders its default About template.
+
+The **Show About** setting controls both its public navigation link and the About entry in the admin sidebar. Hiding the link does not disable the `/about` route; the editor remains reachable at `/admin/about`.
 
 ### Choosing a Homepage Experience
 
@@ -239,6 +269,10 @@ Use the **Add a block** palette in the wide left column to insert content after 
 | Image | Upload or link an image; add alternative text and a caption. |
 | Video | Upload a video or use a supported video URL. |
 | Button | Add a labeled link. |
+| Quote | Add a quotation with attribution. |
+| Callout | Highlight a titled message. |
+| Statistics | Display value-and-label pairs. |
+| FAQ | Add questions and answers. |
 | Divider | Separate parts of the page. |
 
 Blocks can be moved up or down, duplicated, and removed. **Undo** and **Redo** restore editor changes within the current editing session.
@@ -257,11 +291,11 @@ A **Category list** block supports 1–16 items from any available category, inc
 
 Use **Preview** to inspect the unsaved page at desktop or mobile width. **Save & publish** saves the custom documents and activates Custom Home. The site's navigation and footer remain around the custom page.
 
-The editor supports up to 80 blocks per language. Tables support up to 30 rows and 8 columns. A custom page is stored as validated block data; arbitrary scripts and iframe markup are not supported.
+The editor supports up to 80 blocks per language and 500,000 bytes per serialized document. Tables support up to 30 rows and 8 columns. A document is stored as validated block data; arbitrary scripts and iframe markup are not supported.
 
 #### Homepage Media and Languages
 
-These upload limits apply specifically to the Custom Home editor:
+These upload limits apply to media blocks in the shared editor for posts, Custom Home, About, and custom pages:
 
 | Media | Supported sources | Upload limit |
 | --- | --- | --- |
@@ -292,7 +326,9 @@ Under **Website → Design**, configure page, navigation, feature, accent, separ
 
 Under **Website → Menu**, configure category labels, sort order, and visibility. Add custom links with a label, URL, order, visibility setting, and optional new-tab behavior. Supply a translated label when using a secondary language.
 
-Under **Configuration → Settings**, edit site identity, homepage welcome text, social profile links and their visibility, and the public login-link setting. The `/login` route remains available when its navigation link is hidden.
+Under **Configuration → Settings**, edit site identity, homepage welcome text, and public built-in link visibility. The `/login` route remains available when its navigation link is hidden.
+
+Under **Configuration → Social Links**, set profile URLs and individual visibility for LinkedIn, X/Twitter, GitHub, ORCID, Google Scholar, ResearchGate, Bluesky, Mastodon, YouTube, Instagram, and Facebook.
 
 ### Managing Languages
 
@@ -327,18 +363,44 @@ Normal content and design configuration belongs in the admin panel. Deployment p
 | `SESSION_COOKIE_NAME` | `site_session` | Administrator session cookie name. |
 | `SESSION_COOKIE_SECURE` | `true` | Whether the session cookie uses the Secure flag. Default `true` (production). Set to `0` or `false` for local HTTP development. |
 | `LANG_COOKIE_NAME` | `site_lang` | Language preference cookie name. |
+| `SITE_SECRET_KEY` | Random fallback | Fallback signing secret before a database secret is loaded. An initialized database's `session_secret` takes precedence. |
 
 Relative paths are resolved from the application directory. Restart the application after changing environment configuration.
 
-For example, to use another database file:
+For example, a local-development `.env` can contain:
 
 ```dotenv
 SITE_DB_PATH=db/my-site.db
+SESSION_COOKIE_SECURE=false
 ```
 
 Database-backed settings take precedence over the site defaults in [site_defaults.py](site_defaults.py). Existing installations have a persistent session secret stored in the database; routine setup does not require manually configuring one.
 
-The database contains posts, categories, tags, administrator credentials, menus, settings, custom homepage documents, and translations. Uploaded media files live separately in the upload directory. Back up both.
+### Initial values and site defaults
+
+The following variables provide setup inputs or fallback values. They are not an alternative to editing saved site settings in the admin panel. See [site_defaults.py](site_defaults.py) and [initialization.py](initialization.py) for defaults; the browser and CLI setup flows can supply their own initial text.
+
+| Area | Environment variables |
+| --- | --- |
+| Site identity | `SITE_NAME`, `SITE_DESCRIPTION` |
+| Welcome text | `HERO_KICKER_EN`, `HERO_KICKER_SECONDARY`, `HERO_TITLE_EN`, `HERO_TITLE_SECONDARY`, `HERO_COPY_EN`, `HERO_COPY_SECONDARY` |
+| Hero image | `HERO_BACKGROUND_ENABLED`, `HERO_BACKGROUND_IMAGE_PATH` |
+| Initial social URLs | `SOCIAL_LINKEDIN_URL`, `SOCIAL_TWITTER_URL` |
+| Contact | `CONTACT_EMAIL`, `CONTACT_INTRO_EN`, `CONTACT_INTRO_SECONDARY`, `CONTACT_DETAILS_EN`, `CONTACT_DETAILS_SECONDARY` |
+| Navigation visibility | `SHOW_LOGIN_LINK`, `SHOW_CONTACT_LINK`, `SHOW_ABOUT_LINK` |
+| Navigation colors | `COLOR_NAV`, `COLOR_NAV_HOVER`, `COLOR_NAV_ACTIVE` |
+| Feature colors | `COLOR_FEATURE_BG`, `COLOR_FEATURE_TEXT`, `COLOR_FEATURE_BORDER` |
+| Accent colors | `COLOR_ACCENT_PRIMARY`, `COLOR_ACCENT_SECONDARY` |
+| Separator colors | `COLOR_SEPARATOR_1`, `COLOR_SEPARATOR_2`, `COLOR_SEPARATOR_3` |
+| CLI setup credentials | `ADMIN_USERNAME`, `ADMIN_PASSWORD` — consumed by `scripts/generate_db.py`; changing them does not reset an existing account. |
+
+Site visibility and hero-background flags use `1` and `0`. Quote hexadecimal colors in `.env`, for example `COLOR_NAV="#245080"`.
+
+Generic setup values might be `SITE_NAME="Example Site"`, `CONTACT_EMAIL=hello@example.com`, and `SOCIAL_LINKEDIN_URL=https://www.linkedin.com/in/example-user/`. Use your own values when deploying. Prefer the CLI's interactive password prompt over a literal password in shell history.
+
+### Persistent data
+
+The database contains posts, custom pages, categories, tags, administrator password hashes, menus, settings, block documents, contact messages, translations, and session data. Uploaded media files live separately in the upload directory. Back up both.
 
 Uploaded URLs use `/static/uploads/<filename>`. If you override storage locations, ensure these URLs still resolve to the actual upload directory through the static directory layout or your web-server configuration. Setting `SITE_UPLOAD_DIR` alone does not create a new public URL mapping.
 
@@ -346,7 +408,7 @@ Uploaded URLs use `/static/uploads/<filename>`. If you override storage location
 
 ### Running as a Linux Service
 
-The following example assumes FriPeri is installed at `/opt/friperi`, its virtual environment is at `/opt/friperi/.venv`, and `www-data` is the chosen service account. Adjust the paths and account for your server. The account needs read access to the application and write access to the database directory and upload directory.
+The following example assumes FriPeri is installed at `/opt/friperi`, its virtual environment is at `/opt/friperi/.venv`, and a dedicated `friperi` service account already exists. Adjust the paths and account for your server. The account needs read access to the application and write access to the database, upload, and backup directories. Restoring bundled images or `.env` through the panel also requires permission to overwrite those files.
 
 Create `/etc/systemd/system/friperi.service`:
 
@@ -356,10 +418,11 @@ Description=FriPeri personal publishing site
 After=network.target
 
 [Service]
-User=www-data
-Group=www-data
+User=friperi
+Group=friperi
 WorkingDirectory=/opt/friperi
 EnvironmentFile=-/opt/friperi/.env
+Environment=SESSION_COOKIE_SECURE=true
 ExecStart=/opt/friperi/.venv/bin/python -m uvicorn main:app --host 127.0.0.1 --port 8000
 Restart=always
 RestartSec=5
@@ -386,6 +449,8 @@ sudo journalctl -u friperi -f
 
 Place a reverse proxy such as Nginx or Caddy in front of `127.0.0.1:8000` and configure HTTPS for your domain. Complete first-run setup before opening the installation to public traffic.
 
+Use a domain such as `example.com` in deployment configuration and replace it with your own domain. Forward the original host and scheme from your trusted proxy. Keep `SESSION_COOKIE_SECURE=true` in production, including in `.env` if that file is used. The service example runs one Uvicorn process; configure additional workers only after validating your storage and deployment needs.
+
 Ensure proxy upload limits accommodate your intended image and video uploads, including multipart request overhead. Serve only the intended public paths; database files, backups, and `.env` are private application data.
 
 Do not use Uvicorn's development `--reload` option for the service. If exposing `/health`, note that its response includes the configured database and upload paths.
@@ -393,6 +458,17 @@ Do not use Uvicorn's development `--reload` option for the service. If exposing 
 ## Maintenance and Backups
 
 ### Backing Up and Restoring
+
+**Configuration → Backup** provides ZIP creation, download, upload, and restoration. Archives are stored under `backups/` and include these standard paths when present:
+
+- `db/site.db`: database content, accounts, settings, and messages.
+- `static/uploads/`: uploaded images and videos.
+- `static/images/`: bundled site images.
+- `.env`: stored in the archive as `env/.env`.
+
+**The panel uses these fixed paths, even if `SITE_DB_PATH`, `SITE_UPLOAD_DIR`, or `SITE_STATIC_DIR` is overridden.** Use a manual backup of the actual configured paths for such installations. ZIP backups do not include the application source, templates, or all static assets. They may contain credentials and private messages; keep downloaded archives private.
+
+Restore only trusted FriPeri archives. Restoration overwrites matching files and does not remove extra files absent from the archive. It is not an atomic deployment or a guaranteed consistent live SQLite snapshot. Avoid concurrent writes during panel backup/restore, keep a separate backup beforehand, and restart after restoring to reload configuration and session state.
 
 For a straightforward consistent backup:
 
@@ -429,6 +505,8 @@ Confirm with `y` or `yes`, then type the exact phrase `RESET FriPeri`.
 
 The script removes supported database files and migration backups under `db/`, uploaded files under `static/uploads/`, and `.env` / `.env.bak`. It preserves application source, templates, CSS/JS, built-in translations, and the uploads directory itself. Storage overrides outside the supported reset scope cause the script to refuse the reset.
 
+ZIP archives in `backups/` are outside the reset scope and remain on disk.
+
 Start the application again and open the website to return to first-run setup.
 
 ## Development
@@ -439,7 +517,8 @@ Start the application again and open the website to return to first-run setup.
 | --- | --- |
 | `main.py` | Application routes, authentication, public rendering, and admin handlers. |
 | `initialization.py` | Database initialization, schema updates, and credential hashing. |
-| `custom_home.py` | Custom homepage block validation and safe rendering metadata. |
+| `custom_home.py` | Shared block validation, HTML filtering, media URLs, and starter documents. |
+| `navigation.py` | Menu hierarchy validation and public navigation trees. |
 | `localization.py` | Language metadata, UI translations, and content fallback. |
 | `language_migration.py` | Language schema migration and secondary-language archives. |
 | `site_defaults.py` | Default site configuration and supported social platforms. |
@@ -450,13 +529,13 @@ Start the application again and open the website to return to first-run setup.
 | `assets/` | Source stylesheets for the admin and first-run interfaces. |
 | `translations/` | Built-in UI dictionaries and language migration documentation. |
 | `scripts/` | CLI initialization, reset, and test-suite entry point. |
-| `tests/` | Automated regression tests. |
+| `db/`, `static/uploads/`, `backups/` | Runtime database, uploaded media, and ZIP archives; keep persistent copies when deploying. |
 | `licenses/` | Third-party license notices. |
 
 For local development, start the application with automatic reload:
 
 ```bash
-python -m uvicorn main:app --host 127.0.0.1 --port 8000 --reload
+SESSION_COOKIE_SECURE=false python -m uvicorn main:app --host 127.0.0.1 --port 8000 --reload
 ```
 
 ### Working on Styles
@@ -470,32 +549,43 @@ tailwindcss -i assets/admin.css -o static/admin.css --minify
 tailwindcss -i assets/first-run.css -o static/first-run.css --minify
 ```
 
-Rebuild the relevant stylesheet when changing its source or Tailwind utility classes in its templates. Keep source and compiled assets together in commits. Public styles, homepage editor styles, and image crop styles also have dedicated files under `static/`.
+Review the output before replacing a committed stylesheet: runtime CSS also contains additional plain-CSS rules that are not necessarily reproduced from `assets/`. Preserve those rules when rebuilding. Keep source and compiled changes together in commits. Public styles, homepage editor styles, and image crop styles also have dedicated files under `static/`.
 
-### Running Tests
+### Validation
 
-With the project virtual environment active:
+This checkout contains `scripts/check_admin_changes.py`, which discovers tests in `tests/`, but the `tests/` directory itself is not included. The presence of pytest and Playwright in `requirements.txt` does not establish an included or passing test suite.
 
-```bash
-python -m unittest discover -s tests -v
-```
+For documentation and implementation changes, use an isolated installation and check the relevant flows:
 
-The compatibility test entry point is also available:
+1. Complete first-run setup and sign in.
+2. Create a draft, preview it, publish it, and verify anonymous visibility.
+3. Edit a custom page and both homepage modes; verify saving and navigation.
+4. Upload/crop an image and preview desktop/mobile layouts.
+5. Configure a secondary language and verify English fallback.
+6. Submit a contact message and check the admin inbox.
+7. Exercise backup/restore only on disposable data.
 
-```bash
-python scripts/check_admin_changes.py
-```
+After setup, `GET /health` returns `status`, `database`, and `uploads`. It reports process-level information rather than a full database integrity or readiness check, and includes filesystem paths. Before setup, it redirects to the installer like other non-static routes.
 
-Tests use temporary databases. Coverage includes setup, homepage settings, custom homepage documents, validation, language behavior, and related admin operations. For changes to browser interactions, also check mode switching, preview, saving, image cropping, and mobile layouts in a browser.
+## Contributing and Support
+
+Use the repository's Issues area for reproducible bugs and feature requests, and submit focused pull requests for changes. Include the source revision, Python version, operating system, reproduction steps, expected/actual behavior, and relevant logs. Remove passwords, session cookies, personal messages, and `.env` secrets before sharing diagnostics.
+
+When contributing, use generic names, `example.com` addresses, and sample content. Update this README for user-facing changes, keep built-in translation dictionaries aligned when adding interface labels, and describe the checks performed in the pull request. Do not commit runtime databases, uploads, backups, credentials, or your virtual environment.
+
+For security-sensitive reports, avoid publishing exploit details or private data in a public issue. This checkout does not include a dedicated security policy or reporting address.
 
 ## Troubleshooting
 
 | Problem | What to check |
 | --- | --- |
+| Login returns to the login screen on local HTTP. | Start with `SESSION_COOKIE_SECURE=false` locally; use `true` with HTTPS in production. |
 | First-run setup appears for an existing site. | Confirm `SITE_DB_PATH` points to the intended initialized database and that the service account can access it. |
 | The database is read-only or saving fails. | Check write permissions on the database directory as well as the file; SQLite needs access to create supporting files. |
 | Uploaded images do not appear. | Check the upload directory, file permissions, and the `/static/uploads/` URL mapping, especially after overriding storage paths. |
 | A large upload fails before reaching the editor. | Check reverse-proxy request limits and the Custom Home editor's per-file limits. |
+| A panel backup omits the active database or uploads. | The panel archives standard paths only. Back up overridden storage locations manually. |
+| Setup fails on native Windows. | The initializer uses `fcntl`, and dependencies include `uvloop`; use a Linux environment such as WSL. |
 | Custom Home still shows the content feed. | Select Custom Home and use **Save & publish**. An empty custom document falls back to the feed. |
 | Category content is missing from a list. | Confirm the content is published, belongs to the selected category, and fits within the selected item count. |
 | Card appearance does not change in the automatic feed. | Category card settings control category archives and custom category blocks; the automatic feed has its own layouts. |
