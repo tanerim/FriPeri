@@ -1,6 +1,6 @@
 # FriPeri
 <p align="center">
-<img height="250" src="/home/taner/PycharmProjects/FriPeri/static/images/FriPeri_Logo.png"/>
+<img height="250" src="static/images/FriPeri_Logo.png"/>
 </p>
 **A free and simple personal publishing framework.**
 
