@@ -1,4 +1,7 @@
 # FriPeri
+<p align="center">
+<img height="250" src="static/images/FriPeri_Logo.png"/>
+</p>
 
 **A free and simple personal publishing framework.**
 
