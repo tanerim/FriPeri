@@ -109,7 +109,7 @@ Enter your site name and description, homepage welcome text, and administrator c
 
 The administrator password must contain at least eight characters and match its confirmation. Setup stores a salted password hash in SQLite; it does not write a plaintext password to an environment file.
 
-After completing setup, sign in at **http://127.0.0.1:8000/login**. Your administration panel is available at **http://127.0.0.1:8000/admin**.
+After completing setup, sign in at **http://127.0.0.1:8000/login**. Your administration panel is available at **http://127.0.0.1:8000/admin**. The login card displays the FriPeri logo and a project link to [FriPeri on NextNLP](https://nextnlp.com/pages/friperi), which opens in a new tab.
 
 By default, the database is created at `db/site.db`. No manual SQL import, separate database-generation step, or restart is needed. An existing initialized database is migrated at startup instead of being reinstalled.
 
