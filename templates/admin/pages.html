@@ -1,0 +1,35 @@
+{% extends 'admin/base.html' %}
+{% block content %}
+<main id="admin-content" class="admin-settings-page" tabindex="-1">
+  <div class="admin-settings-container">
+    <header class="settings-page-header"><div><h1>{{ t(lang, 'admin.pages') }}</h1><p>{{ t(lang, 'pages.intro') }}</p></div></header>
+    <div class="categories-admin-grid">
+      <form class="admin-card" method="post" action="/admin/pages">
+        <input type="hidden" name="editor_token" value="{{ editor_token }}">
+        <h2>{{ t(lang, 'pages.new') }}</h2>
+        <div class="settings-grid-v3 single-col"><label><span>{{ t(lang, 'pages.title') }}</span><input name="title" maxlength="200" required></label></div>
+        <div class="page-actions"><button class="settings-primary" type="submit">{{ t(lang, 'pages.create') }}</button></div>
+      </form>
+      <section class="admin-card">
+        <h2>{{ t(lang, 'admin.pages') }}</h2>
+        <div class="category-list-admin">
+          {% for page in pages %}
+          <div class="category-row-admin">
+            <div><strong>{{ page.title }}</strong><span>/pages/{{ page.slug }}</span></div>
+            <div>{{ t(lang, 'pages.published' if page.published else 'pages.draft') }} · {{ t(lang, 'common.menu' if page.show_in_menu else 'common.hidden') }}</div>
+            <div class="category-row-actions">
+              <a class="settings-secondary" href="/admin/pages/{{ page.id }}">{{ t(lang, 'common.edit') }}</a>
+              {% if page.published %}<a class="settings-secondary" href="/pages/{{ page.slug }}" target="_blank" rel="noopener noreferrer">{{ t(lang, 'pages.view') }}</a>{% endif %}
+              <form method="post" action="/admin/pages/{{ page.id }}/delete" data-confirm="{{ t(lang, 'pages.delete_confirm') }}">
+                <input type="hidden" name="editor_token" value="{{ editor_token }}">
+                <button type="submit" class="settings-danger">{{ t(lang, 'common.delete') }}</button>
+              </form>
+            </div>
+          </div>
+          {% else %}<p>{{ t(lang, 'common.empty') }}</p>{% endfor %}
+        </div>
+      </section>
+    </div>
+  </div>
+</main>
+{% endblock %}

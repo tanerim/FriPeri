@@ -1,0 +1,31 @@
+{% extends 'admin/base.html' %}
+{% block content %}
+<main id="admin-content" class="admin-settings-page admin-compact-page" tabindex="-1">
+  <div class="admin-settings-container">
+    <header class="settings-page-header">
+      <div><h1><span class="page-heading-icon">{{ icon('contact_details') }}</span>{{ t(lang, 'admin.messages') }} <span class="messages-count">{{ total }}</span></h1><p>{{ t(lang, 'messages.intro') }}</p></div>
+    </header>
+    <section class="admin-card messages-inbox" aria-label="{{ t(lang, 'admin.messages') }}">
+      {% for message in messages %}
+      <details class="inbox-message">
+        <summary>
+          <span class="message-avatar" aria-hidden="true">{{ message.name[:1]|upper }}</span>
+          <span class="message-sender"><strong>{{ message.name }}</strong><span>{{ message.email }}</span></span>
+          <time datetime="{{ message.created_at }}">{{ message.created_at|format_date }}</time>
+        </summary>
+        <div class="message-body">{{ message.message }}</div>
+      </details>
+      {% else %}
+      <div class="admin-empty-state"><span class="icon-tile tone-indigo">{{ icon('contact_details') }}</span><h2>{{ t(lang, 'messages.empty') }}</h2><p>{{ t(lang, 'messages.intro') }}</p></div>
+      {% endfor %}
+    </section>
+    {% if pages > 1 %}
+    <nav class="messages-pagination" aria-label="{{ t(lang, 'messages.pages') }}">
+      {% if page > 1 %}<a class="admin-secondary" href="/admin/messages?page={{ page - 1 }}&amp;lang={{ lang }}">← {{ t(lang, 'messages.previous') }}</a>{% endif %}
+      <span>{{ page }} / {{ pages }}</span>
+      {% if page < pages %}<a class="admin-secondary" href="/admin/messages?page={{ page + 1 }}&amp;lang={{ lang }}">{{ t(lang, 'messages.next') }} →</a>{% endif %}
+    </nav>
+    {% endif %}
+  </div>
+</main>
+{% endblock %}

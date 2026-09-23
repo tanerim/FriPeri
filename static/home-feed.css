@@ -1,0 +1,76 @@
+/* FriPeri's editorial homepage: generous type, tactile cards, and a quiet note rail. */
+.friperi-home { --home-accent: var(--color-accent,#2563eb); --home-ink: #172936; --home-muted: #5a6b76; background: var(--color-page-bg,#f7f8f5); color: var(--home-ink); }
+.friperi-home a { text-decoration: none; }
+.friperi-home :is(h1,h2,h3) { overflow-wrap: anywhere; }
+.friperi-welcome { display: grid; grid-template-columns: minmax(0,1.3fr) minmax(0,1fr); gap: clamp(30px,6vw,100px); align-items: center; width: min(1280px,calc(100% - 80px)); margin: 0 auto; padding: clamp(50px,7vw,104px) 0 64px; }
+.friperi-eyebrow { display: inline-flex; align-items: center; gap: 10px; font-size: 11px; text-transform: uppercase; letter-spacing: .16em; font-weight: 700; }
+.friperi-eyebrow > span { width: 7px; height: 7px; border-radius: 50%; background: var(--home-accent); box-shadow: 0 0 0 5px color-mix(in srgb,var(--home-accent) 10%,transparent); }
+.friperi-welcome h1 { max-width: 12ch; font-size: clamp(44px,6.5vw,88px); line-height: 1.04; font-weight: 650; letter-spacing: -.065em; margin: 26px 0; }
+.friperi-welcome-copy > p { font-size: clamp(16px,1.5vw,20px); line-height: 1.7; color: var(--home-muted); max-width: 48ch; margin: 0 0 30px; }
+.friperi-home .friperi-explore { display: inline-flex; align-items: center; gap: 24px; padding: 12px 12px 12px 22px; border-radius: 40px; background: var(--home-ink); color: white; font-size: 13px; font-weight: 600; }
+.friperi-explore span { display: inline-grid; place-items: center; width: 34px; height: 34px; border-radius: 50%; background: #ffffff1f; font-size: 22px; }
+.friperi-welcome-art { position: relative; min-height: 360px; aspect-ratio: 1.1; border-radius: 180px 180px 24px 24px; overflow: hidden; isolation: isolate; background: color-mix(in srgb,var(--home-accent) 10%,#e8efed); }
+.friperi-welcome-art::before { content: ''; position: absolute; width: 70%; height: 70%; left: 16%; top: 18%; background: radial-gradient(circle at 35% 25%,#fff 0%,color-mix(in srgb,var(--home-accent) 35%,#dce9e4) 48%,var(--home-accent) 100%); border-radius: 50%; box-shadow: inset -18px -20px 40px #12283816, 0 30px 70px #182b2326; }
+.friperi-orbit { position: absolute; border: 1px solid color-mix(in srgb,var(--home-accent) 28%,transparent); width: 120%; height: 45%; top: 30%; left: -10%; border-radius: 50%; transform: rotate(-30deg); z-index: 1; }
+.friperi-orbit.orbit-two { transform: rotate(35deg); }.friperi-orbit.orbit-three { transform: rotate(90deg); }
+.friperi-art-initials { position: absolute; inset: 0; display: grid; place-items: center; font-family: Georgia,serif; font-size: clamp(100px,12vw,170px); font-style: italic; color: #fff; opacity: .85; text-shadow: 0 8px 25px #14253612; }
+.friperi-art-star { position: absolute; right: 10%; top: 10%; color: var(--color-accent-secondary,#b95f3a); font-size: 68px; line-height: 1; }
+.friperi-art-caption { position: absolute; bottom: 20px; left: 24px; right: 24px; text-align: center; font-size: 10px; text-transform: uppercase; letter-spacing: .18em; font-weight: 700; color: var(--home-ink); }
+.friperi-welcome-art.has-cover::before { display: none; }.friperi-welcome-art img { position: absolute; width: 100%; height: 100%; object-fit: cover; }.friperi-welcome-art.has-cover .friperi-art-caption { background: #ffffffe6; padding: 8px 16px; border-radius: 20px; }
+.friperi-home .quick-links { width: min(1280px,calc(100% - 80px)); margin: 0 auto 68px; padding: 0; border: 0; border-radius: 16px; background: var(--color-feature-bg,#f1c83a); overflow: hidden; }
+.friperi-home .quick-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(200px,1fr)); width: 100%; max-width: none; margin: 0; border: 0; }
+.friperi-home .quick-edge { display: none; }
+.friperi-home .quick-item { display: grid; grid-template-columns: 28px 1fr; align-content: start; gap: 6px 16px; min-height: 135px; padding: 26px; color: var(--color-feature-text,#1d0303); background: transparent; border: 0; border-right: 1px solid var(--color-feature-border,#d9a900); }
+.friperi-home .quick-item:last-of-type { border-right: 0; }.friperi-home .quick-item > span { grid-row: 1 / 3; font-size: 11px; opacity: .65; padding-top: 6px; }.friperi-home .quick-item strong { font-size: 22px; font-weight: 600; letter-spacing: -.03em; }.friperi-home .quick-item em { font-size: 12px; line-height: 1.6; font-style: normal; opacity: .8; }.friperi-home .quick-item:hover { background: #ffffff20; }
+.friperi-home .home-container { width: min(1280px,calc(100% - 80px)); max-width: none; padding: 0; margin: 0 auto; scroll-margin-top: 100px; }
+.friperi-home .home-section { margin-bottom: 72px; }
+.friperi-home .editorial-column-header { display: flex; align-items: baseline; justify-content: space-between; flex-wrap: wrap; gap: 16px; border: 0; padding-bottom: 20px; margin-bottom: 0; }
+.friperi-home .section-title { font-size: clamp(26px,3vw,38px); font-weight: 600; letter-spacing: -.05em; margin: 0; color: var(--home-ink); }
+.friperi-home .section-view-all { font-size: 12px; font-weight: 650; color: var(--home-accent); white-space: nowrap; }
+.friperi-home .featured-card { border: 0; border-radius: 24px; background: #142536; color: #f8fafc; overflow: hidden; box-shadow: 0 24px 50px #14253610; }
+.friperi-home .featured-card.has-image { grid-template-columns: minmax(0,1.1fr) minmax(0,1fr); }
+.friperi-home .featured-text { padding: clamp(26px,4vw,56px); }
+.friperi-home .featured-card :is(a,.featured-meta,.featured-excerpt) { color: inherit; }
+.friperi-home .featured-meta { font-size: 11px; flex-wrap: wrap; opacity: .9; }
+.friperi-home .featured-badge { background: #ffffff12; color: #e5eeff; border: 1px solid #ffffff30; border-radius: 24px; padding: 5px 12px; font-size: 10px; text-transform: uppercase; letter-spacing: .07em; }
+.friperi-home .featured-title { font-size: clamp(30px,4vw,52px); line-height: 1.15; letter-spacing: -.04em; font-weight: 550; margin: 24px 0 18px; }
+.friperi-home .featured-excerpt { opacity: .75; font-size: 16px; line-height: 1.7; }
+.friperi-home .featured-image-wrapper { min-height: 360px; }.friperi-home .featured-image-wrapper a { display: block; height: 100%; }.friperi-home .featured-image-wrapper img { width: 100%; height: 100%; object-fit: cover; }
+.friperi-home .layout-editorial_split .editorial-columns { display: grid; grid-template-columns: minmax(0,1.85fr) minmax(0,1fr); gap: 40px; }
+.friperi-home .editorial-columns:has(> .editorial-column:only-child) { grid-template-columns: minmax(0,1fr); }
+.friperi-home .layout-single_column .editorial-columns { display: grid; grid-template-columns: 1fr; gap: 40px; }
+.friperi-home .editorial-row-list { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 20px; }
+.friperi-home .editorial-row-item { min-width: 0; display: flex; flex-direction: column; padding: 22px; margin: 0; border: 1px solid var(--line); border-radius: 16px; background: #fff; overflow: hidden; transition: box-shadow .2s ease, transform .2s ease; }
+.friperi-home .editorial-row-item:hover { transform: translateY(-3px); box-shadow: 0 16px 35px #1425360b; }
+.friperi-home .friperi-post-cover { display: block; margin: -22px -22px 22px; aspect-ratio: 1.8; overflow: hidden; }.friperi-home .friperi-post-cover img { width: 100%; height: 100%; object-fit: cover; }
+.friperi-post-pattern { display: flex; align-items: center; justify-content: space-between; padding: 18px 22px; margin: -22px -22px 20px; background: color-mix(in srgb,var(--home-accent) 7%,white); color: var(--home-accent); font-size: 32px; font-family: Georgia,serif; }.friperi-post-pattern span:last-child { font: 28px system-ui; opacity: .5; }
+.friperi-home .item-meta { font-size: 10px; text-transform: uppercase; letter-spacing: .04em; gap: 6px; flex-wrap: wrap; color: var(--home-muted); }.friperi-home .item-title { font-size: 23px; line-height: 1.25; letter-spacing: -.03em; margin: 12px 0; font-weight: 600; }.friperi-home .item-title a { color: var(--home-ink); }.friperi-home .item-excerpt { font-size: 13px; line-height: 1.8; color: var(--home-muted); margin: 0 0 22px; }.friperi-home .item-action { margin-top: auto; }.friperi-home .editorial-read-link { font-size: 12px; color: var(--home-accent); }
+.friperi-home .notes-column { min-width: 0; background: color-mix(in srgb,var(--home-accent) 4%,white); border: 1px solid var(--line); padding: 26px; border-radius: 20px; align-self: start; }.friperi-home .notes-column .section-title { font-size: 28px; }.friperi-home .notes-column .editorial-column-header { gap: 10px; }
+.friperi-home .editorial-note-item { position: relative; padding: 24px 0 24px 36px; border-bottom: 1px solid var(--line); margin: 0; }.friperi-home .editorial-note-item:last-child { border: 0; padding-bottom: 4px; }.friperi-note-index { position: absolute; left: 0; top: 27px; font: 11px monospace; color: var(--home-accent); }.friperi-home .note-date { font-size: 10px; color: var(--home-muted); }.friperi-home .note-title { font-size: 18px; font-weight: 600; letter-spacing: -.02em; margin: 10px 0; }.friperi-home .note-title a { color: var(--home-ink); }.friperi-home .note-excerpt { font-size: 12px; line-height: 1.8; color: var(--home-muted); }
+.friperi-home .category-module-grid { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 20px; }.friperi-home .category-module-item:first-child { border-top: 1px solid var(--line); padding-top: 22px; }
+.friperi-home .empty-state { padding: 32px; border: 1px dashed var(--line-strong); border-radius: 14px; color: var(--home-muted); font-size: 14px; }
+@media (max-width: 1000px) { .friperi-welcome { gap: 32px; }.friperi-welcome-art { min-height: 280px; }.friperi-home .layout-editorial_split .editorial-columns { grid-template-columns: minmax(0,1fr); }.friperi-home .category-module-grid { grid-template-columns: repeat(2,minmax(0,1fr)); } }
+@media (max-width: 640px) { .friperi-welcome { grid-template-columns: 1fr; width: calc(100% - 36px); padding: 42px 0 32px; gap: 32px; }.friperi-welcome h1 { font-size: 48px; }.friperi-welcome-art { min-height: 240px; aspect-ratio: 1.5; border-radius: 140px 140px 20px 20px; }.friperi-art-initials { font-size: 100px; }.friperi-home .quick-links,.friperi-home .home-container { width: calc(100% - 36px); }.friperi-home .quick-links { margin-bottom: 40px; }.friperi-home .quick-grid { grid-template-columns: 1fr; }.friperi-home .quick-item { min-height: auto; padding: 20px; border-right: 0; border-bottom: 1px solid var(--color-feature-border); }.friperi-home .editorial-row-list,.friperi-home .category-module-grid { grid-template-columns: 1fr; }.friperi-home .featured-card.has-image { grid-template-columns: 1fr; }.friperi-home .featured-image-wrapper { min-height: 240px; }.friperi-home .home-section { margin-bottom: 44px; }.friperi-home .notes-column { padding: 22px; } }
+@media (prefers-reduced-motion: reduce) { .friperi-home .editorial-row-item { transition: none; }.friperi-home .editorial-row-item:hover { transform: none; } }
+.friperi-orbit.orbit-one { border-color: color-mix(in srgb,var(--color-separator-1,#b95f3a) 40%,transparent); }
+.friperi-orbit.orbit-two { border-color: color-mix(in srgb,var(--color-separator-2,#07468d) 35%,transparent); }
+.friperi-orbit.orbit-three { border-color: color-mix(in srgb,var(--color-separator-3,#f1c83a) 60%,transparent); }
+
+/* A quiet, typography-led welcome with separate navigation cards. */
+.friperi-welcome { grid-template-columns:minmax(0,1fr); justify-items:center; padding:clamp(56px,7vw,100px) 0 48px; gap:36px; text-align:center; }
+.friperi-welcome-copy { width:min(100%,780px); }
+.friperi-eyebrow { padding:8px 14px; border:1px solid var(--line); border-radius:100px; background:#ffffffa6; color:var(--home-muted); letter-spacing:.12em; }
+.friperi-welcome h1 { max-width:16ch; margin:24px auto; font-size:clamp(42px,5.5vw,76px); font-weight:600; letter-spacing:-.055em; }
+.friperi-welcome-copy > p { max-width:52ch; margin:0 auto 28px; font-size:clamp(16px,1.5vw,19px); }
+.friperi-home .friperi-explore { padding:10px 12px 10px 22px; gap:22px; box-shadow:0 6px 16px #17293612; }
+.friperi-welcome-art.has-cover { width:min(100%,1000px); min-height:0; aspect-ratio:2.4; border-radius:20px; background:transparent; }
+.friperi-welcome-art.has-cover::before { display:none; }
+.friperi-home .quick-links { background:transparent; border-radius:0; overflow:visible; }
+.friperi-home .quick-grid { gap:18px; }
+.friperi-home .quick-item { grid-template-columns:24px minmax(0,1fr); min-height:134px; padding:26px; border:1px solid var(--line); border-radius:16px; background:#fff; color:var(--home-ink); box-shadow:0 4px 18px #17293604; }
+.friperi-home .quick-item:last-of-type { border:1px solid var(--line); }
+.friperi-home .quick-item > span { color:var(--home-accent); opacity:.8; }
+.friperi-home .quick-item strong { font-size:20px; }
+.friperi-home .quick-item em { color:var(--home-muted); opacity:1; }
+.friperi-home .quick-item:hover { background:color-mix(in srgb,var(--home-accent) 4%,white); border-color:var(--home-accent); }
+@media(max-width:640px) { .friperi-home .quick-grid { gap:12px; }.friperi-home .quick-item { min-height:auto; padding:22px; }.friperi-welcome-art.has-cover { aspect-ratio:1.6; } }

@@ -1,0 +1,32 @@
+{% set card_options = card_options|default({}) %}
+{% if not posts %}
+  <p class="muted">{{ t(lang, "common.empty") }}</p>
+{% else %}
+  {% for post in posts %}
+    <article class="post-card" style="{% if card_options.background %}background: {{ card_options.background }};{% endif %}{% if card_options.text_color %}--card-text: {{ card_options.text_color }}; color: {{ card_options.text_color }};{% endif %}">
+      <a class="post-cover" href="/posts/{{ post['slug'] }}" tabindex="-1" aria-hidden="true">
+        {% if post["image_path"] %}
+          <img src="{{ post['image_path'] }}" alt="" loading="lazy" />
+        {% else %}
+          <span class="post-cover-placeholder" aria-hidden="true">{{ '%02d'|format(loop.index) }}</span>
+        {% endif %}
+        <span class="post-cover-chip">{{ post["category_name"] or (t(lang, 'common.uncategorized')) }}</span>
+      </a>
+      <div class="post-card-body">
+        {% if card_options.get('show_date', true) %}<time class="post-date" datetime="{{ post['created_at'] }}">{{ post["created_at"]|format_date }}</time>{% endif %}
+        {% if card_options.get('show_title', true) %}<h3 class="post-title"><a href="/posts/{{ post['slug'] }}">{{ post["title"] }}</a></h3>{% endif %}
+        {% if card_options.get('show_excerpt', true) and post["excerpt"] %}
+          <p class="post-excerpt">{{ post["excerpt"] }}</p>
+        {% endif %}
+        <div class="post-card-foot">
+          <div class="tag-row">
+            {% for tag in post_tags.get(post["id"], []) %}
+              <span class="tag">{{ tag }}</span>
+            {% endfor %}
+          </div>
+          <a class="post-read" href="/posts/{{ post['slug'] }}" aria-label="{{ t(lang, 'common.read') }}: {{ post['title'] }}">{{ t(lang, "common.read") }} <span aria-hidden="true">&rarr;</span></a>
+        </div>
+      </div>
+    </article>
+  {% endfor %}
+{% endif %}

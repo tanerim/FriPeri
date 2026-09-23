@@ -1,0 +1,26 @@
+<nav class="nav" aria-label="{{ t(lang, 'common.main_navigation') }}">
+  <a class="brand" href="/">
+    <span class="brand-mark">{{ site_initials }}</span>
+    <div class="brand-text">
+      <span class="brand-name">{{ site_name }}</span>
+      {% set tagline = localized(site_settings, 'hero_kicker') %}
+      {% if tagline %}
+        <span class="brand-tagline">{{ tagline }}</span>
+      {% endif %}
+    </div>
+  </a>
+  <div class="nav-links">
+    <a href="/">{{ t(lang, "nav.home") }}</a>
+    {% from 'partials/menu_tree.html' import navigation %}
+    {{ navigation(menu_items, request.url.path) }}
+    {% if user %}
+      <a href="/admin">{{ t(lang, "admin.admin") }}</a>
+      <a href="/logout">{{ t(lang, "nav.logout") }}</a>
+    {% endif %}
+    {% include "partials/lang_switch.html" %}
+  </div>
+  <div class="nav-tools">
+    {% include "partials/lang_switch.html" %}
+    <button class="menu-toggle" type="button" aria-label="{{ t(lang, 'common.menu') }}" onclick="document.body.classList.toggle('menu-open')">☰</button>
+  </div>
+</nav>

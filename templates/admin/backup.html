@@ -1,0 +1,68 @@
+{% extends 'admin/base.html' %}
+{% block content %}
+<main id="admin-content" class="admin-settings-page admin-compact-page" tabindex="-1">
+  <div class="admin-settings-container">
+    <header class="settings-page-header">
+      <div>
+        <h1><span class="page-heading-icon">{{ icon('backup') }}</span>{{ t(lang, 'admin.backup') }}</h1>
+        <p>{{ t(lang, 'admin.backup_copy') }}</p>
+      </div>
+    </header>
+
+    {% if saved %}<p class="notice settings-notice">{{ saved }}</p>{% endif %}
+    {% if error %}<p class="error">{{ error }}</p>{% endif %}
+
+    <!-- Backup Creation -->
+    <section class="settings-card-v3">
+      <header><h2>{{ icon('save') }}{{ t(lang, 'admin.backup_create_title') }}</h2><p>{{ t(lang, 'admin.backup_create_desc') }}</p></header>
+      <form method="post" action="/admin/backup/create">
+        <button type="submit" class="settings-primary">{{ t(lang, 'admin.backup_create_btn') }}</button>
+      </form>
+    </section>
+
+    <!-- Backup Upload -->
+    <section class="settings-card-v3">
+      <header><h2>{{ icon('upload') }}{{ t(lang, 'admin.backup_upload_title') }}</h2><p>{{ t(lang, 'admin.backup_upload_desc') }}</p></header>
+      <form method="post" action="/admin/backup/upload" enctype="multipart/form-data">
+        <div class="settings-grid-v3 single-col">
+          <input type="file" name="file" accept=".zip" required class="settings-file-input">
+        </div>
+        <button type="submit" class="settings-primary">{{ t(lang, 'admin.backup_upload_btn') }}</button>
+      </form>
+    </section>
+
+    <!-- Available Backups -->
+    {% if backups %}
+    <section class="settings-card-v3 backup-table-card" aria-label="{{ t(lang, 'admin.backup_list_title') }}">
+      <header><h2>{{ t(lang, 'admin.backup_list_title') }}</h2></header>
+      <table class="admin-table" style="overflow-x:auto;">
+        <thead><tr><th>{{ t(lang, 'common.file') }}</th><th>{{ t(lang, 'admin.backup_size') }}</th><th>{{ t(lang, 'common.date') }}</th><th style="width:1%; white-space:nowrap;">{{ t(lang, 'common.actions') }}</th></tr></thead>
+        <tbody>
+          {% for b in backups %}
+          <tr>
+            <td class="admin-table-file">{{ b['name'] }}</td>
+            <td>{{ format_size(b['size']) }}</td>
+            <td>{{ b['mtime'] }}</td>
+            <td class="admin-table-actions">
+              <a class="admin-secondary" href="/admin/backup/download/{{ b['name'] }}">{{ t(lang, 'admin.backup_download') }}</a>
+              <form class="inline-form" method="post" action="/admin/backup/restore/{{ b['name'] }}" data-confirm="{{ t(lang, 'admin.backup_restore_confirm') }}">
+                <button type="submit" class="settings-danger">{{ t(lang, 'admin.backup_restore') }}</button>
+              </form>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </section>
+    {% else %}
+    <section class="settings-card-v3">
+      <header><h2>{{ t(lang, 'admin.backup_list_title') }}</h2></header>
+      <div class="admin-empty-state">
+        <span class="icon-tone">{{ icon('backup') }}</span>
+        <h3>{{ t(lang, 'admin.backup_empty') }}</h3>
+      </div>
+    </section>
+    {% endif %}
+  </div>
+</main>
+{% endblock %}

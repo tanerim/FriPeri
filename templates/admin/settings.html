@@ -1,0 +1,89 @@
+{% extends "admin/base.html" %}
+{% from "admin/partials/color_control.html" import color_control %}
+{% block extra_head %}<script src="{{ static_url('appearance-controls.js') }}" defer></script>{% endblock %}
+
+{% block content %}
+<main id="admin-content" class="admin-settings-page admin-compact-page general-settings-page" tabindex="-1">
+  <div class="admin-settings-container">
+
+    <form class="settings-form-v3" method="post" action="/admin/settings" enctype="multipart/form-data">
+      <input type="hidden" name="content_language_code" value="{{ secondary_language.code if secondary_language else '' }}" />
+      <header class="settings-page-header">
+        <div>
+          <h1><span class="page-heading-icon">{{ icon('settings') }}</span>{{ t(lang, "admin.settings") }}</h1>
+          <p>{{ t(lang, "admin.settings_copy") }}</p>
+        </div>
+        <button class="settings-primary" type="submit">{{ icon('save') }}{{ t(lang, 'common.save_changes') }}</button>
+      </header>
+
+      {% if error %}<p class="error">{{ error }}</p>{% endif %}
+      {% if saved %}<p class="notice settings-notice">{{ t(lang, 'common.saved') }}</p>{% endif %}
+
+      <section class="settings-card-v3">
+        <header>
+          <h2>{{ t(lang, 'admin.site_identity') }}</h2>
+          <p>{{ t(lang, 'admin.site_identity_copy') }}</p>
+        </header>
+        <div class="settings-grid-v3">
+          <label><span>{{ t(lang, 'admin.site_name') }}</span><input name="site_name" value="{{ settings['site_name'] }}" required maxlength="120" /></label>
+          <label><span>{{ t(lang, 'admin.site_description') }}</span><input name="site_description" value="{{ settings['site_description'] }}" required maxlength="220" /></label>
+        </div>
+      </section>
+
+      <section class="settings-card-v3">
+        <header>
+          <h2>{{ t(lang, 'admin.hero') }}</h2>
+          <p>{{ t(lang, 'admin.hero_copy_help') }}</p>
+        </header>
+        <div class="settings-language-panels">
+          {% for language in languages %}
+          <fieldset class="settings-language-panel">
+            <legend>{{ language.name }}</legend>
+            <div class="settings-grid-v3">
+              {% for field, key in [('hero_kicker', 'admin.kicker'), ('hero_title', 'content.title'), ('hero_copy', 'admin.copy')] %}
+              <label class="{{ 'span-2' if field == 'hero_copy' else '' }}"><span>{{ t(lang, key) }}</span>
+                {% if field == 'hero_copy' %}<textarea name="{{ field }}_{{ language.suffix }}" {{ 'required' if language.code == 'en' else '' }} maxlength="520" rows="3">{{ settings[field ~ '_' ~ language.suffix] }}</textarea>
+                {% else %}<input name="{{ field }}_{{ language.suffix }}" value="{{ settings[field ~ '_' ~ language.suffix] }}" {{ 'required' if language.code == 'en' else '' }} maxlength="160" />{% endif %}
+              </label>
+              {% endfor %}
+            </div>
+          </fieldset>
+          {% endfor %}
+        </div>
+      </section>
+
+
+
+      <section class="settings-card-v3">
+        <header><h2>{{ t(lang, 'cards.title') }}</h2><p>{{ t(lang, 'cards.help') }}</p></header>
+        <input type="hidden" name="category_cards_present" value="1" />
+        <div class="category-appearance-grid">
+        {% for cat in card_categories %}
+        {% set options = category_cards.get(cat.slug, {}) %}
+        <fieldset class="settings-subgroup category-appearance-card" data-category-appearance>
+          <legend>{{ cat|category_label(lang) }}</legend>
+          <div class="category-card-preview" aria-label="{{ t(lang, 'common.preview') }}">
+            <span data-card-preview="show_date">{{ t(lang, 'cards.sample_date') }}</span>
+            <strong data-card-preview="show_title">{{ t(lang, 'cards.sample_title') }}</strong>
+            <p data-card-preview="show_excerpt">{{ t(lang, 'cards.sample_excerpt') }}</p>
+          </div>
+          <div class="settings-grid-v3 card-color-options">
+            {% for key, fallback in [('background', '#fffdf4' if cat.slug in ['notes', 'notlar'] else '#ffffff'), ('text_color', '#17243b')] %}
+            {{ color_control('card_' ~ cat.id ~ '_' ~ key, t(lang, 'cards.' ~ key), options.get(key, ''), fallback) }}
+            {% endfor %}
+          </div>
+          <div class="card-display-options">
+            {% for key in ['show_date', 'show_title', 'show_excerpt'] %}
+            <label class="settings-check"><input type="checkbox" name="card_{{ cat.id }}_{{ key }}" value="1" {{ 'checked' if options.get(key, true) else '' }} /><span>{{ t(lang, 'cards.' ~ key) }}</span></label>
+            {% endfor %}
+          </div>
+          <button type="button" class="admin-text-link card-reset" data-card-reset>{{ t(lang, 'cards.reset') }}</button>
+        </fieldset>
+        {% endfor %}
+        </div>
+      </section>
+      <div class="settings-save-bar"><span>{{ t(lang, 'dashboard.save_help') }}</span><button class="settings-primary" type="submit">{{ icon('save') }}{{ t(lang, 'common.save_changes') }}</button></div>
+    </form>
+  </div>
+</main>
+{% endblock %}

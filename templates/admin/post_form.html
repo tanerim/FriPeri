@@ -1,0 +1,74 @@
+{% extends "admin/about.html" %}
+{% block content %}
+<main id="admin-content" class="admin-settings-page post-content-builder" tabindex="-1">
+ <div class="admin-settings-container">
+  <form id="page-details" class="settings-form-v3 content-editor-form" method="post" action="{{ action }}" enctype="multipart/form-data">
+   <input type="hidden" name="creation_key" value="{{ creation_key }}">
+   {% if error %}<p class="error">{{ error }}</p>{% endif %}
+   {% set status_value = values.get('status', 'draft') %}
+   <header class="settings-page-header"><div><h1>{{ heading }}</h1><p>{{ t(lang, 'admin.admin_copy') }}</p></div><a class="admin-secondary" href="/admin/posts">← {{ t(lang, 'admin.new_content') }}</a></header>
+     <section class="content-title-fields">
+      {% for language in languages %}
+      <div data-builder-language-fields="{{ language.suffix }}" {% if not loop.first %}hidden{% endif %}>
+       <div class="settings-grid-v3 single-col">
+        <label><span class="field-label">{{ t(lang, 'content.title') }}</span><input class="modern-input" name="title_{{ language.suffix }}" value="{{ values.get('title' if loop.first else 'title_secondary', '') }}" maxlength="160" {% if loop.first %}required{% endif %}></label>
+        <label><span class="field-label">{{ t(lang, 'content.excerpt') }}</span><input class="modern-input" name="excerpt_{{ language.suffix }}" value="{{ values.get('excerpt' if loop.first else 'excerpt_secondary', '') }}" maxlength="260"></label>
+       </div>
+      </div>
+      {% endfor %}
+      <div class="builder-actions"><button type="button" class="admin-secondary" id="builder-preview">{{ t(lang, 'common.preview') }}</button></div>
+     </section>
+        <section class="content-publishing-toolbar" aria-label="{{ t(lang, 'common.details') }}">
+          <div class="content-publishing-grid">
+            <label class="content-publishing-field">
+              <span class="field-label">{{ t(lang, "content.category") }}</span>
+              <select class="modern-select" name="category_id">
+                <option value="" {{ 'selected' if not values.get('category_id') else '' }}>{{ t(lang, 'common.uncategorized') }}</option>
+                {% for cat in categories %}
+                  <option value="{{ cat['id'] }}" {{ "selected" if values.get("category_id", "")|string == cat["id"]|string else "" }}>{{ cat["name"] }}</option>
+                {% endfor %}
+              </select>
+            </label>
+
+            <label class="content-publishing-field">
+              <span class="field-label">{{ t(lang, "content.status") }}</span>
+              <select class="modern-select" name="status" data-status-select required>
+                <option value="draft" {{ "selected" if status_value == "draft" else "" }}>{{ t(lang, "content.draft") }}</option>
+                <option value="published" {{ "selected" if status_value == "published" else "" }}>{{ t(lang, "content.published") }}</option>
+              </select>
+            </label>
+
+            <label class="content-publishing-field">
+              <span class="field-label">{{ t(lang, "content.tags") }}</span>
+              <input class="modern-input" name="tags" value="{{ values.get('tags', '') }}" placeholder="nlp, python, corpus" />
+            </label>
+
+            <div class="content-publishing-field">
+              <span class="field-label">{{ t(lang, "content.image") }} / {{ t(lang, 'common.preview') }}</span>
+              <div class="modern-file-upload">
+                <input type="file" id="content-image-input" name="image" accept="image/png,image/jpeg,image/webp" class="file-input-hidden" />
+                <label for="content-image-input" class="file-upload-btn">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                  <span>Choose image</span>
+                </label>
+                <span class="file-upload-name" id="file-upload-name">No file selected</span>
+              </div>
+              <div id="image-preview-container" class="image-preview-box {{ '' if values.get('image_path') else 'is-hidden' }}">
+                <img id="image-preview-img" src="{{ values.get('image_path', '') }}" alt="Preview" class="preview-thumb" />
+                <div class="preview-actions">
+                  <button type="button" class="admin-secondary" id="crop-image-btn">{{ t(lang, 'crop.open') }}</button>
+                  <button type="button" class="preview-clear-btn" id="clear-image-btn">Clear selection</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="content-publishing-actions">
+              <button class="settings-primary submit-status" id="builder-save" type="button" data-draft-label="{{ t(lang, 'content.save_as_draft') }}" data-publish-label="{{ t(lang, 'content.publish') }}">{{ t(lang, 'content.publish') if status_value == 'published' else t(lang, 'content.save_as_draft') }}</button>
+            </div>
+          </div>
+        </section>
+   {% include 'admin/custom_home.html' %}
+  </form>
+ </div>
+</main>
+{% endblock %}

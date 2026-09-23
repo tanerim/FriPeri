@@ -1,0 +1,13 @@
+{% macro navigation(items, current_path='') %}
+  {% for item in items %}
+    {% if item.children %}
+    <details class="nav-group">
+      <summary><span>{{ item.label }}</span><svg class="nav-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m7 10 5 5 5-5" /></svg></summary>
+      <div class="nav-submenu">
+        {% if item.url %}<a class="nav-parent-link" href="{{ item.url }}" {% if current_path == item.url %}aria-current="page"{% endif %} {% if item.new_tab %}target="_blank" rel="noopener noreferrer"{% endif %}>{{ item.label }}</a>{% endif %}
+        {{ navigation(item.children, current_path) }}
+      </div>
+    </details>
+    {% else %}<a href="{{ item.url }}" {% if current_path == item.url %}aria-current="page"{% endif %} {% if item.new_tab %}target="_blank" rel="noopener noreferrer"{% endif %}>{{ item.label }}</a>{% endif %}
+  {% endfor %}
+{% endmacro %}

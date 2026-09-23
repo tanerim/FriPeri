@@ -1,0 +1,528 @@
+/* HyperUI application patterns, adapted for FriPeri. See licenses/HyperUI-MIT.txt.
+   Build with Tailwind CSS standalone CLI v4.1.18; no browser CDN or preflight. */
+@import "tailwindcss/theme";
+@import "tailwindcss/utilities" source(none);
+@source "../templates/admin";
+@source "../templates/login.html";
+
+.hyperui-admin { @apply bg-gray-50 text-gray-900 text-sm; --admin-primary: #4f46e5; --admin-primary-hover: #4338ca; --brand: #4f46e5; --focus: #a5b4fc; --color-accent: #4f46e5; }
+.hyperui-admin a { @apply no-underline; }
+.admin-shell { @apply flex min-h-screen min-w-0 flex-col; margin-left: 264px; }
+.admin-sidebar { @apply fixed inset-y-0 left-0 z-40 flex flex-col border-r border-gray-200 bg-white; width: 264px; }
+.admin-brand { @apply flex items-center gap-3 border-b border-gray-100 px-6 py-6 text-xl font-bold tracking-tight text-gray-900; }
+.admin-brand-mark { @apply grid size-10 shrink-0 place-content-center rounded-xl bg-white text-xl text-indigo-600; }
+.admin-brand-logo { @apply h-10 w-auto; border-radius: 4px; background-color: aliceblue}
+.admin-brand small { @apply block max-w-40 truncate text-xs font-normal tracking-normal text-gray-500; }
+.admin-navigation { @apply overflow-y-auto p-4; }
+.admin-navigation summary { @apply cursor-pointer items-center justify-between rounded-lg px-3 py-2 font-medium text-gray-700; display: none; }
+.hyperui-nav { @apply flex flex-col gap-1; }
+.admin-nav-link { @apply flex items-center gap-3 rounded-lg px-3 py-3 text-sm font-medium text-gray-600 transition-colors; }
+.admin-nav-link svg { @apply shrink-0; }
+.admin-nav-link:hover { @apply bg-gray-100 text-gray-900; }
+.admin-nav-link.is-active { @apply bg-indigo-50 text-indigo-700; }
+.admin-sidebar-footer { @apply mt-auto flex flex-wrap items-center justify-between gap-3 border-t border-gray-100 p-5 text-xs text-gray-500; }
+.admin-sidebar-footer a { @apply font-medium text-gray-600; }
+.admin-topbar { @apply flex min-h-20 flex-wrap items-center justify-between gap-3 border-b border-gray-200 bg-white px-8 py-4; }
+.admin-topbar-title { @apply font-semibold text-gray-700; }
+.admin-topbar-actions { @apply flex items-center gap-4; }
+.hyperui-admin .admin-settings-page { @apply flex-1 bg-gray-50 p-8; }
+.hyperui-admin .admin-settings-container { @apply w-full; max-width: 1280px; }
+.hyperui-admin .settings-page-header { @apply mb-8 items-center gap-4; }
+.hyperui-admin .settings-page-header h1 { @apply text-3xl font-bold tracking-tight text-gray-900; }
+.hyperui-admin .settings-page-header p { @apply mt-2 text-sm leading-relaxed text-gray-500; max-width: 65ch; }
+.hyperui-admin :is(.settings-card-v3,.admin-card,.auth-card) { @apply rounded-xl border border-gray-200 bg-white p-6 shadow-sm; }
+.hyperui-admin :is(.settings-card-v3,.admin-card) h2 { @apply text-base font-semibold text-gray-900; }
+.hyperui-admin :is(.settings-card-v3,.admin-card) p { @apply text-sm leading-relaxed text-gray-500; }
+.hyperui-admin .settings-card-v3 > header { @apply mb-6 border-b border-gray-100 pb-4; }
+.hyperui-admin :is(.settings-grid-v3,.auth-form) label { @apply text-sm font-medium text-gray-700; }
+.hyperui-admin :is(input:not(.file-input-hidden):not([type='checkbox']):not([type='radio']):not([type='hidden']):not([type='color']),select,textarea) { @apply w-full min-w-0 rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm font-normal text-gray-900 shadow-sm; }
+.hyperui-admin :is(input,select,textarea):focus { border-color: #818cf8; }
+.hyperui-admin :is(input[type='checkbox'],input[type='radio']) { accent-color: #4f46e5; }
+.hyperui-admin input[type='file'] { @apply text-gray-500; }
+.hyperui-admin input.file-input-hidden { width: 1px; height: 1px; padding: 0; border: 0; }
+.hyperui-admin input[type='file']::file-selector-button { @apply mr-3 rounded-md border-0 bg-indigo-50 px-3 py-1 text-sm font-medium text-indigo-700; }
+.hyperui-admin :is(.settings-primary,.button-primary) { @apply inline-flex min-h-11 items-center justify-center gap-2 rounded-lg border border-indigo-600 bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm; }
+.hyperui-admin :is(.settings-primary,.button-primary):hover { @apply border-indigo-700 bg-indigo-700 text-white; }
+.hyperui-admin :is(.admin-secondary,.settings-secondary) { @apply inline-flex min-h-10 items-center justify-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm; }
+.hyperui-admin :is(.admin-secondary,.settings-secondary):hover { @apply bg-gray-50 text-indigo-700; }
+.hyperui-admin :is(.admin-danger,.settings-danger) { @apply inline-flex min-h-10 items-center justify-center rounded-lg border border-red-200 bg-red-50 px-4 py-2 text-sm font-medium text-red-700; }
+.hyperui-admin :is(.admin-danger,.settings-danger):hover { @apply border-red-300 bg-red-100; }
+.hyperui-admin .admin-dashboard-card { @apply relative border-gray-200 pr-12 transition-colors; }
+.hyperui-admin .admin-dashboard-card::after { content: '↗'; @apply absolute right-6 top-6 text-xl text-gray-400; }
+.hyperui-admin .admin-dashboard-card:hover { @apply border-indigo-300 bg-indigo-50; }
+.hyperui-admin .admin-card-grid { @apply gap-5; }
+.hyperui-admin .notice { @apply rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800; }
+.hyperui-admin .error { @apply rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800; }
+.hyperui-admin .admin-table-card { @apply overflow-x-auto p-0; }
+.hyperui-admin .admin-table { @apply w-full text-left text-sm; }
+.hyperui-admin .admin-table th { @apply border-b border-gray-200 bg-gray-50 px-6 py-4 text-xs font-semibold tracking-wide text-gray-500; }
+.hyperui-admin .admin-table td { @apply border-b border-gray-100 px-6 py-4 text-gray-600; }
+.hyperui-admin .admin-table td:first-child a { @apply font-semibold text-gray-900; }
+.hyperui-admin .admin-table tr:hover td { @apply bg-gray-50; }
+.admin-status { @apply inline-flex items-center gap-1.5 whitespace-nowrap rounded-full bg-amber-50 px-2.5 py-1 text-xs font-medium text-amber-700; }
+.admin-status::before { content: ''; @apply size-1.5 rounded-full bg-current; }
+.admin-status.is-published { @apply bg-emerald-50 text-emerald-700; }
+.hyperui-admin .category-row-admin { @apply rounded-lg border border-gray-200 bg-gray-50 p-4; }
+.hyperui-admin .social-settings-item { @apply rounded-lg border border-gray-200 bg-gray-50 p-4; }
+.hyperui-admin .modern-editor-wrapper { @apply overflow-hidden rounded-lg border border-gray-300 shadow-sm; }
+.hyperui-admin .modern-toolbar { @apply border-b border-gray-200 bg-gray-50; }
+.hyperui-admin .admin-editor-toolbar button { @apply rounded-md border-gray-200 bg-white text-gray-600; }
+.hyperui-admin .admin-editor-toolbar button:hover { @apply bg-indigo-50 text-indigo-700; }
+
+.hyperui-admin .color-field { @apply rounded-lg border border-gray-200 bg-gray-50 p-3; }
+.hyperui-admin .auth-page { @apply flex flex-1 items-center justify-center bg-gray-50 px-5 py-12; }
+.hyperui-admin .auth-container { @apply w-full max-w-md; }
+.hyperui-admin .auth-card { @apply p-8; }
+.hyperui-admin .auth-header h1 { @apply text-2xl font-bold tracking-tight; }
+.admin-auth .admin-shell { margin-left: 0; }
+.admin-footer { @apply mt-auto flex flex-wrap justify-between gap-2 px-8 py-6 text-xs font-medium text-gray-400; }
+.admin-skip { @apply fixed left-4 z-50 rounded-lg bg-indigo-600 px-4 py-2 text-white; top: -100px; }
+.admin-skip:focus { top: 12px; }
+.hyperui-admin [hidden] { display: none !important; }
+@media (min-width: 1024px) { .admin-navigation:not([open]) > .hyperui-nav { display: flex; } .admin-navigation::details-content { content-visibility: visible; } }
+
+@media (max-width: 1023px) {
+  .admin-sidebar { @apply relative w-full; }
+  .admin-shell { margin-left: 0; }
+  .admin-brand { @apply px-5 py-4; }
+  .admin-sidebar-footer { @apply px-5 py-3; }
+  .admin-navigation { @apply p-2; }
+  .admin-navigation summary { display: flex; }
+  .hyperui-nav { @apply grid grid-cols-3 gap-1 pt-2; }
+  .admin-topbar { @apply min-h-16 px-5; }
+  .hyperui-admin .admin-settings-page { @apply p-5; }
+}
+@media (max-width: 640px) {
+  .hyperui-nav { @apply grid-cols-2; }
+  .admin-nav-link { @apply gap-2 px-2 text-xs; }
+  .hyperui-admin .settings-page-header { @apply flex-col items-start; }
+  .hyperui-admin :is(.settings-card-v3,.admin-card) { @apply p-4; }
+  .hyperui-admin .admin-table-card { @apply p-0; }
+  .hyperui-admin .admin-table td { @apply px-4 py-2; }
+  .hyperui-admin .settings-page-header h1 { @apply text-2xl; }
+}
+@media (prefers-reduced-motion: reduce) { .hyperui-admin * { transition: none !important; scroll-behavior: auto !important; } }
+
+/* FriPeri admin workspace. Plain CSS keeps the committed build self-contained. */
+.hyperui-admin { --ink: #17243b; --muted: #5b6980; font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: #f5f7fb; color: var(--ink); line-height: 1.5; }
+.hyperui-admin *, .hyperui-admin *::before, .hyperui-admin *::after { box-sizing: border-box; }
+.hyperui-admin :is(a,button,input,select,textarea,summary):focus-visible { outline: 3px solid #818cf8; outline-offset: 3px; }
+.hyperui-admin .admin-icon { flex-shrink: 0; vertical-align: middle; }
+.hyperui-admin .admin-sidebar { background: #fff; border-color: #e4e9f2; }
+.hyperui-admin .admin-brand { padding: 25px 24px; }
+.hyperui-admin .admin-brand-mark { background: #fff; }
+.hyperui-admin .admin-brand small { color: #627087; margin-top: 3px; }
+.hyperui-admin .admin-navigation { padding: 14px; min-height: 0; }
+.hyperui-admin .hyperui-nav { display: flex; flex-direction: column; gap: 18px; }
+.hyperui-admin .admin-nav-heading { margin: 8px 12px; font-size: 10px; font-weight: 750; letter-spacing: .12em; text-transform: uppercase; color: #65738a; }
+.hyperui-admin .admin-nav-link { min-height: 43px; padding: 10px 12px; margin: 2px 0; color: #4b5b73; border: 1px solid transparent; }
+.hyperui-admin .admin-nav-link svg { color: #71809b; }
+.hyperui-admin .nav-posts svg, .hyperui-admin .nav-dashboard svg { color: #6366f1; }
+.hyperui-admin .nav-categories svg, .hyperui-admin .nav-design svg { color: #8b5ac4; }
+.hyperui-admin .nav-homepage svg, .hyperui-admin .nav-contact_details svg { color: #168477; }
+.hyperui-admin .nav-language svg, .hyperui-admin .nav-menu svg { color: #367da8; }
+.hyperui-admin .admin-nav-link:hover { background: #f3f5fb; color: #3730a3; }
+.hyperui-admin .admin-nav-link.is-active { background: #eef0ff; border-color: #e0e4ff; color: #4338ca; box-shadow: inset 3px 0 #6366f1; }
+.hyperui-admin .admin-sidebar-footer { color: #65738a; }
+.hyperui-admin .admin-topbar { min-height: 76px; padding: 16px 32px; border-color: #e4e9f2; }
+.hyperui-admin .admin-topbar-title { display: flex; flex-wrap: wrap; gap: 10px; font-size: 13px; }
+.hyperui-admin .admin-topbar-title a { color: #596981; }
+.hyperui-admin .admin-settings-page { background: #f5f7fb; padding: 32px; }
+.hyperui-admin .admin-settings-container { margin: 0 auto; max-width: 1360px; }
+.hyperui-admin .settings-page-header { margin-bottom: 26px; }
+.hyperui-admin .settings-page-header h1 { display: flex; align-items: center; gap: 12px; font-size: clamp(24px, 2.4vw, 32px); color: #17243b; overflow-wrap: anywhere; }
+.hyperui-admin .settings-page-header p { color: #5b6980; }
+.hyperui-admin .page-heading-icon { display: inline-flex; align-items: center; justify-content: center; width: 42px; height: 42px; border-radius: 12px; color: #4f46e5; background: #e9edff; flex-shrink: 0; }
+.hyperui-admin :is(.settings-card-v3,.admin-card) { border: 1px solid #e0e6ef; border-radius: 14px; box-shadow: 0 3px 12px #17243b04; }
+.hyperui-admin :is(.settings-card-v3,.admin-card) h2 { color: #24334c; }
+.hyperui-admin :is(.settings-card-v3,.admin-card) p { color: #5b6980; }
+.hyperui-admin .settings-card-v3 > header { border-bottom-color: #edf0f6; margin-bottom: 20px; }
+.hyperui-admin .settings-card-v3 > header h2 { display: flex; align-items: center; gap: 10px; }
+.hyperui-admin .settings-card-v3 > header h2::before { content: ''; display: block; width: 4px; height: 18px; background: #818cf8; border-radius: 3px; flex-shrink: 0; }
+.hyperui-admin .settings-grid-v3 { align-items: start; gap: 20px 24px; }
+.hyperui-admin .settings-grid-v3 label, .hyperui-admin .settings-subgroup > label:not(.settings-check) { display: grid; gap: 8px; color: #3e4f68; font-size: 13px; font-weight: 600; }
+.hyperui-admin :is(input:not([type='checkbox']):not([type='radio']):not([type='hidden']):not([type='color']),select,textarea) { border-color: #ccd5e3; border-radius: 8px; font-family: inherit; box-shadow: 0 1px 2px #17243b03; }
+.hyperui-admin textarea { max-height: none; resize: vertical; }
+.hyperui-admin .settings-check, .hyperui-admin .settings-grid-v3 .settings-check { display: inline-flex; flex-direction: row; align-items: center; gap: 10px; align-self: center; width: fit-content; max-width: 100%; min-height: 42px; margin: 0; padding: 9px 12px; border: 1px solid #dce3ed; background: #f8faff; border-radius: 8px; color: #3e4f68; font-size: 13px; cursor: pointer; }
+.hyperui-admin .settings-check:has(input:checked) { background: #eef2ff; border-color: #cdd5fb; color: #3730a3; }
+.hyperui-admin .settings-check input[type='checkbox'], .hyperui-admin .settings-grid-v3 input[type='checkbox'] { appearance: auto; flex: 0 0 18px; width: 18px; height: 18px; min-height: 18px; margin: 0; padding: 0; box-shadow: none; accent-color: #4f46e5; }
+.hyperui-admin .settings-subgroup { border-color: #e0e6ef; background: #f8faff; padding: 18px; gap: 16px; }
+.hyperui-admin .settings-feature-grid { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 16px; margin-top: 18px; }
+.hyperui-admin .settings-item-heading { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
+.hyperui-admin .social-settings-item { background: #fafbfe; border-color: #e0e6ef; }
+.hyperui-admin .social-settings-item > label { display: grid; gap: 8px; }
+.hyperui-admin .settings-save-bar { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 18px 22px; margin-top: 24px; background: #fff; border: 1px solid #e0e6ef; border-radius: 12px; }
+.hyperui-admin .settings-save-bar > span { color: #5b6980; font-size: 13px; }
+.hyperui-admin .settings-primary { white-space: normal; }
+.hyperui-admin .color-field { background: #f8faff; display: grid; grid-template-columns: 1fr auto; gap: 10px; align-items: center; }
+.hyperui-admin .color-field > span { grid-column: 1 / -1; }
+.hyperui-admin .color-field input[type='color'] { width: 52px; height: 38px; min-height: 38px; padding: 3px; border: 1px solid #ccd5e3; border-radius: 7px; cursor: pointer; }
+.hyperui-admin .color-field code { color: #596981; font-size: 12px; }
+.hyperui-admin .admin-eyebrow { display: block; margin-bottom: 9px; color: #4f46e5; font-size: 11px; font-weight: 750; letter-spacing: .1em; text-transform: uppercase; }
+.hyperui-admin .dashboard-welcome { align-items: center; padding: 10px 0 4px; }
+.hyperui-admin .dashboard-stats { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 16px; margin-bottom: 24px; }
+.hyperui-admin .dashboard-stat { display: flex; align-items: center; gap: 14px; padding: 20px; min-width: 0; }
+.hyperui-admin .dashboard-stat:hover { border-color: #a5b4fc; }
+.hyperui-admin .icon-tile { display: inline-flex; flex: 0 0 44px; width: 44px; height: 44px; border-radius: 12px; align-items: center; justify-content: center; }
+.hyperui-admin .tone-indigo { background: #eef0ff; color: #4f46e5; }
+.hyperui-admin .tone-teal { background: #e3f5ef; color: #087b61; }
+.hyperui-admin .tone-amber { background: #fff3dc; color: #a5640b; }
+.hyperui-admin .tone-violet { background: #f2eafa; color: #8952b5; }
+.hyperui-admin .stat-label { display: block; font-size: 12px; color: #5b6980; }
+.hyperui-admin .dashboard-stat strong { display: block; font-size: 29px; line-height: 1.3; letter-spacing: -.04em; color: #17243b; font-variant-numeric: tabular-nums; }
+.hyperui-admin .stat-arrow { margin-left: auto; width: 15px; color: #8995a9; }
+.hyperui-admin .dashboard-columns { display: grid; grid-template-columns: minmax(0,1.65fr) minmax(0,1fr); align-items: start; gap: 24px; }
+.hyperui-admin .dashboard-panel { min-width: 0; padding: 24px; }
+.hyperui-admin .panel-heading { display: flex; align-items: start; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-bottom: 18px; }
+.hyperui-admin .panel-heading h2 { display: flex; gap: 10px; align-items: center; margin: 0; }
+.hyperui-admin .panel-heading h2 svg { color: #6366f1; width: 18px; }
+.hyperui-admin .panel-heading p { margin: 6px 0 0; font-size: 12px; }
+.hyperui-admin .admin-text-link { color: #4f46e5; font-size: 12px; font-weight: 650; }
+.hyperui-admin .admin-text-link:hover { text-decoration: underline; }
+.hyperui-admin .dashboard-post { display: flex; gap: 12px; align-items: center; padding: 17px 4px; border-top: 1px solid #edf0f6; border-radius: 4px; }
+.hyperui-admin .dashboard-post:hover { background: #f8faff; }
+.hyperui-admin .post-list-icon { display: flex; justify-content: center; align-items: center; flex: 0 0 34px; height: 38px; border-radius: 8px; color: #71809b; background: #f2f5fa; }
+.hyperui-admin .post-list-copy { min-width: 0; flex: 1; }
+.hyperui-admin .post-list-copy strong { display: block; color: #24334c; font-size: 13px; overflow-wrap: anywhere; }
+.hyperui-admin .post-list-copy > span { display: block; margin-top: 4px; color: #65738a; font-size: 11px; }
+.hyperui-admin .dashboard-category-list { padding: 0; margin: 0 0 22px; list-style: none; max-height: 390px; overflow-y: auto; }
+.hyperui-admin .dashboard-category-list li { padding: 10px 0; }
+.hyperui-admin .dashboard-category-list li > div { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; font-size: 13px; color: #4b5b73; overflow-wrap: anywhere; }
+.hyperui-admin .dashboard-category-list strong { color: #4338ca; background: #eef0ff; padding: 1px 8px; border-radius: 5px; font-size: 12px; }
+.hyperui-admin meter { display: block; appearance: none; width: 100%; height: 6px; margin-top: 9px; background: #eef0f6; border-radius: 6px; border: 0; overflow: hidden; }
+.hyperui-admin meter::-webkit-meter-bar { background: #eef0f6; border: 0; height: 6px; }
+.hyperui-admin meter::-webkit-meter-optimum-value { background: #8b8eed; border-radius: 6px; }
+.hyperui-admin meter::-moz-meter-bar { background: #8b8eed; border-radius: 6px; }
+.hyperui-admin .dashboard-site-details { margin: 0; }
+.hyperui-admin .dashboard-site-details > div { display: grid; grid-template-columns: minmax(100px,1fr) minmax(0,2fr); gap: 16px; padding: 13px 0; border-top: 1px solid #edf0f6; font-size: 13px; }
+.hyperui-admin .dashboard-site-details dt { color: #65738a; }
+.hyperui-admin .dashboard-site-details dd { margin: 0; color: #24334c; font-weight: 550; overflow-wrap: anywhere; }
+.hyperui-admin .dashboard-shortcuts { display: grid; gap: 8px; }
+.hyperui-admin .dashboard-shortcuts a { display: flex; align-items: center; gap: 12px; padding: 12px; background: #f8faff; border: 1px solid #edf0f6; border-radius: 9px; color: #4b5b73; font-size: 13px; font-weight: 550; }
+.hyperui-admin .dashboard-shortcuts a:hover { border-color: #c7d2fe; background: #eef2ff; }
+.hyperui-admin .dashboard-shortcuts a > svg:first-child { color: #6366f1; width: 18px; }
+.hyperui-admin .dashboard-shortcuts a > svg:last-child { margin-left: auto; width: 15px; color: #8995a9; }
+.hyperui-admin .admin-empty-state { text-align: center; padding: 32px 12px; border-top: 1px solid #edf0f6; }
+.hyperui-admin .admin-empty-state h3 { margin: 14px 0 0; font-size: 16px; }
+.hyperui-admin .admin-empty-state p { margin: 8px 0 20px; }
+.hyperui-admin .admin-footer { color: #65738a; }
+@media (max-width: 1250px) { .hyperui-admin .dashboard-stat { padding: 16px; gap: 10px; } .hyperui-admin .stat-arrow { display: none; } .hyperui-admin .settings-feature-grid { grid-template-columns: 1fr; } }
+@media (max-width: 1100px) { .hyperui-admin .dashboard-stats { grid-template-columns: repeat(2,minmax(0,1fr)); } .hyperui-admin .dashboard-columns { grid-template-columns: 1fr; } }
+@media (max-width: 1023px) { .hyperui-admin .hyperui-nav { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 8px; } .hyperui-admin .admin-brand { padding: 16px 20px; } .hyperui-admin .admin-settings-page, .hyperui-admin .admin-topbar { padding: 20px; } }
+@media (max-width: 640px) {
+ .hyperui-admin .hyperui-nav { grid-template-columns: repeat(2,minmax(0,1fr)); }
+ .hyperui-admin .admin-settings-page { padding: 20px 14px; }
+ .hyperui-admin .admin-topbar { gap: 16px; padding: 14px; }
+ .hyperui-admin .settings-grid-v3, .hyperui-admin .settings-grid-v3.two-col { grid-template-columns: 1fr; }
+ .hyperui-admin .dashboard-welcome { align-items: stretch; }
+ .hyperui-admin .dashboard-stats { gap: 10px; }
+ .hyperui-admin .dashboard-stat { padding: 14px 10px; gap: 8px; }
+ .hyperui-admin .dashboard-stat .icon-tile { width: 32px; height: 36px; flex-basis: 32px; border-radius: 9px; }
+ .hyperui-admin .dashboard-stat strong { font-size: 24px; }
+ .hyperui-admin .dashboard-panel { padding: 18px 16px; }
+ .hyperui-admin .dashboard-post { flex-wrap: wrap; }
+ .hyperui-admin .dashboard-post .post-list-copy { flex-basis: calc(100% - 46px); }
+ .hyperui-admin .dashboard-post .admin-status { margin-left: 46px; }
+ .hyperui-admin .settings-save-bar { align-items: stretch; flex-direction: column; }
+ .hyperui-admin .settings-page-header h1 { font-size: 25px; }
+ .hyperui-admin .dashboard-site-details > div { grid-template-columns: 1fr; gap: 4px; }
+}
+
+/* Section navigation and dashboard reading order. */
+.hyperui-admin .settings-section-nav { display: flex; flex-wrap: wrap; gap: 8px; margin: -6px 0 24px; }
+.hyperui-admin .settings-section-nav a { padding: 7px 12px; border: 1px solid #dce3ed; border-radius: 7px; background: #fff; color: #4b5b73; font-size: 12px; font-weight: 550; }
+.hyperui-admin .settings-section-nav a:hover { color: #4338ca; border-color: #a5b4fc; background: #eef2ff; }
+.hyperui-admin .settings-card-v3 { scroll-margin-top: 20px; }
+.hyperui-admin .settings-subgroup > .settings-check { align-self: flex-start; }
+.hyperui-admin .dashboard-columns { grid-template-areas: "posts categories" "posts overview" "shortcuts shortcuts"; }
+.hyperui-admin .dashboard-columns > :nth-child(1) { grid-area: posts; }
+.hyperui-admin .dashboard-columns > :nth-child(2) { grid-area: categories; }
+.hyperui-admin .dashboard-columns > :nth-child(3) { grid-area: overview; }
+.hyperui-admin .dashboard-columns > :nth-child(4) { grid-area: shortcuts; }
+.hyperui-admin .dashboard-shortcuts { grid-template-columns: repeat(4,minmax(0,1fr)); }
+@media (max-width: 1100px) { .hyperui-admin .dashboard-columns { grid-template-areas: "posts" "categories" "overview" "shortcuts"; } .hyperui-admin .dashboard-shortcuts { grid-template-columns: repeat(2,minmax(0,1fr)); } }
+@media (max-width: 640px) { .hyperui-admin .dashboard-shortcuts { grid-template-columns: 1fr; } }
+
+/* Compact layouts for appearance, homepage modules, and contact settings. */
+.hyperui-admin .design-color-section { display: grid; grid-template-columns: 155px minmax(0,1fr); gap: 24px; align-items: center; padding: 20px 24px; }
+.hyperui-admin .design-color-section > header { margin: 0; padding: 0; border: 0; }
+.hyperui-admin .design-color-grid { grid-template-columns: repeat(3,minmax(0,1fr)); gap: 12px; }
+.hyperui-admin .design-color-grid .color-field { grid-template-columns: 44px minmax(0,1fr); grid-template-rows: auto auto; column-gap: 12px; row-gap: 4px; padding: 12px; align-items: center; min-width: 0; }
+.hyperui-admin .design-color-grid .color-field > span { grid-column: 2; grid-row: 1; font-size: 12px; overflow-wrap: anywhere; }
+.hyperui-admin .design-color-grid .color-field > input[type='color'] { grid-column: 1; grid-row: 1 / 3; width: 44px; height: 44px; min-height: 44px; }
+.hyperui-admin .design-color-grid .color-field > code { grid-column: 2; grid-row: 2; font-size: 11px; }
+.hyperui-admin .footer-copy-grid { margin-top: 20px; padding-top: 20px; border-top: 1px solid #edf0f6; grid-template-columns: repeat(auto-fit,minmax(240px,1fr)); }
+.hyperui-admin .settings-control-row { grid-template-columns: minmax(0,1fr) auto; align-items: end; }
+.hyperui-admin .settings-control-row > .settings-check { align-self: end; }
+.hyperui-admin .source-count-grid { grid-template-columns: minmax(0,1fr) 110px; gap: 12px; align-items: end; }
+.hyperui-admin .homepage-settings-form .settings-subgroup { gap: 14px; padding: 16px; }
+.hyperui-admin .homepage-settings-form .category-modules-table { gap: 10px; }
+.hyperui-admin .homepage-settings-form .category-module-row { display: grid; grid-template-columns: minmax(0,1fr) auto; align-items: center; padding: 12px 16px; background: #f8faff; border-color: #e0e6ef; }
+.hyperui-admin .homepage-settings-form .category-module-inputs { display: flex; gap: 18px; }
+.hyperui-admin .homepage-settings-form .category-module-inputs label { display: flex; align-items: center; gap: 8px; }
+.hyperui-admin .homepage-settings-form .category-module-inputs input { width: 76px; }
+.hyperui-admin .contact-language-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(260px,1fr)); gap: 20px; }
+.hyperui-admin .contact-language-fields { min-width: 0; margin: 0; padding: 16px; border: 1px solid #e0e6ef; border-radius: 10px; background: #f8faff; }
+.hyperui-admin .contact-language-fields legend { padding: 0 8px; color: #4f46e5; font-size: 12px; font-weight: 650; }
+.hyperui-admin .contact-language-fields legend svg { width: 15px; height: 15px; margin-right: 6px; }
+.hyperui-admin .contact-content-card > header h2::before, .hyperui-admin .contact-delivery-card > header h2::before { display: none; }
+.hyperui-admin .contact-content-card > header h2 svg, .hyperui-admin .contact-delivery-card > header h2 svg { color: #168477; }
+.hyperui-admin .contact-language-fields textarea { min-height: 140px; max-height: none; }
+.hyperui-admin .contact-delivery-card { display: grid; grid-template-columns: minmax(155px,1fr) minmax(0,2fr); align-items: center; gap: 24px; }
+.hyperui-admin .contact-delivery-card > header { border: 0; margin: 0; padding: 0; }
+@media (min-width: 1024px) and (max-width: 1250px) {
+ .hyperui-admin .design-color-section { grid-template-columns: 1fr; gap: 16px; }
+}
+@media (max-width: 760px) {
+ .hyperui-admin .design-color-section { grid-template-columns: 1fr; gap: 16px; }
+ .hyperui-admin .design-color-grid { grid-template-columns: repeat(3,minmax(0,1fr)); }
+ .hyperui-admin .design-color-grid .color-field { grid-template-columns: 1fr; }
+ .hyperui-admin .design-color-grid .color-field > span { grid-column: 1; grid-row: 1; }
+ .hyperui-admin .design-color-grid .color-field > input[type='color'] { grid-column: 1; grid-row: 2; }
+ .hyperui-admin .design-color-grid .color-field > code { grid-column: 1; grid-row: 3; }
+ .hyperui-admin .contact-delivery-card { grid-template-columns: 1fr; gap: 16px; }
+}
+@media (max-width: 640px) {
+ .hyperui-admin .design-color-grid { grid-template-columns: 1fr; }
+ .hyperui-admin .design-color-grid .color-field { grid-template-columns: 44px minmax(0,1fr); }
+ .hyperui-admin .design-color-grid .color-field > span { grid-column: 2; grid-row: 1; }
+ .hyperui-admin .design-color-grid .color-field > input[type='color'] { grid-column: 1; grid-row: 1 / 3; }
+ .hyperui-admin .design-color-grid .color-field > code { grid-column: 2; grid-row: 2; }
+ .hyperui-admin .settings-control-row { grid-template-columns: 1fr; }
+ .hyperui-admin .settings-grid-v3.source-count-grid { grid-template-columns: minmax(0,1fr) 90px; }
+ .hyperui-admin .homepage-settings-form .category-module-row { grid-template-columns: 1fr; gap: 12px; }
+ .hyperui-admin .homepage-settings-form .category-module-inputs { gap: 12px; flex-wrap: wrap; }
+ .hyperui-admin .contact-language-grid, .hyperui-admin .footer-copy-grid { grid-template-columns: minmax(0,1fr); }
+}
+
+.hyperui-admin .admin-nav-child { margin-left: 24px; padding-left: 12px; font-size: 12px; border-left: 1px solid #dce3ed; }
+.hyperui-admin .admin-nav-child svg { width: 16px; height: 16px; }
+.hyperui-admin .homepage-mode-options { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 16px; }
+.hyperui-admin .homepage-mode-options > label { display: flex; align-items: start; gap: 14px; padding: 20px; border: 1px solid #dce3ed; border-radius: 12px; background: #fafbfe; cursor: pointer; }
+.hyperui-admin .homepage-mode-options > label:has(input:checked) { border-color: #818cf8; background: #eef0ff; box-shadow: 0 0 0 1px #818cf8; }
+.hyperui-admin .homepage-mode-options input { width: 18px; height: 18px; margin: 4px 0 0; flex-shrink: 0; }
+.hyperui-admin .homepage-mode-options label > span { display: grid; gap: 8px; }
+.hyperui-admin .homepage-mode-options svg { color: #4f46e5; }
+.hyperui-admin .homepage-mode-options small { color: #65738a; font-size: 12px; line-height: 1.6; }
+@media (max-width: 640px) { .hyperui-admin .homepage-mode-options { grid-template-columns: 1fr; } }
+
+/* Admin color accents and the unified homepage workspace. */
+.hyperui-admin { --admin-primary: #5145cd; --admin-primary-hover: #4035b1; --brand: #5145cd; background: #eef2fb; color: #202b45; }
+.hyperui-admin .admin-settings-page { background: linear-gradient(135deg,#eef2ff 0%,#f3f6fb 42%,#eef7f6 100%); }
+.hyperui-admin .admin-sidebar { background: #f8f9ff; border-right-color: #d9dff2; }
+.hyperui-admin .admin-brand { background: #202a50; color: #fff; border-bottom-color: #34416b; }
+.hyperui-admin .admin-brand small { color: #c6d1f1; }
+.hyperui-admin .admin-brand-mark { background: #7765ef; box-shadow: 0 4px 16px #131d3b33; }
+.hyperui-admin .admin-nav-heading { color: #596484; }
+.hyperui-admin .admin-nav-link { color: #3d4966; }
+.hyperui-admin .admin-nav-link:hover { color: #4338b8; background: #e9e8ff; }
+.hyperui-admin .admin-nav-link.is-active { background: #5145cd; color: #fff; box-shadow: 0 4px 10px #5145cd24; }
+.hyperui-admin .admin-nav-link:is(.nav-posts,.nav-categories) svg { color: #087f86; }
+.hyperui-admin .admin-nav-link:is(.nav-homepage,.nav-design,.nav-menu) svg { color: #6850d7; }
+.hyperui-admin .admin-nav-link:is(.nav-settings,.nav-language,.nav-contact_details) svg { color: #a36220; }
+.hyperui-admin .admin-nav-link.is-active svg { color: #fff; }
+.hyperui-admin .admin-topbar { border-bottom-color: #dce2f2; background: #fff; }
+.hyperui-admin .page-heading-icon { color: #5145cd; background: #e5e2ff; }
+.hyperui-admin :is(.settings-card-v3,.admin-card,.auth-card) { border-color: #d8e0f0; box-shadow: 0 3px 14px #24386908; }
+.hyperui-admin .settings-card-v3 > header { border-bottom-color: #e0e5f5; }
+.hyperui-admin .settings-card-v3 > header h2 { color: #293a69; }
+.hyperui-admin :is(.settings-primary,.button-primary) { border-color: #5145cd; background: #5145cd; box-shadow: 0 3px 8px #5145cd25; }
+.hyperui-admin :is(.settings-primary,.button-primary):hover { background: #4035b1; border-color: #4035b1; }
+.hyperui-admin :is(.admin-secondary,.settings-secondary) { color: #454087; border-color: #cbccec; }
+.hyperui-admin :is(.admin-secondary,.settings-secondary):hover { background: #eeecff; border-color: #a89be8; }
+.hyperui-admin :is(input[type='checkbox'],input[type='radio']) { accent-color: #5145cd; }
+.hyperui-admin :is(input,select,textarea):focus-visible { outline: 2px solid #9b8ee8; outline-offset: 2px; }
+.hyperui-admin .settings-section-nav a { background: #e8ecfb; color: #445482; border-color: #d6ddf2; }
+.hyperui-admin .settings-save-bar { background: #e9edf9; border-color: #d5ddf1; }
+.hyperui-admin .admin-table th { background: #edf0fb; color: #445078; }
+.hyperui-admin .tone-blue { background: #dfe7ff; color: #3458c5; }
+.hyperui-admin .tone-teal { background: #d5f2e9; color: #087c62; }
+.hyperui-admin .tone-amber { background: #ffebc5; color: #9a5b09; }
+.hyperui-admin .tone-violet { background: #ebe0ff; color: #7542bf; }
+.hyperui-admin [hidden] { display: none !important; }
+.hyperui-admin .homepage-mode-panel { border: 0; margin: 0; padding: 0; min-width: 0; display: grid; gap: 24px; }
+.hyperui-admin .homepage-mode-card { background: #fff; border-top: 3px solid #7665db; }
+.hyperui-admin .homepage-mode-options > label { background: #f8f9fe; border-color: #d8ddf0; transition: background .15s,border-color .15s,box-shadow .15s; }
+.hyperui-admin .homepage-mode-options > label:hover { border-color: #a79bdc; }
+.hyperui-admin .homepage-mode-options > label:has(input[value='feed']:checked) { background: #eaf7f3; border-color: #15947c; box-shadow: 0 0 0 1px #15947c; }
+.hyperui-admin .homepage-mode-options > label:has(input[value='feed']) svg { color: #07806c; }
+.hyperui-admin .homepage-mode-options > label:has(input[value='feed']) input { accent-color: #07806c; }
+.hyperui-admin .homepage-mode-options > label:has(input[value='custom']:checked) { background: #efebff; border-color: #7962d5; box-shadow: 0 0 0 1px #7962d5; }
+.hyperui-admin .homepage-mode-options small { color: #52617b; }
+.hyperui-admin #homepage-custom-panel > .settings-page-header { margin: 0; padding: 22px 24px; background: #efebff; border: 1px solid #d8cef7; border-radius: 12px; }
+.hyperui-admin #custom-home-title { display: flex; align-items: center; gap: 10px; margin: 0; font-size: 21px; color: #3d306b; }
+.hyperui-admin #homepage-custom-panel .builder-topbar { padding: 0; }
+.hyperui-admin #homepage-custom-panel .builder-canvas { background: #e7edf8; border-color: #b6c5df; }
+.hyperui-admin #homepage-custom-panel .builder-block-header { background: #f0edfc; border-color: #e0d9f4; }
+.hyperui-admin #homepage-custom-panel .builder-block-header strong { color: #65518b; }
+.hyperui-admin #homepage-custom-panel .builder-add-button:hover { background: #e7e1fc; border-color: #b7a7e7; }
+.hyperui-admin #homepage-save-status:empty { display: none; }
+@media (max-width: 640px) {
+  .hyperui-admin .homepage-mode-panel { gap: 18px; }
+  .hyperui-admin #homepage-custom-panel > .settings-page-header { padding: 18px; }
+}
+
+/* Compact administration surfaces and restrained section colors. */
+.hyperui-admin .admin-settings-container { margin-inline: auto; }
+.hyperui-admin .admin-sidebar { background: #1b2540; border-color: #2f3b57; }
+.hyperui-admin .admin-brand { background: #1b2540; border-color: #34405a; }
+.hyperui-admin .admin-brand-mark { background: #ffffff; box-shadow: none; }
+.hyperui-admin .admin-nav-group { --section-color: #b5bdff; --section-bg: #34365f; }
+.hyperui-admin .nav-group-2 { --section-color: #83d9c9; --section-bg: #21454b; }
+.hyperui-admin .nav-group-3 { --section-color: #d0b3f4; --section-bg: #403456; }
+.hyperui-admin .nav-group-4 { --section-color: #edc58c; --section-bg: #494036; }
+.hyperui-admin .admin-nav-heading { display: flex; align-items: center; gap: 8px; color: #a8b5cc; font-size: 10px; letter-spacing: .11em; }
+.hyperui-admin .admin-nav-heading::before { content: ''; width: 5px; height: 5px; border-radius: 50%; background: var(--section-color); }
+.hyperui-admin .admin-nav-link { color: #d1d9e8; padding: 8px 10px; gap: 10px; font-size: 13px; border-radius: 9px; }
+.hyperui-admin .admin-nav-link svg { width: 29px; height: 29px; padding: 6px; border-radius: 7px; background: var(--section-bg); }
+.hyperui-admin .admin-nav-group .admin-nav-link svg { color: var(--section-color); }
+.hyperui-admin .admin-nav-link:hover { color: #fff; background: #293651; }
+.hyperui-admin .admin-nav-link.is-active { color: #fff; background: var(--section-bg); border-color: transparent; box-shadow: inset 3px 0 var(--section-color); }
+.hyperui-admin .admin-sidebar-footer { border-color: #34405a; color: #a8b5cc; }
+.hyperui-admin .admin-sidebar-footer a { color: #dae2f0; }
+.hyperui-admin .admin-navigation summary { color: #e0e7f3; }
+.hyperui-admin .admin-sidebar :is(a,summary):focus-visible { outline-color: #c4baff; }
+.hyperui-admin .admin-compact-page .settings-page-header { margin-bottom: 20px; }
+.hyperui-admin .admin-compact-page .settings-page-header h1 { font-size: 26px; }
+.hyperui-admin .admin-compact-page .settings-card-v3 { padding: 20px; margin-bottom: 16px; }
+.hyperui-admin .admin-compact-page .settings-card-v3 > header { margin-bottom: 16px; padding-bottom: 12px; }
+.hyperui-admin .admin-compact-page .settings-card-v3 > header h2 { font-size: 14px; }
+.hyperui-admin .admin-compact-page .settings-card-v3 > header p { font-size: 12px; }
+.hyperui-admin .admin-compact-page .settings-grid-v3 { gap: 14px 16px; }
+.hyperui-admin .admin-compact-page .settings-grid-v3 label { gap: 6px; font-size: 12px; }
+.hyperui-admin .admin-compact-page :is(input:not([type='checkbox']):not([type='hidden']):not([type='color']),textarea) { padding: 9px 11px; box-shadow: none; }
+.hyperui-admin .admin-compact-page textarea { min-height: 92px; }
+.hyperui-admin .admin-compact-page .settings-check { font-size: 12px; min-height: 38px; padding: 8px 10px; }
+.hyperui-admin .admin-compact-page .settings-save-bar { padding: 12px 16px; margin-top: 16px; background: #fff; }
+.hyperui-admin .settings-inline-heading { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; }
+.hyperui-admin .menu-category-row { display: grid; grid-template-columns: minmax(110px,.6fr) minmax(0,3fr); align-items: center; gap: 20px; padding: 16px 0; border-bottom: 1px solid #e9edf4; }
+.hyperui-admin .menu-category-row:first-child { padding-top: 0; }
+.hyperui-admin .menu-category-row:last-child { border-bottom: 0; padding-bottom: 0; }
+.hyperui-admin .menu-category-row h3 { display: flex; align-items: center; gap: 9px; font-size: 13px; margin: 0; color: #31415e; overflow-wrap: anywhere; }
+.hyperui-admin .menu-category-row h3 svg { color: #5d57b5; width: 18px; }
+.hyperui-admin .menu-category-fields { grid-template-columns: repeat(auto-fit,minmax(140px,1fr)); align-items: end; }
+.hyperui-admin .menu-category-fields .menu-check { align-self: end; width: fit-content; }
+.hyperui-admin .menu-page-options { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 12px; }
+.hyperui-admin .menu-page-option { display: grid; grid-template-rows: auto 1fr; gap: 12px; min-width: 0; padding: 14px; border: 1px solid #dce3ed; border-radius: 10px; background: #f8faff; }
+.hyperui-admin .menu-page-option:has(input:checked) { background: #f3f4ff; border-color: #cdd5fb; }
+.hyperui-admin .menu-page-option .settings-check { width: 100%; min-height: 24px; padding: 0; border: 0; background: transparent; }
+.hyperui-admin .menu-page-option > label:not(.settings-check) { display: grid; align-content: end; gap: 6px; min-width: 0; color: #3e4f68; font-size: 12px; font-weight: 600; }
+.hyperui-admin .menu-page-option select { width: 100%; min-width: 0; }
+@media(max-width:760px) { .hyperui-admin .menu-page-options { grid-template-columns: minmax(0,1fr); } }
+.hyperui-admin .custom-menu-items { display: grid; gap: 12px; }
+.hyperui-admin .custom-menu-row { display: flex; align-items: end; gap: 16px; padding: 16px; background: #f8f9fd; }
+.hyperui-admin .custom-menu-fields { flex: 1; min-width: 0; grid-template-columns: repeat(2,minmax(0,1fr)); }
+.hyperui-admin .custom-menu-url { grid-column: 1 / -1; }
+.hyperui-admin .custom-menu-row > .settings-danger { font-size: 12px; padding: 8px 12px; }
+.hyperui-admin .menu-empty-hint { text-align: center; padding: 16px; margin: 0; border: 1px dashed #d8dfed; border-radius: 8px; }
+.hyperui-admin .custom-menu-items:has(.custom-menu-row) .menu-empty-hint { display: none; }
+.hyperui-admin .settings-language-panels, .hyperui-admin .category-appearance-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(min(100%,300px),1fr)); gap: 16px; }
+.hyperui-admin .settings-language-panel { min-width: 0; margin: 0; padding: 14px; border: 1px solid #e2e6f0; border-radius: 10px; background: #fafbfe; }
+.hyperui-admin .settings-language-panel legend { padding: 0 6px; color: #6154a3; font-size: 12px; font-weight: 650; }
+.hyperui-admin .category-appearance-card { min-width: 0; margin: 0; padding: 14px; gap: 12px; background: #fafbfe; }
+.hyperui-admin .category-appearance-card legend { padding: 0 6px; font-size: 13px; font-weight: 650; color: #31415e; }
+.hyperui-admin .card-color-options .color-field { display: flex; flex-direction: row; align-items: center; justify-content: space-between; gap: 8px; padding: 8px 10px; background: #fff; }
+.hyperui-admin .card-color-options .color-field input[type='color'] { width: 34px; height: 30px; min-height: 30px; padding: 2px; flex-shrink: 0; }
+.hyperui-admin .card-display-options { display: flex; flex-wrap: wrap; gap: 6px; }
+.hyperui-admin .card-display-options .settings-check { background: transparent; border-color: transparent; padding: 4px 6px; min-height: 32px; }
+.hyperui-admin .dashboard-welcome { position: relative; padding: 26px; border: 1px solid #dce2f0; border-radius: 14px; background: linear-gradient(110deg,#fff 35%,#eeebfc 100%); }
+.hyperui-admin .dashboard-welcome h1 { font-size: clamp(23px,2.2vw,30px); letter-spacing: -.035em; }
+.hyperui-admin .dashboard-welcome p { max-width: 58ch; font-size: 13px; }
+.hyperui-admin .dashboard-welcome .admin-eyebrow { font-size: 10px; color: #685b9e; margin-bottom: 10px; }
+.hyperui-admin .dashboard-stats { gap: 14px; margin-bottom: 20px; }
+.hyperui-admin .dashboard-stat { position: relative; display: grid; grid-template-columns: 1fr auto; padding: 18px 20px; gap: 12px; border-top: 3px solid var(--stat-accent); }
+.hyperui-admin .stat-indigo { --stat-accent: #7772cf; }
+.hyperui-admin .stat-teal { --stat-accent: #4b9d8b; }
+.hyperui-admin .stat-amber { --stat-accent: #c29552; }
+.hyperui-admin .stat-violet { --stat-accent: #9c77bb; }
+.hyperui-admin .dashboard-stat .icon-tile { grid-column: 2; grid-row: 1; width: 38px; height: 38px; border-radius: 10px; }
+.hyperui-admin .dashboard-stat > div { grid-column: 1; grid-row: 1; }
+.hyperui-admin .dashboard-stat strong { font-size: 32px; margin-top: 6px; }
+.hyperui-admin .dashboard-stat .stat-arrow { display: none; }
+.hyperui-admin .dashboard-columns { gap: 20px; }
+.hyperui-admin .dashboard-panel { padding: 20px; }
+.hyperui-admin .dashboard-panel .panel-heading { margin-bottom: 16px; }
+.hyperui-admin .dashboard-panel .panel-heading h2 { font-size: 14px; }
+.hyperui-admin .dashboard-post { padding: 14px 0; }
+.hyperui-admin .dashboard-post .post-list-icon { color: #637395; background: #eff2f8; }
+.hyperui-admin .dashboard-category-list li { padding: 9px 0; }
+.hyperui-admin .dashboard-category-list li:nth-child(3n+2) meter::-webkit-meter-optimum-value { background: #65a797; }
+.hyperui-admin .dashboard-category-list li:nth-child(3n+2) meter::-moz-meter-bar { background: #65a797; }
+.hyperui-admin .dashboard-category-list li:nth-child(3n) meter::-webkit-meter-optimum-value { background: #b39acb; }
+.hyperui-admin .dashboard-category-list li:nth-child(3n) meter::-moz-meter-bar { background: #b39acb; }
+.hyperui-admin .dashboard-shortcuts { grid-template-columns: repeat(2,minmax(0,1fr)); }
+.hyperui-admin .dashboard-shortcuts a { min-width: 0; padding: 12px 10px; }
+.hyperui-admin .dashboard-shortcuts a span { overflow-wrap: anywhere; }
+@media (max-width: 1200px) {
+  .hyperui-admin .menu-category-row { grid-template-columns: 1fr; gap: 12px; }
+}
+@media (max-width: 640px) {
+  .hyperui-admin .admin-compact-page .settings-card-v3 { padding: 16px; }
+  .hyperui-admin .menu-category-fields { grid-template-columns: repeat(2,minmax(0,1fr)); }
+  .hyperui-admin .custom-menu-row { flex-direction: column; align-items: stretch; gap: 12px; padding: 12px; }
+  .hyperui-admin .custom-menu-row > .settings-danger { align-self: end; }
+  .hyperui-admin .settings-language-panel .settings-grid-v3 { grid-template-columns: 1fr; }
+  .hyperui-admin .card-color-options { grid-template-columns: repeat(2,minmax(0,1fr)); }
+  .hyperui-admin .dashboard-welcome { padding: 20px; align-items: start; }
+  .hyperui-admin .dashboard-stat { padding: 14px; gap: 8px; }
+  .hyperui-admin .dashboard-stat .icon-tile { width: 30px; height: 30px; }
+  .hyperui-admin .dashboard-stat strong { font-size: 27px; }
+  .hyperui-admin .dashboard-stat .stat-label { font-size: 11px; }
+  .hyperui-admin .dashboard-panel { padding: 16px; }
+  .hyperui-admin .dashboard-post { flex-wrap: wrap; }
+  .hyperui-admin .dashboard-post .admin-status { margin-left: 46px; }
+}
+@media (max-width: 380px) {
+  .hyperui-admin .menu-category-fields, .hyperui-admin .custom-menu-fields, .hyperui-admin .card-color-options, .hyperui-admin .dashboard-shortcuts { grid-template-columns: 1fr; }
+}
+
+/* Appearance controls: compact groups and previews using the current form values. */
+.hyperui-admin .design-settings-page .design-settings-form { display: grid; grid-template-columns: 1fr; gap: 16px; }
+.hyperui-admin .design-settings-form > :is(.settings-page-header,.settings-section-nav,.settings-save-bar,.notice,.design-footer-section) { grid-column: 1 / -1; margin: 0; }
+.hyperui-admin .design-settings-page .settings-card-v3 { margin: 0; }
+.hyperui-admin .design-settings-page .design-color-section { display: grid; grid-template-columns: 150px minmax(0,1fr); align-items: center; gap: 20px; }
+.hyperui-admin .design-settings-page .design-color-section > header { border: 0; margin: 0; padding: 0; }
+.hyperui-admin .design-settings-page .design-color-grid { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 10px; }
+.hyperui-admin .design-settings-page .design-footer-section .design-color-grid { grid-template-columns: repeat(3,minmax(0,1fr)); }
+.hyperui-admin .design-settings-page .footer-copy-grid { margin-top: 20px; }
+.hyperui-admin :is(.design-color-grid,.card-color-options) .color-control { display: grid; grid-template-columns: 38px minmax(0,1fr) 110px; align-items: center; gap: 10px; padding: 10px; background: #fafbfe; }
+.hyperui-admin :is(.design-color-grid,.card-color-options) .color-control > span { grid-column: 2; grid-row: 1; font-size: 12px; }
+.hyperui-admin :is(.design-color-grid,.card-color-options) .color-control input[type='color'] { grid-column: 1; grid-row: 1; width: 36px; height: 36px; min-height: 36px; padding: 2px; }
+.hyperui-admin :is(.design-color-grid,.card-color-options) .color-control input[data-color-value] { grid-column: 3; grid-row: 1; padding: 8px; font: 12px ui-monospace,monospace; min-width: 0; }
+.hyperui-admin .category-card-preview { display: grid; align-content: center; gap: 10px; padding: 22px; min-height: 172px; border: 1px solid #dce2ed; border-radius: 10px; overflow-wrap: anywhere; }
+.hyperui-admin .category-card-preview > span { font-size: 11px; opacity: .7; }
+.hyperui-admin .category-card-preview > strong { font-size: 20px; line-height: 1.35; }
+.hyperui-admin .category-card-preview > p { color: inherit; font-size: 13px; margin: 0; opacity: .8; }
+.hyperui-admin .category-appearance-card .card-color-options { grid-template-columns: 1fr; gap: 8px; }
+.hyperui-admin .category-appearance-card { gap: 16px; padding: 16px; }
+.hyperui-admin .card-reset { align-self: start; border: 0; background: none; padding: 4px 0; cursor: pointer; font: inherit; font-size: 12px; }
+@media(max-width:1200px) { .hyperui-admin .design-settings-page .design-color-grid, .hyperui-admin .design-settings-page .design-footer-section .design-color-grid { grid-template-columns: repeat(2,minmax(0,1fr)); } }
+@media(max-width:760px) {
+ .hyperui-admin .design-settings-page .design-color-section { grid-template-columns: 1fr; gap: 14px; }
+ .hyperui-admin .design-settings-page .design-color-grid, .hyperui-admin .design-settings-page .design-footer-section .design-color-grid { grid-template-columns: 1fr; }
+}
+@media(max-width:380px) {
+  .hyperui-admin :is(.design-color-grid,.card-color-options) .color-control { grid-template-columns: 36px minmax(0,1fr); }
+  .hyperui-admin :is(.design-color-grid,.card-color-options) .color-control input[data-color-value] { grid-column: 2; grid-row: 2; }
+}
+
+/* Private contact inbox. */
+.hyperui-admin .messages-count { font-size: 13px; padding: 5px 10px; border-radius: 8px; background: #e8e5fc; color: #5145a0; }
+.hyperui-admin .messages-inbox { padding: 8px 20px; }
+.hyperui-admin .inbox-message + .inbox-message { border-top: 1px solid #e3e8f1; }
+.hyperui-admin .inbox-message summary { display: flex; align-items: center; gap: 14px; cursor: pointer; padding: 18px 0; list-style: none; }
+.hyperui-admin .inbox-message summary::-webkit-details-marker { display: none; }
+.hyperui-admin .inbox-message summary::after { content: '+'; margin-left: 8px; font-size: 20px; color: #65738a; }
+.hyperui-admin .inbox-message[open] summary::after { content: '−'; }
+.hyperui-admin .inbox-message summary:focus-visible { outline: 2px solid #8175cf; outline-offset: 2px; border-radius: 6px; }
+.hyperui-admin .message-avatar { display: grid; place-items: center; flex: 0 0 38px; height: 38px; border-radius: 10px; background: #eeecfc; color: #6154a3; font-weight: 650; }
+.hyperui-admin .message-sender { display: grid; gap: 4px; flex: 1; min-width: 0; overflow-wrap: anywhere; }
+.hyperui-admin .message-sender > span, .hyperui-admin .inbox-message time { font-size: 12px; color: #64748b; }
+.hyperui-admin .message-body { white-space: pre-wrap; overflow-wrap: anywhere; padding: 18px; margin: 0 0 18px 52px; background: #f7f9fd; border-radius: 10px; line-height: 1.8; }
+.hyperui-admin .messages-pagination { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 16px; margin-top: 20px; }
+@media(max-width:640px) {
+ .hyperui-admin .inbox-message summary { flex-wrap: wrap; gap: 10px; }
+ .hyperui-admin .inbox-message time { margin-left: 48px; }
+ .hyperui-admin .message-body { margin-left: 0; }
+ .hyperui-admin .message-sender { flex-basis: calc(100% - 48px); }
+}

@@ -1,0 +1,37 @@
+{% from 'admin/partials/icons.html' import icon %}
+<!doctype html>
+<html lang="{{ lang }}">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#f9fafb" />
+    <title>{{ title }} · FriPeri</title>
+    <link rel="stylesheet" href="{{ static_url('site.css') }}" />
+    <link rel="stylesheet" href="{{ static_url('admin.css') }}" />
+    {% block extra_head %}{% endblock %}
+    <link rel="stylesheet" href="{{ static_url('image-crop.css') }}" />
+    {% set crop_labels = {} %}{% for key in ['title','apply','cancel','ratio','original','zoom','horizontal','vertical','help','error','rotate_left','rotate_right','flip_horizontal','flip_vertical','grid','reset','format','output','keyboard_help'] %}{% set _ = crop_labels.update({key: t(lang, 'crop.' ~ key)}) %}{% endfor %}
+    <script type="application/json" id="image-crop-labels">{{ crop_labels|tojson }}</script>
+    <script src="{{ static_url('image-crop.js') }}" defer></script>
+    <script src="{{ static_url('editor.js') }}" defer></script>
+    <script src="{{ static_url('admin-workspace.js') }}" defer></script>
+  </head>
+  <body class="admin-site hyperui-admin {{ 'admin-auth' if not user else '' }}">
+    <a class="admin-skip" href="#admin-content">{{ t(lang, 'content.content') }} ↓</a>
+    {% if user %}
+    <aside class="admin-sidebar">
+      <a class="admin-brand" href="/admin"><img class="admin-brand-logo" src="{{ static_url('images/FriPeri_Logo.png') }}" alt="FriPeri"></a>
+      {% include 'admin/partials/admin_nav.html' %}
+      <div class="admin-sidebar-footer"><span>{{ t(lang, 'admin.admin') }}</span><a href="/logout">{{ t(lang, 'nav.logout') }} ↗</a></div>
+    </aside>
+    {% endif %}
+    <div class="admin-shell">
+      <header class="admin-topbar">
+        <span class="admin-topbar-title">{% if user %}<a href="/admin">{{ t(lang, 'dashboard.title') }}</a>{% if active_admin|default('admin') != 'admin' %}<span aria-hidden="true"> / </span><span>{{ t(lang, 'language.title' if active_admin == 'language' else ('admin.social_links_title' if active_admin == 'social_links' else 'admin.' ~ active_admin)) }}</span>{% endif %}{% else %}<a href="/first-run"><img class="admin-topbar-logo" src="{{ static_url('images/FriPeri_Logo.png') }}" alt="FriPeri"></a>{% endif %}</span>
+        <div class="admin-topbar-actions">{% include 'partials/lang_switch.html' %}<a class="admin-secondary" href="/">{{ t(lang, 'nav.home') }} ↗</a></div>
+      </header>
+      {% block content %}{% endblock %}
+      <footer class="admin-footer">FriPeri <span>Personal publishing framework</span></footer>
+    </div>
+  </body>
+</html>

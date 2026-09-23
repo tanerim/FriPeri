@@ -1,0 +1,50 @@
+{% extends "admin/base.html" %}
+
+{% block content %}
+<main id="admin-content" class="admin-settings-page" tabindex="-1">
+  <div class="admin-settings-container">
+    <header class="settings-page-header">
+      <div>
+        <h1><span class="page-heading-icon">{{ icon('categories') }}</span>{{ t(lang, "admin.categories") }}</h1>
+        <p>{{ t(lang, "admin.category_desc") }}</p>
+      </div>
+    </header>
+    {% if error %}<p class="error">{{ error }}</p>{% endif %}
+    <div class="categories-admin-grid">
+      <form class="admin-card" method="post" action="/admin/categories">
+      <input type="hidden" name="content_language_code" value="{{ secondary_language.code if secondary_language else '' }}" />
+        <h2>{{ t(lang, 'admin.new_category') }}</h2>
+        <div class="settings-grid-v3 single-col">
+          <label><span>{{ t(lang, 'admin.category_name') }} — {{ languages[0].name }}</span><input name="name" required /></label>
+          {% if secondary_language %}<label><span>{{ t(lang, 'admin.label') }} — {{ secondary_language.name }}</span><input name="menu_label_secondary" /></label>{% endif %}
+          {% for language in languages %}<label><span>{{ t(lang, 'admin.category_desc') }} — {{ language.name }}</span><input name="{{ 'description' if language.code == 'en' else 'description_secondary' }}" /></label>{% endfor %}
+        </div>
+        <div class="page-actions"><button class="settings-primary" type="submit">{{ icon('save') }}{{ t(lang, "common.save") }}</button></div>
+      </form>
+      <section class="admin-card">
+        <h2>{{ t(lang, "admin.categories") }}</h2>
+        <div class="category-list-admin">
+          {% for cat in categories %}
+            <div class="category-row-admin">
+              <div><strong>{{ cat["name"] }}</strong><span>{{ cat["slug"] }}</span></div>
+              <div>{{ t(lang, 'common.menu' if cat['show_in_menu'] else 'common.hidden') }}</div>
+              <div>{{ cat["sort_order"] }}</div>
+              <div class="category-row-actions">
+                <a class="settings-secondary" href="/admin/menu?edit_category={{ cat['id'] }}">
+                  {{ t(lang, 'common.edit') }}
+                </a>
+                <form method="post" action="/admin/categories/{{ cat.id }}/delete" data-confirm="{{ t(lang, 'admin.delete_category_confirm') }}">
+                  <input type="hidden" name="confirmed" value="1" />
+                  <button type="submit" class="settings-danger">{{ t(lang, 'common.delete') }}</button>
+                </form>
+              </div>
+            </div>
+          {% else %}
+            <p>{{ t(lang, 'common.empty') }}</p>
+          {% endfor %}
+        </div>
+      </section>
+    </div>
+  </div>
+</main>
+{% endblock %}

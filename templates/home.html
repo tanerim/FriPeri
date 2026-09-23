@@ -1,0 +1,212 @@
+{% extends "base.html" %}
+
+{% block extra_head %}<link rel="stylesheet" href="{{ static_url('home-feed.css') }}" />{% endblock %}
+{% block content %}
+<main class="home-main friperi-home">
+  <section class="friperi-welcome" aria-labelledby="home-title">
+    <div class="friperi-welcome-copy">
+      <span class="friperi-eyebrow"><span aria-hidden="true"></span>{{ localized(site_settings, 'hero_kicker') }}</span>
+      <h1 id="home-title">{{ localized(site_settings, 'hero_title') or site_name }}</h1>
+      <p>{{ localized(site_settings, 'hero_copy') }}</p>
+      <a class="friperi-explore" href="#home-stories">{{ t(lang, 'home.explore') }} <span aria-hidden="true">↘</span></a>
+    </div>
+    {% if site_settings.hero_background_enabled == '1' and site_settings.hero_background_image_path %}
+    <div class="friperi-welcome-art has-cover" aria-hidden="true">
+      <img src="{{ site_settings.hero_background_image_path }}" alt="" fetchpriority="high" />
+    </div>
+    {% endif %}
+  </section>
+
+  {% if show_feature_strip %}
+  <section class="quick-links" aria-label="{{ t(lang, 'home.featured') }}">
+    <div class="quick-grid">
+      <div class="quick-edge quick-edge-left" aria-hidden="true"></div>
+      {% if show_feature_blog %}
+      <a href="/category/{{ latest_writing_slug }}" class="quick-item">
+        <span>01</span>
+        <strong>{{ t(lang, 'nav.blog') }}</strong>
+        <em>{{ feature_blog_desc }}</em>
+      </a>
+      {% endif %}
+      {% if show_feature_notes %}
+      <a href="/category/{{ latest_notes_slug }}" class="quick-item">
+        <span>02</span>
+        <strong>{{ t(lang, 'nav.notes') }}</strong>
+        <em>{{ feature_notes_desc }}</em>
+      </a>
+      {% endif %}
+      {% if show_feature_contact %}
+      <a href="/contact" class="quick-item">
+        <span>03</span>
+        <strong>{{ t(lang, 'nav.contact') }}</strong>
+        <em>{{ feature_contact_desc }}</em>
+      </a>
+      {% endif %}
+      <div class="quick-edge quick-edge-right" aria-hidden="true"></div>
+    </div>
+  </section>
+  {% endif %}
+
+  <div class="home-container" id="home-stories">
+    {# 1. FEATURED CONTENT (Optional) #}
+    {% if featured_post %}
+    <section class="home-section featured-content-section" aria-label="{{ t(lang, 'home.featured_section') }}">
+      <div class="featured-card {{ 'has-image' if featured_post.image_path and settings.show_featured_image == '1' else 'no-image' }}">
+        <div class="featured-text">
+          <div class="featured-meta">
+            <span class="featured-badge">{{ t(lang, 'home.featured') }}</span>
+            {% if featured_post.category_name %}
+              <span class="featured-cat"><a href="/category/{{ featured_post.category_slug }}">{{ featured_post.category_name }}</a></span>
+              <span class="meta-dot">·</span>
+            {% endif %}
+            <time datetime="{{ featured_post.created_at }}">{{ featured_post.created_at|format_date }}</time>
+          </div>
+          <h2 class="featured-title">
+            <a href="/posts/{{ featured_post.slug }}">{{ featured_post.title }}</a>
+          </h2>
+          {% if featured_post.excerpt %}
+            <p class="featured-excerpt">{{ featured_post.excerpt }}</p>
+          {% endif %}
+          <div class="featured-action">
+            <a href="/posts/{{ featured_post.slug }}" class="editorial-read-link">
+              <span>{{ t(lang, 'common.read') }}</span>
+              <svg class="arrow-icon" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <line x1="3" y1="8" x2="13" y2="8"></line>
+                <polyline points="9 4 13 8 9 12"></polyline>
+              </svg>
+            </a>
+          </div>
+        </div>
+        {% if featured_post.image_path and settings.show_featured_image == '1' %}
+        <div class="featured-image-wrapper">
+          <a href="/posts/{{ featured_post.slug }}">
+            <img src="{{ featured_post.image_path }}" alt="{{ featured_post.title }}" loading="lazy" />
+          </a>
+        </div>
+        {% endif %}
+      </div>
+    </section>
+    {% endif %}
+
+    {# 2. LATEST CONTENT (Writing + Notes in editorial split or single column) #}
+    {% if (show_latest_writing and (latest_writing_posts or show_empty_placeholders)) or (show_latest_notes and (latest_notes_posts or show_empty_placeholders)) %}
+    <section class="home-section latest-content-section layout-{{ homepage_layout }}">
+      <div class="editorial-columns">
+        {# Latest Writing Column #}
+        {% if show_latest_writing and (latest_writing_posts or show_empty_placeholders) %}
+        <div class="editorial-column writing-column">
+          <div class="editorial-column-header">
+            <h2 class="section-title">{{ latest_writing_title }}</h2>
+            <a href="/category/{{ latest_writing_slug }}" class="section-view-all">{{ t(lang, 'home.view_all') }} →</a>
+          </div>
+          {% if latest_writing_posts %}
+            <div class="editorial-row-list">
+              {% for post in latest_writing_posts %}
+                <article class="editorial-row-item">
+                  {% if post.image_path %}<a class="friperi-post-cover" href="/posts/{{ post.slug }}" tabindex="-1" aria-hidden="true"><img src="{{ post.image_path }}" alt="" loading="lazy" /></a>{% else %}<div class="friperi-post-pattern" aria-hidden="true"><span>{{ '%02d'|format(loop.index) }}</span><span>↗</span></div>{% endif %}
+                  <div class="item-meta">
+                    <time datetime="{{ post.created_at }}">{{ post.created_at|format_date }}</time>
+                    {% if post.category_name %}
+                      <span class="meta-dot">·</span>
+                      <span class="item-cat">{{ post.category_name }}</span>
+                    {% endif %}
+                  </div>
+                  <h3 class="item-title">
+                    <a href="/posts/{{ post.slug }}">{{ post.title }}</a>
+                  </h3>
+                  {% if post.excerpt %}
+                    <p class="item-excerpt">{{ post.excerpt }}</p>
+                  {% endif %}
+                  <div class="item-action">
+                    <a href="/posts/{{ post.slug }}" class="editorial-read-link">
+                      <span>{{ t(lang, 'common.read') }}</span>
+                      <svg class="arrow-icon" width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <line x1="3" y1="8" x2="13" y2="8"></line>
+                        <polyline points="9 4 13 8 9 12"></polyline>
+                      </svg>
+                    </a>
+                  </div>
+                </article>
+              {% endfor %}
+            </div>
+          {% else %}
+            <p class="empty-state">{{ t(lang, 'common.empty') }}</p>
+          {% endif %}
+        </div>
+        {% endif %}
+
+        {# Latest Notes Column #}
+        {% if show_latest_notes and (latest_notes_posts or show_empty_placeholders) %}
+        <div class="editorial-column notes-column">
+          <div class="editorial-column-header">
+            <h2 class="section-title">{{ latest_notes_title }}</h2>
+            <a href="/category/{{ latest_notes_slug }}" class="section-view-all">{{ t(lang, 'home.view_all') }} →</a>
+          </div>
+          {% if latest_notes_posts %}
+            <div class="editorial-notes-list">
+              {% for post in latest_notes_posts %}
+                <article class="editorial-note-item"><span class="friperi-note-index" aria-hidden="true">{{ '%02d'|format(loop.index) }}</span>
+                  <time class="note-date" datetime="{{ post.created_at }}">{{ post.created_at|format_date }}</time>
+                  <h3 class="note-title">
+                    <a href="/posts/{{ post.slug }}">{{ post.title }}</a>
+                  </h3>
+                  {% if post.excerpt %}
+                    <p class="note-excerpt">{{ post.excerpt }}</p>
+                  {% endif %}
+                </article>
+              {% endfor %}
+            </div>
+          {% else %}
+            <p class="empty-state">{{ t(lang, 'common.empty') }}</p>
+          {% endif %}
+        </div>
+        {% endif %}
+      </div>
+    </section>
+    {% endif %}
+
+    {# 3. OPTIONAL CATEGORY MODULES #}
+    {% if homepage_category_modules %}
+      {% for module in homepage_category_modules %}
+        {% if module.posts or show_empty_placeholders %}
+        <section class="home-section category-module-section">
+          <div class="editorial-column-header">
+            <h2 class="section-title">{{ module.title }}</h2>
+            <a href="/category/{{ module.slug }}" class="section-view-all">{{ t(lang, 'home.view_all') }} →</a>
+          </div>
+          {% if module.posts %}
+            <div class="category-module-grid">
+              {% for post in module.posts %}
+                <article class="editorial-row-item category-module-item">
+                  {% if post.image_path %}<a class="friperi-post-cover" href="/posts/{{ post.slug }}" tabindex="-1" aria-hidden="true"><img src="{{ post.image_path }}" alt="" loading="lazy" /></a>{% endif %}
+                  <div class="item-meta">
+                    <time datetime="{{ post.created_at }}">{{ post.created_at|format_date }}</time>
+                  </div>
+                  <h3 class="item-title">
+                    <a href="/posts/{{ post.slug }}">{{ post.title }}</a>
+                  </h3>
+                  {% if post.excerpt %}
+                    <p class="item-excerpt">{{ post.excerpt }}</p>
+                  {% endif %}
+                  <div class="item-action">
+                    <a href="/posts/{{ post.slug }}" class="editorial-read-link">
+                      <span>{{ t(lang, 'common.read') }}</span>
+                      <svg class="arrow-icon" width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <line x1="3" y1="8" x2="13" y2="8"></line>
+                        <polyline points="9 4 13 8 9 12"></polyline>
+                      </svg>
+                    </a>
+                  </div>
+                </article>
+              {% endfor %}
+            </div>
+          {% else %}
+            <p class="empty-state">{{ t(lang, 'common.empty') }}</p>
+          {% endif %}
+        </section>
+        {% endif %}
+      {% endfor %}
+    {% endif %}
+  </div>
+</main>
+{% endblock %}

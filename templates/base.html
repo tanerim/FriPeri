@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="{{ lang }}">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="{{ site_description }}" />
+    <meta name="theme-color" content="#eef0e5" />
+    <title>{{ title }}</title>
+    <link rel="stylesheet" href="{{ static_url('site.css') }}" />
+    <style>
+      :root {
+        --color-page-bg: {{ design_vars.color_page_bg }};
+        --color-footer-bg: {{ design_vars.color_footer_bg }};
+        --color-footer-text: {{ design_vars.color_footer_text }};
+        --color-footer-border: {{ design_vars.color_footer_border }};
+        --color-nav: {{ design_vars.color_nav }};
+        --color-nav-hover: {{ design_vars.color_nav_hover }};
+        --color-nav-active: {{ design_vars.color_nav_active }};
+        --color-feature-bg: {{ design_vars.color_feature_bg }};
+        --color-feature-text: {{ design_vars.color_feature_text }};
+        --color-feature-border: {{ design_vars.color_feature_border }};
+        --color-accent: {{ design_vars.color_accent_primary }};
+        --color-accent-secondary: {{ design_vars.color_accent_secondary }};
+        --color-separator-1: {{ design_vars.color_separator_1 }};
+        --color-separator-2: {{ design_vars.color_separator_2 }};
+        --color-separator-3: {{ design_vars.color_separator_3 }};
+      }
+    </style>
+    {% block extra_head %}{% endblock %}
+    <script src="{{ static_url('editor.js') }}" defer></script>
+    <script src="{{ static_url('navigation.js') }}" defer></script>
+  </head>
+  <body class="{{ 'admin-site' if request.url.path.startswith('/admin') else 'public-site' }}">
+    <header class="site-header">{% include "partials/nav.html" %}</header>
+    {% block content %}{% endblock %}
+    {% if site_settings.show_footer == '1' %}
+    <footer class="site-footer">
+      <div class="footer-inner">
+        <div class="footer-left">
+          <span>{{ localized(site_settings, 'footer_text') or (site_name ~ ' © ' ~ year_now) }}</span>
+        </div>
+        <div class="footer-center">
+          {% if social_links %}
+          <div class="footer-social-links" aria-label="{{ t(lang, 'common.social_links') }}">
+            {% for social in social_links %}
+            <a href="{{ social.url }}" aria-label="{{ social.name }}" title="{{ social.name }}" rel="noopener noreferrer" target="_blank">
+              {% include 'partials/social_icon.html' %}
+            </a>
+            {% endfor %}
+          </div>
+          {% endif %}
+        </div>
+        <div class="footer-right">
+          <span class="footer-powered">Powered by <a href="https://github.com/tanerim/friperi" rel="noopener noreferrer" target="_blank">FriPeri</a>. A <a href="https://nextnlp.com" rel="noopener noreferrer" target="_blank">NextNLP</a> Project</span>
+        </div>
+      </div>
+    </footer>
+    {% endif %}
+  </body>
+</html>

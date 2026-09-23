@@ -1,0 +1,70 @@
+{% extends "admin/base.html" %}
+
+{% block content %}
+<main id="admin-content" class="admin-settings-page" tabindex="-1">
+  <div class="admin-settings-container">
+    <form class="settings-form-v3" method="post" action="/admin/social-links" enctype="multipart/form-data">
+      <input type="hidden" name="content_language_code" value="{{ secondary_language.code if secondary_language else '' }}" />
+      <header class="settings-page-header">
+        <div>
+          <h1><span class="page-heading-icon">{{ icon('social') }}</span>{{ t(lang, "admin.social_links_title") }}</h1>
+          <p>{{ t(lang, "admin.social_links_description") }}</p>
+        </div>
+        <button class="settings-primary" type="submit">{{ icon('save') }}{{ t(lang, 'common.save_changes') }}</button>
+      </header>
+
+      {% if error %}<p class="error">{{ error }}</p>{% endif %}
+      {% if saved %}<p class="notice settings-notice">{{ t(lang, 'common.saved') }}</p>{% endif %}
+
+      <section class="settings-card-v3">
+        <header>
+          <h2>{{ t(lang, 'admin.social') }}</h2>
+          <p>{{ t(lang, 'admin.social_help') }}</p>
+        </header>
+        <div class="social-card-grid">
+          {% for key, name in social_platforms %}
+          <div class="social-platform-card">
+            <div class="social-platform-row">
+              <span class="social-platform-name">
+                <svg class="platform-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  {% if key == 'linkedin' %}
+                  <path d="M6.94 8.98H3.72v11.2h3.22V8.98ZM7.24 5.5a1.86 1.86 0 1 0-3.72 0 1.86 1.86 0 0 0 3.72 0Zm13.24 8.15c0-3.01-1.6-4.94-4.18-4.94-1.42 0-2.45.64-3.04 1.52V8.98h-3.08v11.2h3.22v-5.54c0-1.46.28-2.87 2.08-2.87 1.78 0 1.8 1.66 1.8 2.96v5.45h3.22v-6.53Z"/>
+                  {% elif key == 'twitter' %}
+                  <path d="M14.29 10.16 22.12 1h-1.86l-6.8 7.95L8.02 1H1.76l8.21 12.02L1.76 22.6h1.86l7.18-8.39 5.73 8.39h6.26l-8.5-12.44Zm-2.54 2.97-.83-1.2L4.3 2.41h2.83l5.34 7.68.83 1.2 6.96 10.02h-2.83l-5.68-8.18Z"/>
+                  {% elif key == 'github' %}
+                  <path d="M12 2a10 10 0 0 0-3.16 19.49c.5.09.68-.22.68-.48v-1.86c-2.78.6-3.37-1.18-3.37-1.18-.45-1.16-1.11-1.47-1.11-1.47-.91-.62.07-.61.07-.61 1 .07 1.53 1.03 1.53 1.03.89 1.53 2.34 1.09 2.91.83.09-.65.35-1.09.64-1.34-2.22-.25-4.56-1.11-4.56-4.95 0-1.09.39-1.98 1.03-2.68-.1-.25-.45-1.27.1-2.65 0 0 .84-.27 2.75 1.03A9.6 9.6 0 0 1 12 6.82c.85 0 1.71.11 2.51.34 1.91-1.3 2.75-1.03 2.75-1.03.55 1.38.2 2.4.1 2.65.64.7 1.03 1.59 1.03 2.68 0 3.85-2.34 4.7-4.57 4.95.36.31.68.92.68 1.85v2.75c0 .27.18.58.69.48A10 10 0 0 0 12 2Z"/>
+                  {% elif key == 'orcid' %}
+                  <circle cx="12" cy="12" r="10"/><path d="M7 10v7m4-7h2a3.5 3.5 0 0 1 0 7h-2z"/><circle cx="7" cy="7" r="1"/>
+                  {% elif key == 'google_scholar' %}
+                  <path d="m12 2 12 8-12 8L0 10z"/><path d="M5 14v5c4 3 10 3 14 0v-5l-7 5z"/>
+                  {% elif key == 'researchgate' %}
+                  <path d="M4 20V7h5a4 4 0 0 1 0 8H4m5 0 5 5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="18" cy="6" r="4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                  {% elif key == 'bluesky' %}
+                  <path d="M5 3c3 2 6 6 7 8 1-2 4-6 7-8 2-1 3 0 3 2 0 1-.5 6-1 7-1 2-4 2-6 1 4 1 5 3 3 6-3 4-5-1-6-3-1 2-3 7-6 3-2-3-1-5 3-6-2 1-5 1-6-1-.5-1-1-6-1-7 0-2 1-3 3-2Z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+                  {% elif key == 'mastodon' %}
+                  <path d="M21 7c0-4-3-5-9-5S3 3 3 7v8c0 6 5 7 10 7l4-1v-3c-5 2-10 1-10-2v-1c6 2 14 1 14-4Z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M7 12V7c0-2 5-2 5 1 0-3 5-3 5-1v5" fill="none" stroke="currentColor" stroke-width="1.8"/>
+                  {% elif key == 'youtube' %}
+                  <path d="M3 5c-3 1-3 13 0 14 4 1 14 1 18 0 3-1 3-13 0-14C17 4 7 4 3 5Zm7 3v8l6-4Z" fill="none" stroke="currentColor" stroke-width="1.6"/>
+                  {% elif key == 'instagram' %}
+                  <rect x="3" y="3" width="18" height="18" rx="5" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="12" r="4" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="17.5" cy="6.5" r="1.2" fill="currentColor"/>
+                  {% elif key == 'facebook' %}
+                  <path d="M14 22v-9h3l.5-4H14V7c0-1 .3-2 2-2h2V1.5L15 1c-3 0-5 2-5 5v3H7v4h3v9Z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+                  {% endif %}
+                </svg>
+              </span>
+              <span class="social-platform-label">{{ name }}</span>
+              <input name="social_{{ key }}_url" value="{{ settings['social_' ~ key ~ '_url'] }}" type="url" placeholder="https://" class="social-url-input" />
+              <label class="settings-check show-checkbox end-of-row">
+                <input name="social_{{ key }}_visible" type="checkbox" value="1" {{ 'checked' if settings['social_' ~ key ~ '_visible'] == '1' else '' }} />
+                <span>{{ t(lang, 'common.show') }}</span>
+              </label>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </section>
+      <div class="settings-save-bar"><span>{{ t(lang, 'dashboard.save_help') }}</span><button class="settings-primary" type="submit">{{ icon('save') }}{{ t(lang, 'common.save_changes') }}</button></div>
+    </form>
+  </div>
+</main>
+{% endblock %}

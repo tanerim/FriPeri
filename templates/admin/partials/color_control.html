@@ -1,0 +1,7 @@
+{% macro color_control(name, label, value, fallback='#ffffff', alpha=false) %}
+<label class="color-field color-control" data-color-control>
+  <span>{{ label }}</span>
+  <input type="color" value="{{ (value or fallback)[:7] }}" aria-label="{{ label }}" data-color-picker />
+  <input type="text" name="{{ name }}" value="{{ value }}" placeholder="{{ fallback }}" pattern="#[0-9a-fA-F]{6}{{ '([0-9a-fA-F]{2})?' if alpha else '' }}" maxlength="{{ 9 if alpha else 7 }}" spellcheck="false" aria-label="{{ label }} — HEX" data-color-value data-fallback="{{ fallback }}" />
+</label>
+{% endmacro %}

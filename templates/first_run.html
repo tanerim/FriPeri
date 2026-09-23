@@ -1,0 +1,96 @@
+
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f7f8f5"><title>Set up your website · FriPeri</title>
+  <link rel="stylesheet" href="{{ static_url('first-run.css') }}">
+  <script src="{{ static_url('first-run.js') }}" defer></script>
+</head>
+<body>
+{% set help = {
+  'site_name': 'The name visitors see in your website header and browser tab. Use your name, a project name, or an organization name.',
+  'site_description': 'A short summary of what your website offers. Search engines may show this below your page title.',
+  'hero_kicker_en': 'A short line above the main heading and below your site name in the header. Describe your topic or purpose in a few words.',
+  'hero_title_en': 'The main heading visitors see at the top of your homepage. Leave it blank to use your site name.',
+  'hero_copy_en': 'A short paragraph below the heading. Tell visitors what they can find here or what your website is about.',
+  'hero_kicker_secondary': 'Translate your short introduction. Leave this blank to show the English text.',
+  'hero_title_secondary': 'Translate your welcome heading. Leave this blank to show the English text.',
+  'hero_copy_secondary': 'Translate your welcome message. Leave this blank to show the English text.',
+  'social_linkedin_url': 'A full link to your LinkedIn profile or page. Leave it blank if you do not use LinkedIn.',
+  'social_twitter_url': 'A full link to your X profile. More social platforms can be added in the admin panel later.',
+  'contact_email': 'The email address for visitor messages. Use an address you are comfortable sharing publicly.',
+  'hero_background_image_path': 'An image URL or an existing site path, such as /static/uploads/cover.jpg. You can upload an image in the admin panel later.',
+  'admin_username': 'The username you will use to sign in and manage your website. This is separate from your public site name.'
+} %}
+{% macro field(key) %}
+  {% for name, label, type, required in fields if name == key %}
+  <div class="field{% if key in ['site_description', 'hero_copy_en', 'hero_copy_secondary', 'admin_username'] %} wide{% endif %}">
+    <label for="{{ key }}">{{ label }}{% if not required %} <span class="optional">Optional</span>{% endif %}</label>
+    {% if key in ['site_description', 'hero_copy_en', 'hero_copy_secondary'] %}
+    <textarea id="{{ key }}" name="{{ key }}" rows="3" maxlength="4000" {% if required %}required{% endif %} aria-describedby="{{ key }}-help{% if errors.get(key) %} {{ key }}-error{% endif %}" {% if errors.get(key) %}aria-invalid="true"{% endif %}>{{ values.get(key, '') }}</textarea>
+    {% else %}
+    <input id="{{ key }}" type="{{ type }}" name="{{ key }}" value="{{ values.get(key, '') }}" maxlength="4000" {% if required %}required{% endif %} {% if key == 'admin_username' %}autocomplete="username" autocapitalize="none" spellcheck="false"{% endif %} aria-describedby="{{ key }}-help{% if errors.get(key) %} {{ key }}-error{% endif %}" {% if errors.get(key) %}aria-invalid="true"{% endif %}>
+    {% endif %}
+    <p id="{{ key }}-help" class="help">{{ help[key] }}</p>
+    {% if errors.get(key) %}<p class="error" id="{{ key }}-error">{{ errors[key] }}</p>{% endif %}
+  </div>
+  {% endfor %}
+{% endmacro %}
+<a class="skip-link" href="#setup-form">Skip to setup</a>
+<header class="topbar"><a class="brand" href="/first-run"><img class="topbar-logo" src="{{ static_url('images/FriPeri_Logo.png') }}" alt="FriPeri"></a><div class="topbar-right"></div></header>
+<main class="setup">
+  <aside class="setup-aside">
+    <span class="eyebrow">A SPACE OF YOUR OWN</span>
+    <h1>Good ideas<br>deserve a <em>home.</em></h1>
+    <p class="intro-copy">Make room for your stories, notes, and everything you want to share. Your FriPeri website starts here.</p>
+    <nav class="setup-nav" aria-label="Setup sections">
+      <a href="#identity-heading"><span>01</span><div>Your website<small>A name and a little context</small></div></a>
+      <a href="#homepage-heading"><span>02</span><div>A warm welcome<small>Your homepage introduction</small></div></a>
+      <a href="#personalize-heading"><span>03</span><div>Make it yours<small>Links and appearance · optional</small></div></a>
+      <a href="#account-heading"><span>04</span><div>Your admin account<small>The keys to your new space</small></div></a>
+    </nav>
+    <div class="aside-note"><span class="note-mark" aria-hidden="true">✦</span><p><strong>Start simple. Grow from here.</strong>Website details, languages, and appearance can all be changed in your admin panel later.</p></div>
+    <div class="palette" aria-hidden="true"><i></i><i></i><i></i></div>
+  </aside>
+  <div class="form-column">
+  <header class="form-intro"><span class="eyebrow">LET’S GET YOU SET UP</span><h2>A few details. A fresh beginning.</h2><p>Complete the four sections below. Fields marked “Optional” can wait.</p></header>
+  <form method="post" action="/first-run" id="setup-form">
+    <input type="hidden" name="setup_token" value="{{ setup_token }}">
+    {% if errors %}<div class="error-summary" role="alert" tabindex="-1"><strong>Let’s fix a few things before continuing.</strong><p>{{ errors.get('setup', 'Review the fields below, then enter your password again and try once more.') }}</p><ul>{% for key, message in errors.items() if key != 'setup' %}<li><a href="#{{ 'secondary-language' if key == 'secondary_language' else key }}">{{ message }}</a></li>{% endfor %}</ul></div>{% endif %}
+    <section class="card" aria-labelledby="identity-heading">
+      <div class="card-heading"><span class="step">01</span><div><h2 id="identity-heading">Your website</h2><p>Give your website a name and tell visitors what it is about.</p></div></div>
+      <div class="grid">{{ field('site_name') }}{{ field('site_description') }}</div>
+    </section>
+    <section class="card" aria-labelledby="homepage-heading">
+      <div class="card-heading"><span class="step">02</span><div><h2 id="homepage-heading">Welcome your visitors</h2><p>These texts appear together at the top of your homepage.</p></div></div>
+      <div class="homepage-example" aria-label="Homepage text preview"><div class="preview-bar"><span><i></i><i></i><i></i></span><span>HOMEPAGE TEXT PREVIEW</span></div><div class="preview-content"><small id="preview-kicker">{{ values.get('hero_kicker_en', '') }}</small><strong id="preview-title">{{ values.get('hero_title_en') or values.get('site_name', '') }}</strong><p id="preview-copy">{{ values.get('hero_copy_en', '') }}</p></div><div class="preview-stripe" aria-hidden="true"></div></div>
+      <div class="grid">{{ field('hero_kicker_en') }}{{ field('hero_title_en') }}{{ field('hero_copy_en') }}
+        <div class="field wide"><label for="secondary-language">Add another language <span class="optional">Optional</span></label><select id="secondary-language" name="secondary_language" aria-describedby="secondary-language-help{% if errors.get('secondary_language') %} secondary-language-error{% endif %}" {% if errors.get('secondary_language') %}aria-invalid="true"{% endif %}>{% for code, name in [('', 'English only'), ('tr', 'Turkish'), ('de', 'German'), ('fr', 'French')] %}<option value="{{ code }}" {% if values.secondary_language == code %}selected{% endif %}>{{ name }}</option>{% endfor %}</select><p class="help" id="secondary-language-help">English is your website's base language. Add translations so visitors can switch between languages. You can configure more languages after setup.</p>{% if errors.get('secondary_language') %}<p class="error" id="secondary-language-error">{{ errors.secondary_language }}</p>{% endif %}</div>
+      </div>
+      <div class="translations" id="setup-translations"><h3>Homepage translations <span id="translation-language"></span></h3><p class="help">Optional: untranslated fields use the English text.</p><div class="grid">{{ field('hero_kicker_secondary') }}{{ field('hero_title_secondary') }}{{ field('hero_copy_secondary') }}</div></div>
+    </section>
+    <section class="card" aria-labelledby="personalize-heading">
+      <div class="card-heading"><span class="step">03</span><div><h2 id="personalize-heading">Links and appearance <span class="optional">Optional</span></h2><p>Add ways to connect and a background image, or skip this section.</p></div></div>
+      <div class="info-note"><span aria-hidden="true">i</span><p><strong>Choose what you share.</strong> Your contact email and social links will be visible to visitors. You can leave them blank for now.</p></div><div class="grid">{{ field('social_linkedin_url') }}{{ field('social_twitter_url') }}{{ field('contact_email') }}{{ field('hero_background_image_path') }}
+        <div class="field wide"><label for="hero_background_enabled">Show a homepage background image</label><select id="hero_background_enabled" name="hero_background_enabled" aria-describedby="background-help{% if errors.get('hero_background_enabled') %} background-error{% endif %}" {% if errors.get('hero_background_enabled') %}aria-invalid="true"{% endif %}><option value="0">No background image</option><option value="1" {% if values.hero_background_enabled == '1' %}selected{% endif %}>Use the image above</option></select><p class="help" id="background-help">Display the selected image behind your homepage welcome text.</p>{% if errors.get('hero_background_enabled') %}<p class="error" id="background-error">{{ errors.hero_background_enabled }}</p>{% endif %}</div>
+      </div>
+    </section>
+    <section class="card" aria-labelledby="account-heading">
+      <div class="card-heading"><span class="step">04</span><div><h2 id="account-heading">Your administrator account</h2><p>Use this account to publish content and manage your website.</p></div></div>
+      <div class="password-required" id="password-required" hidden role="alert">
+        <span class="password-required-icon" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="16" height="11" rx="3"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/><path d="M12 14v3"/></svg></span>
+        <div><strong>Add a password to protect your website.</strong><p>Your administrator account needs a password. Enter at least 8 characters, then confirm it below to continue.</p></div>
+      </div>
+      <div class="grid">{{ field('admin_username') }}
+      {% for key, label, hint in [('admin_password', 'Password', 'Use at least 8 characters. A longer, unique password is recommended.'), ('password_confirmation', 'Confirm password', 'Enter the same password again to confirm it.')] %}
+        <div class="field"><label for="{{ key }}">{{ label }}</label><div class="password-control"><input id="{{ key }}" type="password" name="{{ key }}" autocomplete="new-password" minlength="8" maxlength="1024" required aria-describedby="{{ key }}-help{% if errors.get(key) %} {{ key }}-error{% endif %}" {% if errors.get(key) %}aria-invalid="true"{% endif %}><button class="password-toggle" type="button" data-password="{{ key }}" aria-controls="{{ key }}" aria-label="Show {{ label | lower }}" aria-pressed="false" hidden>Show</button></div><p class="help" id="{{ key }}-help">{{ hint }}</p>{% if errors.get(key) %}<p class="error" id="{{ key }}-error">{{ errors[key] }}</p>{% endif %}</div>
+      {% endfor %}</div>
+    </section>
+    <div class="mismatch-warning" id="password-mismatch" hidden role="status"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg><p>The passwords you entered do not match. Fix this before creating your website.</p></div>
+    <div class="submit-row"><p>Your next chapter starts here.<span>After setup, sign in with your new admin account.</span></p><button class="primary-button" type="submit">Create my website <span aria-hidden="true">→</span></button></div>
+  </form>
+  <footer><span>FriPeri · Personal publishing framework</span><span>Your space. Your stories.</span></footer></div>
+</main>
+</body>
+</html>

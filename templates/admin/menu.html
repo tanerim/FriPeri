@@ -1,0 +1,84 @@
+{% extends "admin/base.html" %}
+{% from 'admin/partials/menu_parent.html' import parent_select %}
+
+{% block content %}
+<main id="admin-content" class="admin-settings-page admin-compact-page menu-settings-page" tabindex="-1">
+  <div class="admin-settings-container">
+    <form class="settings-form-v3" method="post" action="/admin/menu">
+      <input type="hidden" name="content_language_code" value="{{ secondary_language.code if secondary_language else '' }}" />
+      <input type="hidden" name="menu_hierarchy" value="1" />
+      <header class="settings-page-header">
+        <div>
+          <h1><span class="page-heading-icon">{{ icon('menu') }}</span>{{ t(lang, "admin.menu") }}</h1>
+          <p>{{ t(lang, "admin.menu_help") }}</p>
+          <p>{{ t(lang, 'menu.hierarchy_help') }}</p>
+        </div>
+        <button class="settings-primary" type="submit">{{ icon('save') }}{{ t(lang, "common.save") }}</button>
+      </header>
+      {% if error %}<p class="error">{{ error }}</p>{% endif %}
+      <section class="settings-card-v3 menu-categories-panel">
+        <header><h2>{{ t(lang, 'admin.categories') }}</h2></header>
+        <div class="menu-category-rows">
+        {% for cat in categories %}
+          <section class="menu-category-row{% if editing_category_id and cat['id'] == editing_category_id %} menu-category-row-highlighted{% endif %}">
+            <h3>{{ icon('categories') }}{{ cat["name"] }}</h3>
+            <input type="hidden" name="category_id" value="{{ cat['id'] }}" />
+            {% if editing_category_id and cat['id'] == editing_category_id %}<input type="hidden" name="highlight_category" value="{{ cat['id'] }}" />{% endif %}
+            <div class="settings-grid-v3 menu-category-fields">
+              {% for language in languages %}
+              <label><span>{{ t(lang, 'admin.label') }} — {{ language.name }}</span><input name="label_{{ language.suffix }}_{{ cat.id }}" value="{{ cat['menu_label_' ~ language.suffix] }}" {{ 'required' if language.code == 'en' else '' }} /></label>
+              {% endfor %}
+              <label><span>{{ t(lang, "admin.sort_order") }}</span><input name="sort_{{ cat['id'] }}" type="number" value="{{ cat['sort_order'] }}" /></label>
+              {{ parent_select('category-' ~ cat.id, menu_parents, custom_items, lang, t) }}
+              <label class="settings-check menu-check"><input name="show_{{ cat['id'] }}" type="checkbox" value="1" {{ "checked" if cat["show_in_menu"] else "" }} /> <span>{{ t(lang, "admin.show_menu") }}</span></label>
+            </div>
+          </section>
+        {% endfor %}
+        </div>
+      </section>
+      <section class="settings-card-v3">
+        <header><h2>{{ t(lang, 'admin.pages') }}</h2>
+        <p>{{ t(lang, 'admin.pages_copy') }}</p></header>
+        <div class="menu-page-options">
+          {% for key, field, setting, label in [
+            ('about', 'show_about_link', 'show_about_link', 'admin.show_about'),
+            ('contact', 'show_contact_link_page', 'show_contact_link', 'admin.show_contact'),
+            ('login', 'show_login_link', 'show_login_link', 'admin.show_login')
+          ] %}
+          <div class="menu-page-option" role="group" aria-label="{{ t(lang, 'nav.' ~ key) }}">
+            <label class="settings-check"><input name="{{ field }}" type="checkbox" value="1" {{ 'checked' if site_settings.get(setting) == '1' else '' }} /><span>{{ t(lang, label) }}</span></label>
+            {{ parent_select('builtin-' ~ key, menu_parents, custom_items, lang, t) }}
+          </div>
+          {% endfor %}
+        </div>
+      </section>
+      <section class="settings-card-v3">
+        <header><h2>{{ t(lang, 'menu.custom_pages') }}</h2><p>{{ t(lang, 'menu.pages_help') }}</p></header>
+        {% for page in menu_pages %}
+        <section class="menu-category-row">
+          <h3>{{ page.title }}{% if not page.published %} · {{ t(lang, 'pages.draft') }}{% endif %}</h3>
+          <div class="settings-grid-v3">
+            {{ parent_select('page-' ~ page.id, menu_parents, custom_items, lang, t) }}
+            <label><span>{{ t(lang, 'admin.sort_order') }}</span><input type="number" name="page_sort_{{ page.id }}" value="{{ page_orders.get(page.id|string, 100) }}"></label>
+            <label class="settings-check"><input type="checkbox" name="page_show_{{ page.id }}" value="1" {% if page.show_in_menu %}checked{% endif %}><span>{{ t(lang, 'admin.show_menu') }}</span></label>
+          </div>
+        </section>
+        {% else %}<p>{{ t(lang, 'common.empty') }}</p>{% endfor %}
+      </section>
+      <section class="settings-card-v3">
+        <header class="settings-inline-heading"><h2>{{ t(lang, 'admin.custom_menu') }}</h2>
+          <button class="admin-secondary" id="add-menu-item" type="button">{{ t(lang, 'admin.add_menu') }}</button>
+        </header>
+        <div id="custom-menu-items" class="custom-menu-items">
+          {% for item in custom_items %}<div class="social-settings-item custom-menu-row">{% include 'admin/partials/custom_menu_item.html' %}</div>{% endfor %}
+          <p class="menu-empty-hint">{{ t(lang, 'common.empty') }}</p>
+        </div>
+
+        <template id="custom-menu-template"><div class="social-settings-item custom-menu-row">{% with item={'id': '__NEW__', 'label_secondary': '', 'label_en': '', 'url': '', 'sort_order': 100, 'show_in_menu': 1, 'new_tab': 0} %}{% include 'admin/partials/custom_menu_item.html' %}{% endwith %}</div></template>
+      </section>
+      <div class="settings-save-bar"><span>{{ t(lang, 'dashboard.save_help') }}</span><button class="settings-primary" type="submit">{{ icon('save') }}{{ t(lang, 'common.save_changes') }}</button></div>
+    </form>
+    <script src="{{ static_url('admin-menu.js') }}" defer></script>
+  </div>
+</main>
+{% endblock %}

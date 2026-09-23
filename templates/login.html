@@ -1,0 +1,21 @@
+{% extends "admin/base.html" %}
+
+{% block content %}
+<main id="admin-content" class="auth-page" tabindex="-1">
+  <div class="auth-container">
+    <section class="auth-card">
+      <header class="auth-header">
+        <h1>{{ t(lang, "nav.login") }}</h1>
+        <p>{{ t(lang, 'auth.intro') }}</p>
+      </header>
+      {% if request.query_params.get('setup') == 'ready' %}<p role="status">FriPeri is ready. Sign in to continue.</p>{% endif %}
+      <form class="auth-form" method="post" action="/login">
+        {% if error %}<p class="error">{{ error }}</p>{% endif %}
+        <label><span>{{ t(lang, "auth.username") }}</span><input name="username" autocomplete="username" required /></label>
+        <label><span>{{ t(lang, "auth.password") }}</span><input name="password" type="password" autocomplete="current-password" required /></label>
+        <button class="settings-primary" type="submit">{{ t(lang, "auth.login_action") }}</button>
+      </form>
+    </section>
+  </div>
+</main>
+{% endblock %}

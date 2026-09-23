@@ -1,0 +1,7 @@
+{% extends 'base.html' %}
+{% block extra_head %}<link rel="stylesheet" href="{{ static_url('custom-home.css') }}" />{% endblock %}
+{% block content %}
+<main class="custom-home-page" id="custom-home-content">
+  {% include 'partials/content_blocks.html' %}
+</main>
+{% endblock %}

@@ -1,0 +1,40 @@
+{% extends "admin/base.html" %}
+
+{% block content %}
+<main id="admin-content" class="admin-settings-page" tabindex="-1">
+  <div class="admin-settings-container">
+    <form class="settings-form-v3" method="post" action="/admin/contact-details">
+      <input type="hidden" name="content_language_code" value="{{ secondary_language.code if secondary_language else '' }}" />
+      <header class="settings-page-header">
+        <div><h1><span class="page-heading-icon">{{ icon('contact_details') }}</span>{{ t(lang, "admin.contact_details") }}</h1><p>{{ t(lang, "admin.contact_details_copy") }}</p></div>
+        <button class="settings-primary" type="submit">{{ icon('save') }}{{ t(lang, 'common.save_changes') }}</button>
+      </header>
+      {% if error %}<p class="error">{{ error }}</p>{% endif %}
+      {% if saved %}<p class="notice settings-notice">{{ t(lang, 'common.saved') }}</p>{% endif %}
+
+      <section class="settings-card-v3 contact-content-card">
+        <header class="settings-item-heading">
+          <h2>{{ icon('contact_details') }}{{ t(lang, 'admin.contact_page') }}</h2>
+        </header>
+        <div class="contact-language-grid">
+          {% for language in languages %}
+          <fieldset class="contact-language-fields">
+            <legend>{{ icon('language') }}{{ language.name }}</legend>
+            <div class="settings-grid-v3 single-col">
+              <label><span>{{ t(lang, 'admin.intro_text') }}</span><input name="contact_intro_{{ language.suffix }}" value="{{ settings['contact_intro_' ~ language.suffix] }}" /></label>
+              <label><span>{{ t(lang, 'admin.public_contact') }}</span><textarea name="contact_details_{{ language.suffix }}" rows="5">{{ settings['contact_details_' ~ language.suffix] }}</textarea></label>
+            </div>
+          </fieldset>
+          {% endfor %}
+        </div>
+        <hr>
+        <p>{{ t(lang, 'messages.delivery_help') }} <a class="admin-text-link" href="/admin/messages">{{ t(lang, 'admin.messages') }} →</a></p>
+        <div class="contact-delivery">
+          <label><span>{{ t(lang, 'messages.contact_email') }}</span><input name="contact_email" value="{{ settings.contact_email }}" type="email" /></label>
+        </div>
+      </section>
+      <div class="settings-save-bar"><span>{{ t(lang, 'dashboard.save_help') }}</span><button class="settings-primary" type="submit">{{ icon('save') }}{{ t(lang, 'common.save_changes') }}</button></div>
+    </form>
+  </div>
+</main>
+{% endblock %}

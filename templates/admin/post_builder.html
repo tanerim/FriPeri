@@ -1,0 +1,87 @@
+{% extends "admin/base.html" %}
+{% block extra_head %}
+<link rel="stylesheet" href="{{ static_url('custom-home.css') }}" />
+<link rel="stylesheet" href="{{ static_url('home-builder.css') }}" />
+<link rel="stylesheet" href="{{ static_url('post-builder.css') }}" />
+<script src="{{ static_url('home-builder.js') }}" defer></script>
+<script src="{{ static_url('post-builder.js') }}" defer></script>
+{% endblock %}
+{% block content %}
+<main id="admin-content" class="admin-settings-page" tabindex="-1">
+  <div class="admin-settings-container">
+    <form id="post-builder-form" class="settings-form-v3" method="post" action="/admin/posts/{{ post_id }}/edit/blocks" enctype="multipart/form-data">
+      <header class="settings-page-header">
+        <div><h1>{{ t(lang, 'admin.admin_copy') }}</h1><p>{{ t(lang, 'post_blocks.intro') }}</p></div>
+        <div class="builder-actions">
+          <button type="button" class="admin-secondary" id="builder-preview">{{ t(lang, 'common.preview') }}</button>
+          <button type="button" class="settings-primary" id="builder-save">{{ t(lang, 'builder.publish') }}</button>
+        </div>
+      </header>
+      <noscript><p class="error">{{ t(lang, 'builder.javascript') }}</p></noscript>
+      <div id="post-builder-status" role="status" aria-live="polite"></div>
+      <div class="builder-topbar">
+        <label>{{ t(lang, 'language.title') }} <select id="builder-language">{% for language in languages %}<option value="{{ language.suffix }}">{{ language.name }}</option>{% endfor %}</select></label>
+      </div>
+      <div class="builder-layout">
+        <aside class="admin-card builder-palette">
+          <h2>{{ t(lang, 'builder.add') }}</h2>
+          <div id="post-builder-add-blocks"></div>
+        </aside>
+        <div class="builder-workspace"><div id="post-builder-canvas" class="builder-canvas"></div></div>
+      </div>
+      <!-- Post metadata sidebar (always visible) -->
+      <section class="admin-card post-builder-meta-card">
+        <h2>{{ t(lang, 'common.metadata') }}</h2>
+        <div class="settings-grid-v3 single-col">
+          <label>
+            <span>{{ t(lang, "content.status") }}</span>
+            <select class="modern-select" name="post_status">
+              <option value="draft" {{ 'selected' if post.get('status') == 'draft' else '' }}>{{ t(lang, "content.draft") }}</option>
+              <option value="published" {{ 'selected' if post.get('status') == 'published' else '' }}>{{ t(lang, "content.published") }}</option>
+            </select>
+          </label>
+          <label>
+            <span>{{ t(lang, "content.category") }}</span>
+            <select class="modern-select" name="post_category_id">
+              <option value="">{{ t(lang, 'common.uncategorized') }}</option>
+              {% for cat in categories %}
+                <option value="{{ cat['id'] }}" {{ "selected" if post.get("category_id", "")|string == cat["id"]|string else "" }}>{{ cat["name"] }}</option>
+              {% endfor %}
+            </select>
+          </label>
+          <label>
+            <span>{{ t(lang, "content.tags") }}</span>
+            <input class="modern-input" name="post_tags" value="{{ post_tags }}" placeholder="nlp, python, corpus" />
+          </label>
+          <label>
+            <span>{{ t(lang, "content.image") }}</span>
+            <input class="modern-input" name="post_image_path" value="{{ post.get('image_path', '') }}" />
+          </label>
+        </div>
+      </section>
+      <!-- Translation section -->
+      {% if secondary_language %}
+      <section class="admin-card post-builder-translation-card">
+        <h2>{{ t(lang, 'common.translation') }} — {{ secondary_language.name }}</h2>
+        <div class="settings-grid-v3 single-col">
+          <label>
+            <span>{{ t(lang, "content.title") }}</span>
+            <input class="modern-input" name="title_secondary" value="{{ post.get('title_secondary', '') }}" maxlength="160" />
+          </label>
+          <label>
+            <span>{{ t(lang, "content.excerpt") }}</span>
+            <input class="modern-input" name="excerpt_secondary" value="{{ post.get('excerpt_secondary', '') }}" maxlength="260" />
+          </label>
+          <label>
+            <span>{{ t(lang, "content.content") }}</span>
+            <div class="editor modern-editor translation-editor admin-editor" data-editor="body_html_secondary" data-required="0" contenteditable="true" role="textbox" aria-label="Secondary body">{{ post.get('body_html_secondary', '')|safe }}</div>
+            <input type="hidden" name="body_html_secondary" value="{{ post.get('body_html_secondary', '') }}" />
+          </label>
+        </div>
+      </section>
+      {% endif %}
+      <input type="hidden" name="content_language_code" value="{{ secondary_language.code if secondary_language else '' }}" />
+    </form>
+  </div>
+</main>
+{% endblock %}

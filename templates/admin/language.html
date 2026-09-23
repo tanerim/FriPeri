@@ -1,0 +1,60 @@
+{% extends "admin/base.html" %}
+{% block content %}
+<main id="admin-content" class="admin-settings-page" tabindex="-1">
+  <div class="admin-settings-container">
+    <form class="settings-form-v3" method="post" action="/admin/language" data-language-form>
+      <header class="settings-page-header">
+        <div><h1><span class="page-heading-icon">{{ icon('language') }}</span>{{ t(lang, 'language.title') }}</h1><p>{{ t(lang, 'language.intro') }}</p></div>
+        <button class="settings-primary" type="submit">{{ icon('save') }}{{ t(lang, 'common.save_changes') }}</button>
+      </header>
+      {% if error %}<p class="error">{{ error }}</p>{% endif %}
+      {% if saved %}<p class="notice settings-notice">{{ t(lang, 'language.saved') }}</p>{% endif %}
+      <section class="settings-card-v3">
+        <header><h2>{{ t(lang, 'language.primary') }}</h2><p>{{ t(lang, 'language.primary_help') }}</p></header>
+        <strong>{{ builtin_languages.en.name }}</strong>
+      </section>
+      <section class="settings-card-v3">
+        <header><h2>{{ t(lang, 'language.secondary') }}</h2><p>{{ t(lang, 'language.secondary_help') }}</p></header>
+        <div class="settings-grid-v3">
+          <label><span>{{ t(lang, 'language.secondary') }}</span>
+            <select name="secondary_language" id="secondary-language">
+              <option value="">{{ t(lang, 'language.none') }}</option>
+              {% for code, info in builtin_languages.items() if code != 'en' %}<option value="{{ code }}" {{ 'selected' if settings.secondary_language == code else '' }}>{{ info.name }} — {{ info.native_name }}</option>{% endfor %}
+              <option value="custom" {{ 'selected' if settings.secondary_language == 'custom' else '' }}>{{ t(lang, 'language.custom') }}</option>
+            </select>
+          </label>
+        </div>
+        <div class="settings-grid-v3 language-custom-fields" data-custom-language {{ 'hidden' if settings.secondary_language != 'custom' else '' }}>
+          <label><span>{{ t(lang, 'language.name') }}</span><input name="secondary_language_name" value="{{ settings.secondary_language_name }}" maxlength="80" /></label>
+          <label><span>{{ t(lang, 'language.code') }}</span><input name="secondary_language_code" value="{{ settings.secondary_language_code }}" maxlength="35" pattern="[A-Za-z]{2,3}(-[A-Za-z0-9]{2,8})*" placeholder="pl" /></label>
+        </div>
+      </section>
+      {% if detected %}
+      <section class="settings-card-v3">
+        <header><h2>{{ t(lang, 'language.detected') }}</h2><p>{{ t(lang, 'language.detected_help') }}</p></header>
+        <p><strong data-detected-name data-code="{{ detected.code }}">{{ detected.name }}</strong> ({{ detected.locale }})</p>
+        {% if detected.code != 'en' %}<button type="button" class="admin-secondary" data-use-detected data-code="{{ detected.code }}" data-name="{{ detected.name }}" data-supported="{{ '1' if detected.supported else '0' }}" data-label="{{ t(lang, 'language.use' if detected.supported else 'language.configure') }}">{{ t(lang, 'language.use' if detected.supported else 'language.configure')|replace('{name}', detected.name) }}</button>{% endif %}
+      </section>
+      {% endif %}
+      <section class="settings-card-v3" data-switcher-card {{ 'hidden' if not settings.secondary_language else '' }}>
+        <header><h2>{{ t(lang, 'language.switcher') }}</h2></header>
+        <label class="settings-check"><input type="checkbox" name="show_language_switcher" value="1" {{ 'checked' if settings.show_language_switcher == '1' else '' }} /><span>{{ t(lang, 'language.show_switcher') }}</span></label>
+      </section>
+      <div data-custom-language {{ 'hidden' if settings.secondary_language != 'custom' else '' }}>
+        <input type="hidden" name="translation_language_code" value="{{ settings.secondary_language_code }}" />
+        {% for group, entries in translation_groups.items() %}
+        <section class="settings-card-v3 translation-card">
+          <header><h2>{{ t(lang, 'language.translation_' ~ group) }}</h2><p>{{ t(lang, 'language.translation_help') }}</p></header>
+          <div class="translation-heading"><strong>{{ builtin_languages.en.name }}</strong><strong data-secondary-name>{{ settings.secondary_language_name or t(lang, 'language.secondary') }}</strong></div>
+          {% for key, english in entries %}
+          <label class="translation-row"><span>{{ english }}<small>{{ key }}</small></span><textarea name="translation_{{ key }}" rows="2" maxlength="4000">{{ custom_translations.get(key, '') }}</textarea></label>
+          {% endfor %}
+        </section>
+        {% endfor %}
+      </div>
+      <div class="settings-save-bar"><span>{{ t(lang, 'dashboard.save_help') }}</span><button class="settings-primary" type="submit">{{ icon('save') }}{{ t(lang, 'common.save_changes') }}</button></div>
+    </form>
+  </div>
+</main>
+<script src="{{ static_url('admin-language.js') }}" defer></script>
+{% endblock %}

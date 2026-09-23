@@ -1,0 +1,10 @@
+{% macro parent_select(key, parents, custom_items, lang, t) %}
+<label><span>{{ t(lang, 'menu.parent') }}</span>
+  <select name="parent_{{ key }}" data-menu-parent="{{ key }}" data-root-label="{{ t(lang, 'menu.root') }}">
+    <option value="">{{ t(lang, 'menu.root') }}</option>
+    {% for item in custom_items if key != 'custom-' ~ item.id %}
+    <option value="custom-{{ item.id }}" {% if parents.get(key) == 'custom-' ~ item.id %}selected{% endif %}>{{ item.label_en }}</option>
+    {% endfor %}
+  </select>
+</label>
+{% endmacro %}

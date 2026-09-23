@@ -1,0 +1,35 @@
+  {% for block in custom_blocks if block.type != 'category' or block.posts %}
+  <section class="custom-block custom-{{ block.type }} tone-{{ block.tone }} align-{{ block.align }} width-{{ block.width }}" 
+    {% if block.tone == 'custom' %}style="background: {{ block.background }}"{% endif %}
+    {% if block.foreground %}style="--text-color: {{ block.foreground }}"{% endif %}
+  >
+    {% if block.type == 'heading' %}
+      <{{ block.level }}>{{ block.text }}</{{ block.level }}>
+    {% elif block.type in ['text', 'legacy_html'] %}
+      <div class="custom-rich-text">{{ block.html|safe }}</div>
+    {% elif block.type == 'list' %}
+      {% set tag = 'ol' if block.ordered else 'ul' %}<{{ tag }}>{% for item in block['items'] %}<li>{{ item }}</li>{% endfor %}</{{ tag }}>
+    {% elif block.type == 'table' %}
+      <div class="custom-table-scroll"><table>{% if block.caption %}<caption>{{ block.caption }}</caption>{% endif %}{% for row in block.rows %}{% set first = loop.first %}<tr>{% for cell in row %}{% if first %}<th scope="col">{{ cell }}</th>{% else %}<td>{{ cell }}</td>{% endif %}{% endfor %}</tr>{% endfor %}</table></div>
+    {% elif block.type == 'image' and block.url %}
+      <figure><img src="{{ block.url }}" alt="{{ block.alt }}" loading="lazy" />{% if block.caption %}<figcaption>{{ block.caption }}</figcaption>{% endif %}</figure>
+    {% elif block.type == 'video' and block.video %}
+      <figure>{% if block.video.kind == 'embed' %}<iframe src="{{ block.video.url }}" title="{{ block.alt or block.caption or t(lang, 'builder.video') }}" loading="lazy" allow="fullscreen; picture-in-picture" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe>{% else %}<video src="{{ block.video.url }}" controls preload="metadata" aria-label="{{ block.alt or t(lang, 'builder.video') }}"></video>{% endif %}{% if block.caption %}<figcaption>{{ block.caption }}</figcaption>{% endif %}</figure>
+    {% elif block.type == 'button' and block.url %}
+      <a class="custom-button" href="{{ block.url }}">{{ block.text }} <span aria-hidden="true">↗</span></a>
+    {% elif block.type == 'category' %}
+      <div class="category-page category-{{ block.category }}"><div class="archive-list category-list" data-items="{{ block.posts|length }}">
+        {% with posts=block.posts, post_tags=block.post_tags, card_options=block.card_options %}{% include 'partials/post_cards.html' %}{% endwith %}
+      </div></div>
+    {% elif block.type == 'quote' %}
+      <figure><blockquote><p>{{ block.text }}</p></blockquote>{% if block.attribution %}<figcaption>{{ block.attribution }}</figcaption>{% endif %}</figure>
+    {% elif block.type == 'callout' %}
+      <h3>{{ block.title }}</h3><p>{{ block.text }}</p>
+    {% elif block.type == 'stats' %}
+      <dl class="custom-stats-grid">{% for item in block['items'] %}<div><dt>{{ item.label }}</dt><dd>{{ item.value }}</dd></div>{% endfor %}</dl>
+    {% elif block.type == 'faq' %}
+      <div class="custom-faq-items">{% for item in block['items'] %}<details><summary>{{ item.question }}</summary><p>{{ item.answer }}</p></details>{% endfor %}</div>
+    {% elif block.type == 'divider' %}<hr />
+    {% endif %}
+  </section>
+  {% endfor %}

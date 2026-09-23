@@ -1,0 +1,21 @@
+.image-crop-dialog { width: min(720px,calc(100vw - 24px)); max-height: calc(100dvh - 32px); overflow: auto; padding: clamp(16px,3vw,28px); border: 1px solid #dbe3eb; border-radius: 18px; background: #fff; color: #17243b; }
+.image-crop-dialog::backdrop { background: #101c2999; }
+.image-crop-dialog h2 { margin: 0 0 8px; }
+.image-crop-dialog p { margin: 8px 0 16px; }
+.image-crop-dialog canvas { display: block; max-width: 100%; height: auto; max-height: 42vh; object-fit: contain; margin: 0 auto 20px; background: #edf1f5; touch-action: none; cursor: grab; }
+.image-crop-dialog canvas:active { cursor: grabbing; }
+.image-crop-controls { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 16px; }
+.image-crop-controls label { display: grid; gap: 8px; min-width: 0; }
+.image-crop-controls input { width: 100%; }
+.image-crop-actions { display: flex; justify-content: flex-end; gap: 12px; margin-top: 24px; }
+@media(max-width: 480px) { .image-crop-controls { grid-template-columns: 1fr; gap: 10px; } }
+.image-crop-toolbar { display: flex; flex-wrap: wrap; gap: 8px; margin: 16px 0; }
+.hyperui-admin .image-crop-toolbar button { min-height: 34px; padding: 6px 10px; font-size: 12px; }
+.image-crop-toolbar button[aria-pressed='true'] { background: #efedff; border-color: #8c80cf; }
+.image-crop-dimensions { display: block; text-align: center; font-size: 12px; color: #53627b; margin: 0 0 16px; font-variant-numeric: tabular-nums; }
+.image-crop-dialog canvas { border-radius: 8px; background: repeating-conic-gradient(#eef0f5 0% 25%,white 0% 50%) 0 / 16px 16px; }
+.hyperui-admin .image-crop-controls input[type='range'] { padding: 0; box-shadow: none; accent-color: #5145cd; }
+.hyperui-admin .image-crop-dialog h2 { font-size: 24px; line-height: 1.3; letter-spacing: -.02em; }
+.hyperui-admin .image-crop-dialog > p { font-size: 13px; color: #53627b; line-height: 1.6; }
+.hyperui-admin .image-crop-controls label { font-size: 12px; color: #3e4f68; gap: 6px; }
+.hyperui-admin .image-crop-controls input[type='range'] { padding: 0 !important; box-shadow: none !important; border: 0 !important; min-height: 24px; background: transparent; }

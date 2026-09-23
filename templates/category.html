@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block content %}
+<main class="page category-page category-{{ category['slug'] }}">
+  <section class="category-archive">
+    <div class="wide-container">
+      {% if category['slug'] not in ['blog', 'notes', 'notlar'] %}
+      <header class="category-head">
+        <h1>{{ category|category_label(lang) }}</h1>
+        {% set description = localized(category, 'description') %}
+        {% if description %}<p class="lead">{{ description }}</p>{% endif %}
+      </header>
+      {% endif %}
+      <div class="archive-list category-list">{% include "partials/post_cards.html" %}</div>
+    </div>
+  </section>
+</main>
+{% endblock %}

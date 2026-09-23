@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block extra_head %}<link rel="stylesheet" href="{{ static_url('custom-home.css') }}" />{% endblock %}
+{% block content %}
+<main class="page"><div class="article-shell">
+  <article class="article">
+    <p class="eyebrow">{{ post["category_name"] or (t(lang, 'common.uncategorized')) }} · {{ post["created_at"]|format_date }}</p>
+    <h1>{{ post["title"] }}</h1>
+    <p class="lead">{{ post["excerpt"] }}</p>
+    <div class="tag-row">
+      {% for tag in tags %}
+        <span class="tag">{{ tag }}</span>
+      {% endfor %}
+    </div>
+    {% if post["image_path"] %}
+      <img src="{{ post['image_path'] }}" alt="" />
+    {% endif %}
+    <div class="article-body">{% if custom_blocks is not none %}{% include 'partials/content_blocks.html' %}{% else %}{{ body_html|safe }}{% endif %}</div>
+  </article>
+</div></main>
+{% endblock %}

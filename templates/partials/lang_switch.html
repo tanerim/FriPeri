@@ -1,0 +1,7 @@
+{% if secondary_language and site_settings.show_language_switcher == '1' %}
+<span class="locale" aria-label="{{ t(lang, 'common.lang') }}">
+  {% for language in languages %}
+  <a class="{{ 'active' if lang == language.code else '' }}" href="/set-language/{{ language.code }}?next={{ request.url.path|urlencode }}" lang="{{ language.code }}" title="{{ language.name }}">{{ language.code|upper }}</a>
+  {% endfor %}
+</span>
+{% endif %}

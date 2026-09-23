@@ -1,0 +1,52 @@
+{% extends "admin/base.html" %}
+{% from "admin/partials/color_control.html" import color_control %}
+{% block extra_head %}<script src="{{ static_url('appearance-controls.js') }}" defer></script>{% endblock %}
+
+{% block content %}
+<main id="admin-content" class="admin-settings-page admin-compact-page design-settings-page" tabindex="-1">
+  <div class="admin-settings-container">
+    <form class="settings-form-v3 design-settings-form" method="post" action="/admin/design">
+      <input type="hidden" name="content_language_code" value="{{ secondary_language.code if secondary_language else '' }}" />
+      <header class="settings-page-header">
+        <div><h1><span class="page-heading-icon">{{ icon('design') }}</span>{{ t(lang, "admin.design") }}</h1><p>{{ t(lang, "admin.design_copy") }}</p></div>
+        <button class="settings-primary" type="submit">{{ icon('save') }}{{ t(lang, 'common.save_changes') }}</button>
+      </header>
+      {% if saved %}<p class="notice settings-notice">{{ t(lang, 'common.saved') }}</p>{% endif %}
+
+      {% set color_groups = [
+        ('design.page', ['color_page_bg']),
+        ('design.navigation', ['color_nav', 'color_nav_hover', 'color_nav_active']),
+        ('design.feature', ['color_feature_bg', 'color_feature_text', 'color_feature_border']),
+        ('design.accent', ['color_accent_primary', 'color_accent_secondary']),
+        ('design.separator', ['color_separator_1', 'color_separator_2', 'color_separator_3'])
+      ] %}
+      {% for title, fields in color_groups %}
+        <section class="settings-card-v3 design-color-section">
+          <header><h2>{{ t(lang, title) }}</h2></header>
+          <div class="settings-grid-v3 design-color-grid">
+            {% for key in fields %}
+              {{ color_control(key, t(lang, 'design.' ~ key), settings[key], alpha=true) }}
+            {% endfor %}
+          </div>
+        </section>
+      {% endfor %}
+
+      <section class="settings-card-v3 design-footer-section">
+        <header class="settings-item-heading"><h2>{{ t(lang, 'design.footer') }}</h2><label class="settings-check"><input type="checkbox" name="show_footer" value="1" {{ 'checked' if settings.show_footer == '1' else '' }} /><span>{{ t(lang, 'admin.show_footer') }}</span></label></header>
+        <div class="settings-grid-v3 design-color-grid">
+          {% for key in ['color_footer_bg', 'color_footer_text', 'color_footer_border'] %}
+          {{ color_control(key, t(lang, 'design.' ~ key), settings[key], alpha=true) }}
+          {% endfor %}
+        </div>
+        <div class="settings-grid-v3 footer-copy-grid">
+          {% for language in languages %}
+          <label><span>{{ t(lang, 'admin.footer_text') }} — {{ language.name }}</span><input name="footer_text_{{ language.suffix }}" value="{{ settings['footer_text_' ~ language.suffix] }}" placeholder="© 2026 {{ site_name }}" /></label>
+          {% endfor %}
+
+        </div>
+      </section>
+      <div class="settings-save-bar"><span>{{ t(lang, 'dashboard.save_help') }}</span><button class="settings-primary" type="submit">{{ icon('save') }}{{ t(lang, 'common.save_changes') }}</button></div>
+    </form>
+  </div>
+</main>
+{% endblock %}

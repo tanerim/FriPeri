@@ -1,0 +1,36 @@
+{% extends "admin/base.html" %}
+
+{% block content %}
+<main id="admin-content" class="admin-settings-page" tabindex="-1">
+  <div class="admin-settings-container">
+    <header class="settings-page-header">
+      <div>
+        <h1><span class="page-heading-icon">{{ icon('posts') }}</span>{{ t(lang, "admin.posts") }}</h1>
+        <p>{{ t(lang, "admin.admin_copy") }}</p>
+      </div>
+      <a class="settings-primary" href="/admin/posts/new">{{ t(lang, "admin.new_content") }}</a>
+    </header>
+    <section class="admin-card admin-table-card">
+      <table class="admin-table">
+        <thead><tr><th>{{ t(lang, "content.title") }}</th><th>{{ t(lang, "content.category") }}</th><th>{{ t(lang, "content.status") }}</th><th>{{ t(lang, 'common.date') }}</th><th></th></tr></thead>
+        <tbody>
+          {% for post in posts %}
+            <tr>
+              <td><a href="/posts/{{ post['slug'] }}">{{ post["title"] }}</a></td>
+              <td>{{ post["category_name"] or (t(lang, 'common.uncategorized')) }}</td>
+              <td><span class="admin-status {{ 'is-published' if post['status'] == 'published' else '' }}">{{ t(lang, "content.published") if post["status"] == "published" else t(lang, "content.draft") }}</span></td>
+              <td>{{ post["created_at"]|format_date }}</td>
+              <td class="admin-table-actions">
+                <a class="admin-secondary" href="/admin/posts/{{ post['id'] }}/edit">{{ t(lang, "common.edit") }}</a>
+                <form class="inline-form" method="post" action="/admin/posts/{{ post['id'] }}/delete" data-confirm="{{ t(lang, 'admin.delete_content_confirm') }}"><button class="danger admin-danger" type="submit">{{ t(lang, "common.delete") }}</button></form>
+              </td>
+            </tr>
+          {% else %}
+            <tr><td colspan="5">{{ t(lang, 'common.empty') }} <a href="/admin/posts/new">{{ t(lang, 'admin.new_content') }} →</a></td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </section>
+  </div>
+</main>
+{% endblock %}

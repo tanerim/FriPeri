@@ -1,0 +1,216 @@
+{% extends "admin/base.html" %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{{ static_url('custom-home.css') }}" />
+<link rel="stylesheet" href="{{ static_url('home-builder.css') }}" />
+<script src="{{ static_url('home-builder.js') }}" defer></script>
+<script src="{{ static_url('homepage-settings.js') }}" defer></script>
+{% endblock %}
+{% block content %}
+{% set selected_mode = 'custom' if request.query_params.get('mode', settings.homepage_mode) == 'custom' else 'feed' %}
+<main id="admin-content" class="admin-settings-page" tabindex="-1">
+  <div class="admin-settings-container">
+    <form id="homepage-form" class="settings-form-v3 homepage-settings-form" method="post" action="/admin/homepage" enctype="multipart/form-data">
+      <input type="hidden" name="content_language_code" value="{{ secondary_language.code if secondary_language else '' }}" />
+      <header class="settings-page-header">
+        <div><h1><span class="page-heading-icon">{{ icon('homepage') }}</span>{{ t(lang, "admin.homepage") }}</h1><p>{{ t(lang, "admin.homepage_copy") }}</p></div>
+        <button class="settings-primary" type="submit" data-feed-save {{ 'hidden' if selected_mode == 'custom' else '' }}>{{ icon('save') }}{{ t(lang, 'common.save_changes') }}</button>
+      </header>
+      {% if saved %}<p class="notice settings-notice">{{ t(lang, 'common.saved') }}</p>{% endif %}
+
+      <section class="settings-card-v3 homepage-mode-card">
+        <header><h2>{{ t(lang, 'builder.mode') }}</h2><p>{{ t(lang, 'builder.mode_help') }}</p></header>
+        <div class="homepage-mode-options">
+          <label><input type="radio" name="homepage_mode" value="feed" aria-controls="homepage-feed-panel" {{ 'checked' if selected_mode != 'custom' else '' }} /><span>{{ icon('posts') }}<strong>{{ t(lang, 'builder.feed') }}</strong><small>{{ t(lang, 'builder.feed_help') }}</small></span></label>
+          <label><input type="radio" name="homepage_mode" value="custom" aria-controls="homepage-custom-panel" {{ 'checked' if selected_mode == 'custom' else '' }} /><span>{{ icon('design') }}<strong>{{ t(lang, 'admin.custom_home') }}</strong><small>{{ t(lang, 'builder.custom_help') }}</small></span></label>
+        </div>
+      </section>
+      <fieldset id="homepage-feed-panel" class="homepage-mode-panel" aria-label="{{ t(lang, 'builder.feed') }}" {{ 'hidden disabled' if selected_mode == 'custom' else '' }}>
+      <section class="settings-card-v3">
+        <header>
+          <h2>{{ t(lang, 'design.homepage') }} — {{ t(lang, 'design.homepage_general') }}</h2>
+        </header>
+        <label class="settings-check"><input type="checkbox" name="show_feature_strip" value="1" {{ 'checked' if settings.show_feature_strip == '1' else '' }} /><span>{{ t(lang, 'dashboard.show_feature_strip') }}</span></label>
+        <div class="settings-feature-grid">
+          {% for feature in ['blog', 'notes', 'contact'] %}
+          <div class="settings-subgroup">
+            <label class="settings-check"><input type="checkbox" name="show_feature_{{ feature }}" value="1" {{ 'checked' if settings['show_feature_' ~ feature] == '1' else '' }} /><span>{{ t(lang, 'dashboard.show_' ~ feature) }}</span></label>
+            {% for language in languages %}
+            <label><span>{{ t(lang, 'dashboard.description') }} — {{ language.name }}</span><input name="feature_{{ feature }}_desc_{{ language.suffix }}" value="{{ settings['feature_' ~ feature ~ '_desc_' ~ language.suffix] }}" /></label>
+            {% endfor %}
+          </div>
+          {% endfor %}
+        </div>
+      </section>
+
+      <section class="settings-card-v3">
+        <header>
+          <h2>{{ t(lang, 'admin.hero_background') }}</h2>
+          <p>{{ t(lang, 'admin.hero_background_help') }}</p>
+        </header>
+        <div class="hero-upload-panel">
+          <label class="settings-check">
+            <input name="hero_background_enabled" type="checkbox" value="1" {{ "checked" if settings['hero_background_enabled'] == "1" else "" }} />
+            <span>{{ t(lang, 'admin.enable_background') }}</span>
+          </label>
+
+          <div class="hero-image-status">
+            {% if settings["hero_background_image_path"] %}
+              <img src="{{ settings['hero_background_image_path'] }}" alt="" />
+              <div>
+                <strong>{{ t(lang, 'admin.current_image') }}</strong>
+                <p>{{ settings["hero_background_image_path"] }}</p>
+              </div>
+            {% else %}
+              <div class="hero-image-empty">{{ t(lang, 'admin.no_image') }}</div>
+              <div>
+                <strong>{{ t(lang, 'admin.no_current_image') }}</strong>
+                <p>{{ t(lang, 'admin.image_help') }}</p>
+              </div>
+            {% endif %}
+          </div>
+
+          <label class="settings-file">
+            <span>{{ t(lang, 'admin.upload_image') }}</span>
+            <input name="hero_background_image" type="file" accept="image/png,image/jpeg,image/webp" />
+          </label>
+        </div>
+      </section>
+      <input type="hidden" name="homepage_general_present" value="1" />
+      <!-- 1. Featured Content -->
+      <section class="settings-card-v3">
+        <header class="settings-item-heading">
+          <h2>{{ t(lang, 'design.homepage_featured') }}</h2>
+          <label class="settings-check">
+            <input type="checkbox" name="show_featured_post" value="1" {{ 'checked' if settings.show_featured_post == '1' else '' }} />
+            <span>Show featured content</span>
+          </label>
+        </header>
+        <div class="settings-grid-v3 settings-control-row">
+          <label>
+            <span>Featured content item</span>
+            <select name="featured_post_id">
+              <option value="">-- None / Select a post --</option>
+              {% for post in all_posts %}
+                <option value="{{ post.id }}" {{ 'selected' if settings.featured_post_id == post.id|string else '' }}>
+                  {{ post.title }} ({{ post.status }})
+                </option>
+              {% endfor %}
+            </select>
+          </label>
+          <label class="settings-check">
+            <input type="checkbox" name="show_featured_image" value="1" {{ 'checked' if settings.show_featured_image == '1' else '' }} />
+            <span>Show featured image</span>
+          </label>
+        </div>
+      </section>
+
+      <!-- 2. Latest Content -->
+      <section class="settings-card-v3">
+        <header>
+          <h2>{{ t(lang, 'design.homepage_latest') }}</h2>
+        </header>
+        <div class="settings-grid-v3">
+          <div class="settings-subgroup">
+            <label class="settings-check">
+              <input type="checkbox" name="show_latest_writing" value="1" {{ 'checked' if settings.show_latest_writing == '1' else '' }} />
+              <span>Show Latest Writing</span>
+            </label>
+            <div class="settings-grid-v3 source-count-grid">
+            <label>
+              <span>{{ t(lang, 'content.category') }}</span>
+              <select name="latest_writing_category">
+                {% for cat in all_categories %}
+                  <option value="{{ cat.slug }}" {{ 'selected' if settings.latest_writing_category == cat.slug else '' }}>{{ cat.name }} ({{ cat.slug }})</option>
+                {% endfor %}
+              </select>
+            </label>
+            <label>
+              <span>{{ t(lang, 'admin.items_count') }}</span>
+              <input type="number" name="latest_writing_count" min="1" max="12" value="{{ settings.latest_writing_count or '4' }}" />
+            </label>
+            </div>
+          </div>
+
+          <div class="settings-subgroup">
+            <label class="settings-check">
+              <input type="checkbox" name="show_latest_notes" value="1" {{ 'checked' if settings.show_latest_notes == '1' else '' }} />
+              <span>Show Latest Notes</span>
+            </label>
+            <div class="settings-grid-v3 source-count-grid">
+            <label>
+              <span>{{ t(lang, 'content.category') }}</span>
+              <select name="latest_notes_category">
+                {% for cat in all_categories %}
+                  <option value="{{ cat.slug }}" {{ 'selected' if settings.latest_notes_category == cat.slug else '' }}>{{ cat.name }} ({{ cat.slug }})</option>
+                {% endfor %}
+              </select>
+            </label>
+            <label>
+              <span>{{ t(lang, 'admin.items_count') }}</span>
+              <input type="number" name="latest_notes_count" min="1" max="16" value="{{ settings.latest_notes_count or '5' }}" />
+            </label>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 3. Homepage Categories -->
+      <section class="settings-card-v3">
+        <header>
+          <h2>{{ t(lang, 'design.homepage_categories') }}</h2>
+        </header>
+        <div class="settings-grid-v3 single-col">
+          <p class="settings-help-text">Select additional categories to display as independent sections on the homepage.</p>
+          <div class="category-modules-table">
+            {% for cat in homepage_categories %}
+              <div class="category-module-row">
+                <label class="settings-check">
+                  <input type="checkbox" name="hp_cat_enabled_{{ cat.id }}" value="1" {{ 'checked' if cat.hp_enabled else '' }} />
+                  <strong>{{ cat.name }}</strong>
+                </label>
+                <div class="category-module-inputs">
+                  <label>
+                    <span>Order:</span>
+                    <input type="number" name="hp_cat_order_{{ cat.id }}" value="{{ cat.hp_order }}" />
+                  </label>
+                  <label>
+                    <span>Items:</span>
+                    <input type="number" name="hp_cat_count_{{ cat.id }}" min="1" max="12" value="{{ cat.hp_count }}" />
+                  </label>
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+        </div>
+      </section>
+
+      <!-- 4. Layout & Empty State -->
+      <section class="settings-card-v3">
+        <header>
+          <h2>{{ t(lang, 'design.homepage_layout') }}</h2>
+        </header>
+        <div class="settings-grid-v3 settings-control-row">
+          <label>
+            <span>Latest Content Layout</span>
+            <select name="homepage_layout">
+              <option value="editorial_split" {{ 'selected' if settings.homepage_layout == 'editorial_split' else '' }}>Editorial split (65% / 35%)</option>
+              <option value="single_column" {{ 'selected' if settings.homepage_layout == 'single_column' else '' }}>Single column</option>
+            </select>
+          </label>
+          <label class="settings-check">
+            <input type="checkbox" name="show_empty_placeholders" value="1" {{ 'checked' if settings.show_empty_placeholders == '1' else '' }} />
+            <span>Show empty category placeholders</span>
+          </label>
+        </div>
+      </section>
+      <div class="settings-save-bar"><span>{{ t(lang, 'dashboard.save_help') }}</span><button class="settings-primary" type="submit" data-feed-save>{{ icon('save') }}{{ t(lang, 'common.save_changes') }}</button></div>
+      </fieldset>
+      <fieldset id="homepage-custom-panel" class="homepage-mode-panel" aria-labelledby="custom-home-title" {{ 'hidden disabled' if selected_mode != 'custom' else '' }}>
+        {% include 'admin/custom_home.html' %}
+      </fieldset>
+      <div id="homepage-save-status" role="status" aria-live="polite"></div>
+    </form>
+  </div>
+</main>
+{% endblock %}

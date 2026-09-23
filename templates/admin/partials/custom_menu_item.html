@@ -1,0 +1,12 @@
+<input type="hidden" name="custom_id" value="{{ item.id }}" />
+<div class="settings-grid-v3 custom-menu-fields">
+  {% for language in languages %}
+  <label><span>{{ t(lang, 'admin.label') }} — {{ language.name }}</span><input name="custom_{{ language.suffix }}_{{ item.id }}" value="{{ item['label_' ~ language.suffix] }}" {{ 'required' if language.code == 'en' else '' }} /></label>
+  {% endfor %}
+  <label class="custom-menu-url"><span>{{ t(lang, 'common.url') }}</span><input name="custom_url_{{ item.id }}" value="{{ item.url }}" placeholder="/tools or https://example.com" /><small>{{ t(lang, 'menu.group_help') }}</small></label>
+  {{ parent_select('custom-' ~ item.id, menu_parents, custom_items, lang, t) }}
+  <label><span>{{ t(lang, 'admin.sort_order') }}</span><input name="custom_sort_{{ item.id }}" value="{{ item.sort_order }}" type="number" required /></label>
+  <label class="settings-check"><input name="custom_show_{{ item.id }}" type="checkbox" value="1" {{ 'checked' if item.show_in_menu else '' }} /><span>{{ t(lang, 'admin.show_menu') }}</span></label>
+  <label class="settings-check"><input name="custom_tab_{{ item.id }}" type="checkbox" value="1" {{ 'checked' if item.new_tab else '' }} /><span>{{ t(lang, 'admin.new_tab') }}</span></label>
+</div>
+<button class="settings-danger" type="button" data-delete-menu>{{ t(lang, 'common.delete') }}</button>

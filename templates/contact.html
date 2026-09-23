@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block content %}
+<main class="contact-page">
+  <div class="contact-container">
+    <header class="contact-header">
+      <h1>{{ t(lang, "nav.contact") }}</h1>
+      {% if contact_intro %}<p>{{ contact_intro }}</p>{% endif %}
+    </header>
+    <section class="contact-card">
+      {% if success %}<p class="notice">{{ t(lang, 'contact.success') }}</p>{% endif %}
+      {% if error %}
+        <p class="error">
+          {% if error == "required" %}{{ t(lang, 'contact.required') }}
+          {% elif error == "email" %}{{ t(lang, 'contact.invalid_email') }}
+          {% elif error == "too_long" %}{{ t(lang, 'contact.too_long') }}
+          {% elif error == "token" %}{{ t(lang, 'contact.invalid_token') }}
+          {% else %}{{ t(lang, 'contact.error') }}{% endif %}
+        </p>
+      {% endif %}
+      <form class="contact-form" method="post" action="/contact">
+        <input type="hidden" name="contact_token" value="{{ contact_form_token }}" />
+        <label class="honeypot">{{ t(lang, 'contact.website') }}<input name="website" autocomplete="off" tabindex="-1" /></label>
+        <label><span>{{ t(lang, "contact.name") }}</span><input name="name" value="{{ values.get('name', '') }}" required maxlength="120" /></label>
+        <label><span>{{ t(lang, "contact.email") }}</span><input name="email" value="{{ values.get('email', '') }}" type="email" required maxlength="160" /></label>
+        <label><span>{{ t(lang, "contact.message") }}</span><textarea name="message" required maxlength="4000">{{ values.get('message', '') }}</textarea></label>
+        <button class="settings-primary" type="submit">{{ t(lang, "contact.send") }}</button>
+      </form>
+    </section>
+    {% if contact_details %}
+      <aside class="contact-details-block">{{ contact_details|e|replace("\n", "<br>")|safe }}</aside>
+    {% endif %}
+  </div>
+</main>
+{% endblock %}

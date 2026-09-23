@@ -1,0 +1,83 @@
+{% extends "admin/base.html" %}
+{% block content %}
+<main id="admin-content" class="admin-settings-page dashboard-page" tabindex="-1">
+  <div class="admin-settings-container">
+    <header class="settings-page-header dashboard-welcome">
+      <div>
+        <span class="admin-eyebrow">{{ t(lang, 'dashboard.eyebrow') }}</span>
+        <h1>{{ t(lang, 'dashboard.welcome') }}, {{ user }}.</h1>
+        <p>{{ t(lang, 'dashboard.intro') }}</p>
+      </div>
+      <a class="settings-primary" href="/admin/posts/new">{{ icon('plus') }}{{ t(lang, 'admin.new_post') }}</a>
+    </header>
+
+    {# First-run guide for brand-new users #}
+    {% if is_first_run %}
+    <div class="admin-wizard-banner" id="first-wizard">
+      <div class="wizard-icon">{{ icon('guide') }}</div>
+      <div class="wizard-content">
+        <strong>{{ t(lang, 'dashboard.wizard_intro') }}</strong><br>
+        {{ t(lang, 'dashboard.wizard_text') }}
+      </div>
+      <a class="settings-primary wizard-action" href="/admin/homepage">{{ t(lang, 'dashboard.wizard_action') }}</a>
+    </div>
+    {% endif %}
+
+    {# Stats: all clickable, equal height, tighter #}
+    <div class="dashboard-stats">
+      {% for label, value, glyph, tone, href in [
+        ('dashboard.total_posts', counts.total, 'posts', 'indigo', '/admin/posts'),
+        ('content.published', counts.published, 'check', 'teal', '/admin/posts'),
+        ('dashboard.drafts', counts.drafts, 'draft', 'amber', '/admin/posts'),
+        ('admin.categories', category_counts|length, 'categories', 'violet', '/admin/categories')
+      ] %}
+      <a class="admin-card dashboard-stat stat-{{ tone }}" href="{{ href }}">
+        <span class="icon-tile tone-{{ tone }}">{{ icon(glyph) }}</span>
+        <div>
+          <span class="stat-label">{{ t(lang, label) }}</span>
+          <strong>{{ value }}</strong>
+        </div>
+        {{ icon('arrow', 'stat-arrow') }}
+      </a>
+      {% endfor %}
+    </div>
+
+    {# 2-column layout: posts left, categories right #}
+    <div class="dashboard-columns">
+      <section class="admin-card dashboard-panel">
+        <header class="panel-heading"><div><h2>{{ icon('posts') }}{{ t(lang, 'dashboard.latest_posts') }}</h2><p>{{ t(lang, 'dashboard.latest_help') }}</p></div><a class="admin-text-link" href="/admin/posts">{{ t(lang, 'dashboard.view_all') }} →</a></header>
+        <div class="dashboard-posts">
+          {% for post in recent_posts %}
+          <a class="dashboard-post" href="/admin/posts/{{ post.id }}/edit">
+            <span class="post-list-icon">{{ icon('posts' if post.status == 'published' else 'draft') }}</span>
+            <div class="post-list-copy">
+              <strong>{{ post.title }}</strong>
+              <span>{{ post.category_name or t(lang, 'common.uncategorized') }} <span aria-hidden="true">·</span> <time datetime="{{ post.created_at }}">{{ post.created_at|format_date }}</time></span>
+            </div>
+            <span class="admin-status {{ 'is-published' if post.status == 'published' else '' }}">{{ t(lang, 'content.published' if post.status == 'published' else 'content.draft') }}</span>
+          </a>
+          {% else %}
+          <div class="admin-empty-state">
+            <span class="icon-tile tone-indigo">{{ icon('posts') }}</span>
+            <h3>{{ t(lang, 'common.empty') }}</h3>
+            <p>{{ t(lang, 'dashboard.empty_help') }}</p>
+            <a class="settings-primary" href="/admin/posts/new">{{ icon('plus') }} {{ t(lang, 'admin.new_post') }}</a>
+          </div>
+          {% endfor %}
+        </div>
+      </section>
+      <section class="admin-card dashboard-panel">
+        <header class="panel-heading"><div><h2>{{ icon('categories') }}{{ t(lang, 'dashboard.category_posts') }}</h2><p>{{ t(lang, 'dashboard.category_help') }}</p></div></header>
+        <ul class="dashboard-category-list">
+          {% for category in category_counts %}
+          <li><div><span>{{ category.label }}</span><strong>{{ category.post_count }}</strong></div><meter min="0" max="{{ counts.total or 1 }}" value="{{ category.post_count }}" aria-label="{{ category.label }}: {{ category.post_count }} / {{ counts.total }}">{{ category.post_count }}</meter></li>
+          {% endfor %}
+          {% if uncategorized_count %}<li><div><span>{{ t(lang, 'common.uncategorized') }}</span><strong>{{ uncategorized_count }}</strong></div><meter min="0" max="{{ counts.total or 1 }}" value="{{ uncategorized_count }}" aria-label="{{ t(lang, 'common.uncategorized') }}">{{ uncategorized_count }}</meter></li>{% endif %}
+        </ul>
+        {% if not category_counts %}<p>{{ t(lang, 'common.empty') }}</p>{% endif %}
+        <a class="admin-text-link" href="/admin/categories">{{ t(lang, 'dashboard.manage_categories') }} →</a>
+      </section>
+    </div>
+  </div>
+</main>
+{% endblock %}
