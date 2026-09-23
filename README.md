@@ -45,7 +45,7 @@ Running the application does not require Node.js, a frontend build, an external 
 
 ### Requirements
 
-- Python 3.10 or newer, including the `venv` module and pip.
+- Python 3.11 or newer, including the `venv` module and pip.
 - A Unix-like environment with Python's `fcntl` module, which the first-run initializer uses for file locking. On Windows, use a Linux environment such as WSL rather than native Windows Python.
 - Write access to the database directory and upload directory.
 - A modern browser for the admin interface.
