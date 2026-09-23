@@ -2,6 +2,7 @@
 <p align="center">
 <img height="250" src="static/images/FriPeri_Logo.png"/>
 </p>
+
 **A free and simple personal publishing framework.**
 
 FriPeri is a self-hosted publishing application for personal websites, blogs, notes, and other category-based content. It combines a public website with a browser-based administration panel, stores content and configuration in SQLite, and lets you choose between an automatically updated content feed and a custom homepage built from visual blocks.
