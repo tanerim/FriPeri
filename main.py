@@ -64,6 +64,14 @@ app = FastAPI(
     version="2.0.0",
 )
 app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
+
+@app.get("/app-ads.txt", include_in_schema=False)
+async def app_ads_txt():
+    return FileResponse(
+        STATIC_DIR / "app-ads.txt",
+        media_type="text/plain",
+    )
+
 templates = Jinja2Templates(directory=TEMPLATES_DIR)
 
 
