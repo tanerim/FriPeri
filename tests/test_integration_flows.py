@@ -153,3 +153,14 @@ def test_post_media_upload_uses_isolated_upload_directory(site):
         value = conn.execute("SELECT image_path FROM posts WHERE title=?", ("Post with an image",)).fetchone()
     assert value and value[0].startswith("/static/uploads/")
     assert (main.UPLOAD_DIR / value[0].rsplit("/", 1)[1]).is_file()
+
+
+def test_lifespan_configured_and_database_started(site):
+    client, db = site
+    assert main.app.router.lifespan_context is main.lifespan
+    assert main.app.state.initialized is True
+    assert is_initialized(db)
+    # Render through the modern TemplateResponse(request, name, context) path.
+    page = client.get("/login")
+    assert page.status_code == 200
+    assert "text/html" in page.headers.get("content-type", "")
