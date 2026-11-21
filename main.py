@@ -1390,8 +1390,8 @@ async def enforce_roles(request: Request, call_next):
     elif path == "/admin/categories":
         allowed = method in ("GET", "HEAD", "POST")
     elif path.startswith("/admin/categories/"):
-        allowed = role == "editor" and method == "POST" and bool(
-            re.fullmatch(r"/admin/categories/\d+/delete", path))
+        allowed = role == "editor" and bool(
+            re.fullmatch(r"/admin/categories/\d+/(?:edit|delete)", path))
     elif role == "editor":
         allowed = (path == "/admin/pages" or path.startswith("/admin/pages/")
                    or path == "/admin/about" or path.startswith("/admin/about/")
@@ -1854,6 +1854,50 @@ async def create_category(request: Request) -> Response:
                 if created:
                     conn.execute("INSERT OR IGNORE INTO user_categories (user_id, category_id) VALUES (?, ?)",
                                  (account["id"], created["id"]))
+    return RedirectResponse("/admin/categories", status_code=303)
+
+
+@app.get("/admin/categories/{category_id:int}/edit", response_class=HTMLResponse)
+async def edit_category_page(category_id: int, request: Request) -> Response:
+    user = require_user(request)
+    if not user:
+        return RedirectResponse("/login", status_code=303)
+    with get_db() as conn:
+        category = conn.execute("SELECT * FROM categories WHERE id=?", (category_id,)).fetchone()
+    if not category:
+        return Response(status_code=404)
+    return render_template(request, "admin/category_edit.html", "Edit category", {
+        "active_admin": "categories", "category": category,
+        "editor_token": custom_home_token(user),
+    }, user)
+
+
+@app.post("/admin/categories/{category_id:int}/edit")
+async def update_category_details(category_id: int, request: Request) -> Response:
+    user = require_user(request)
+    if not user:
+        return RedirectResponse("/login", status_code=303)
+    form = await request.form()
+    if not custom_home_authorized(request, form):
+        return Response("Forbidden", status_code=403)
+    stale = stale_language_form(request, form)
+    if stale is not None:
+        return stale
+    name = str(form.get("name", "")).strip()
+    description = str(form.get("description", "")).strip()
+    secondary_label = str(form.get("menu_label_secondary", "")).strip()
+    secondary_desc = str(form.get("description_secondary", "")).strip()
+    if not name or len(name) > 120 or len(description) > 4000 or len(secondary_label) > 160 or len(secondary_desc) > 4000:
+        return Response("Invalid category metadata", status_code=400)
+    with get_db() as conn:
+        try:
+            changed = conn.execute("""UPDATE categories SET name=?, description=?, menu_label_en=?,
+                menu_label_secondary=?, description_secondary=? WHERE id=?""",
+                (name, description, name, secondary_label, secondary_desc, category_id))
+        except sqlite3.IntegrityError:
+            return Response("Category name is already in use", status_code=409)
+        if not changed.rowcount:
+            return Response(status_code=404)
     return RedirectResponse("/admin/categories", status_code=303)
 
 
