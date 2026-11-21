@@ -486,5 +486,6 @@
   "dashboard.wizard_text": "Konfigurieren Sie zunächst die Startseite Ihrer Website.",
   "dashboard.wizard_action": "Startseite konfigurieren",
   "builder.section_add_placeholder": "Blocktyp auswählen…",
-  "builder.section_add_section": "Abschnitt hinzufügen"
+  "builder.section_add_section": "Abschnitt hinzufügen",
+  "admin.users": "Benutzer"
 }
