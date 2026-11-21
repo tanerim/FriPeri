@@ -800,11 +800,14 @@
     card.append(tools);
     const content = el('div','section-content builder-section-content');
 
-    const add = el('select');
+    const addControls = el('div','builder-section-add-controls');
+    const addLabel = el('label','builder-section-add-label');
+    addLabel.append(el('span','',t('section_add')));
+    const add = el('select','builder-section-add-select');
     add.setAttribute('aria-label',t('section_add'));
-    add.add(new Option(t('section_add'),''));
+    add.add(new Option(t('section_add_placeholder'),''));
     for (const kind of Object.keys(symbols)) {
-      if (kind !== 'section' || depth < 2) add.add(new Option(t(kind),kind));
+      if (kind !== 'section') add.add(new Option(t(kind),kind));
     }
     add.addEventListener('change',()=>{
       if (!add.value) return;
@@ -812,9 +815,19 @@
       if (blockCount(blocks()) >= 80) return message(t('limit'),true);
       mutate(()=>block.children.push(newBlock(kind)));
     });
+    addLabel.append(add);
+    addControls.append(addLabel);
+    // Section nesting is supported by the validator to a maximum depth of three.
+    if (depth < 2) {
+      const addSection = button('+ '+t('section_add_section'),()=>{
+        if (blockCount(blocks()) >= 80) return message(t('limit'),true);
+        mutate(()=>block.children.push(newBlock('section')));
+      },'builder-section-add-button');
+      addControls.append(addSection);
+    }
     if (hero) {
       const advanced=el('details','builder-section-panel builder-hero-advanced');
-      advanced.append(el('summary','',t('hero_advanced')),content,add);
+      advanced.append(el('summary','',t('hero_advanced')),content,addControls);
       advanced.open=advancedHeroes.has(block);
       const syncMode=()=>{
         const editor=card.querySelector(':scope > .builder-hero-editor');
@@ -835,7 +848,7 @@
       body.append(advanced);
     } else {
       renderBlocks(block.children,content,depth+1);
-      body.append(content,add);
+      body.append(content,addControls);
     }
   }
 
