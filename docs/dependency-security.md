@@ -59,3 +59,33 @@ python -m pytest -q tests/test_backup_security.py tests/test_security_guards.py 
 ```
 
 Keep the previously reviewed vulnerable pins in the historical table above as audit context; the table no longer describes the current source requirements. Any remaining issues found by the scanner need triage before declaring a production-ready release.
+
+
+## Additional November 2026 upstream advisory check
+
+An online advisory review on 2026-11-21 found that the repository's current **starlette==0.49.3** remains affected by important newer vulnerabilities:
+
+- **CVE-2026-48710 / GHSA-86qp-5c8j-p5mr:** malformed HTTP Host header can poison `request.url.path`, potentially bypassing path-based security checks. The advisory calls for **Starlette >=1.0.1**. FriPeri has security-sensitive middleware that checks `request.url.path`, so this deserves priority.
+- **CVE-2026-54283 / GHSA-82w8-qh3p-5jfq:** `application/x-www-form-urlencoded` parsing ignores field count/size constraints, enabling denial-of-service; fixed in **Starlette >=1.3.1**. FriPeri calls `request.form()` extensively.
+
+Upstream references:
+- https://github.com/advisories/GHSA-86qp-5c8j-p5mr
+- https://github.com/advisories/GHSA-82w8-qh3p-5jfq
+
+FastAPI published **GHSA-f56c-v883-vx8r** on 2026-11-17, affecting FastAPI **>=0.123.2,<0.163.2** and fixed in 0.163.2. FriPeri's current **fastapi==0.120.4** is *outside the affected range listed by that particular advisory*, but a future upgrade through that range should not stop at an affected release.
+
+- https://github.com/fastapi/fastapi/security/advisories/GHSA-f56c-v883-vx8r
+
+**Compatibility gate:** do not update Starlette independently of FastAPI's declared dependency range. Plan and test a compatible FastAPI/Starlette upgrade (target at least Starlette 1.3.1), resolve fresh packages, and rerun all integration and optional browser tests before production rollout. The current pin set cannot be called fully vulnerability-free.
+
+### Audit status
+
+The assistant environment did **not** execute `pip-audit`: network access prevented installing the scanner. This section is an advisory check, not a full dependency-tree scan. Run the following locally and review the actual output:
+
+```bash
+python -m pip install --upgrade pip-audit
+python -m pip_audit -r requirements.txt
+python -m pip_audit
+```
+
+The first audit checks repository pins and resolved dependencies; the second examines the current Python environment. Preserve audit results in release notes. Avoid blanket suppression of findings.
