@@ -1426,28 +1426,53 @@ async def admin(request: Request) -> Response:
     if not user:
         return RedirectResponse("/login", status_code=303)
     lang = pick_lang(request)
+    account = actor(request)
     with get_db() as conn:
-        counts = dict(conn.execute("""
-            SELECT COUNT(*) AS total,
-                   COUNT(CASE WHEN status = 'published' THEN 1 END) AS published,
-                   COUNT(CASE WHEN status = 'draft' THEN 1 END) AS drafts
-            FROM posts
-        """).fetchone())
-        recent_posts = [localize_post(row, lang) for row in conn.execute("""
-            SELECT p.*, c.name AS category_name, c.menu_label_en AS category_label_en,
-                   c.menu_label_secondary AS category_label_secondary
-            FROM posts p LEFT JOIN categories c ON c.id = p.category_id
-            ORDER BY datetime(p.created_at) DESC, p.id DESC LIMIT 6
-        """).fetchall()]
-        category_counts = [dict(row, label=category_label(row, lang)) for row in conn.execute("""
-            SELECT c.*, COUNT(p.id) AS post_count
-            FROM categories c LEFT JOIN posts p ON p.category_id = c.id
-            GROUP BY c.id ORDER BY post_count DESC, c.sort_order, c.name
-        """).fetchall()]
-        uncategorized_count = conn.execute("""
-            SELECT COUNT(*) FROM posts p LEFT JOIN categories c ON c.id = p.category_id
-            WHERE c.id IS NULL
-        """).fetchone()[0]
+        if account and account["role"] == "cc":
+            counts = dict(conn.execute("""
+                SELECT COUNT(*) AS total,
+                       COUNT(CASE WHEN status = 'published' THEN 1 END) AS published,
+                       COUNT(CASE WHEN status = 'draft' THEN 1 END) AS drafts
+                FROM posts WHERE author_id=?
+            """, (account["id"],)).fetchone())
+            recent_posts = [localize_post(row, lang) for row in conn.execute("""
+                SELECT p.*, c.name AS category_name, c.menu_label_en AS category_label_en,
+                       c.menu_label_secondary AS category_label_secondary
+                FROM posts p LEFT JOIN categories c ON c.id=p.category_id
+                WHERE p.author_id=? ORDER BY datetime(p.created_at) DESC, p.id DESC LIMIT 6
+            """, (account["id"],)).fetchall()]
+            category_counts = [dict(row, label=category_label(row, lang)) for row in conn.execute("""
+                SELECT c.*, COUNT(p.id) AS post_count
+                FROM categories c
+                JOIN user_categories uc ON uc.category_id=c.id AND uc.user_id=?
+                LEFT JOIN posts p ON p.category_id=c.id AND p.author_id=?
+                GROUP BY c.id ORDER BY post_count DESC, c.sort_order, c.name
+            """, (account["id"], account["id"])).fetchall()]
+            uncategorized_count = conn.execute(
+                "SELECT COUNT(*) FROM posts WHERE author_id=? AND category_id IS NULL",
+                (account["id"],)).fetchone()[0]
+        else:
+                counts = dict(conn.execute("""
+                SELECT COUNT(*) AS total,
+                       COUNT(CASE WHEN status = 'published' THEN 1 END) AS published,
+                       COUNT(CASE WHEN status = 'draft' THEN 1 END) AS drafts
+                FROM posts
+            """).fetchone())
+            recent_posts = [localize_post(row, lang) for row in conn.execute("""
+                SELECT p.*, c.name AS category_name, c.menu_label_en AS category_label_en,
+                       c.menu_label_secondary AS category_label_secondary
+                FROM posts p LEFT JOIN categories c ON c.id = p.category_id
+                ORDER BY datetime(p.created_at) DESC, p.id DESC LIMIT 6
+            """).fetchall()]
+            category_counts = [dict(row, label=category_label(row, lang)) for row in conn.execute("""
+                SELECT c.*, COUNT(p.id) AS post_count
+                FROM categories c LEFT JOIN posts p ON p.category_id = c.id
+                GROUP BY c.id ORDER BY post_count DESC, c.sort_order, c.name
+            """).fetchall()]
+            uncategorized_count = conn.execute("""
+                SELECT COUNT(*) FROM posts p LEFT JOIN categories c ON c.id = p.category_id
+                WHERE c.id IS NULL
+            """).fetchone()[0]
     is_first_run = not counts.get('total') and not category_counts
     return render_template(request, "admin/index.html", t(lang, "dashboard.title"), {
         "active_admin": "admin", "counts": counts, "recent_posts": recent_posts,
