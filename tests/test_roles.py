@@ -114,3 +114,38 @@ def test_admin_account_creation_and_last_admin_guards(site):
     assert client.post(f"/admin/users/{new_id}/delete", data={"editor_token": token}).status_code == 303
     with sqlite3.connect(db) as conn:
         assert conn.execute("SELECT 1 FROM users WHERE id=?", (new_id,)).fetchone() is None
+
+
+def test_editor_can_edit_category_metadata_but_not_site_menu(site):
+    client, db = site
+    _make_user(db, "ed", "editor")
+    _as(client, "ed")
+    with sqlite3.connect(db) as conn:
+        cid = conn.execute("SELECT id FROM categories ORDER BY id LIMIT 1").fetchone()[0]
+    assert client.get(f"/admin/categories/{cid}/edit").status_code == 200
+    saved = client.post(f"/admin/categories/{cid}/edit", data={
+        "editor_token": main.custom_home_token("ed"),
+        "name": "Edited category", "description": "Editor updated",
+    })
+    assert saved.status_code == 303
+    with sqlite3.connect(db) as conn:
+        assert conn.execute("SELECT description FROM categories WHERE id=?", (cid,)).fetchone()[0] == "Editor updated"
+    assert client.get("/admin/menu").status_code == 403
+
+
+def test_changed_role_invalidates_existing_session(site):
+    client, db = site
+    uid = _make_user(db, "writer")
+    _as(client, "writer")
+    old_session = client.cookies.get(main.SESSION_COOKIE)
+    assert client.get("/admin").status_code == 200
+    client.cookies.clear()
+    sign_in(client)
+    response = client.post(f"/admin/users/{uid}", data={
+        "editor_token": main.custom_home_token("admin"),
+        "role": "editor",
+    })
+    assert response.status_code == 303
+    client.cookies.clear()
+    client.cookies.set(main.SESSION_COOKIE, old_session)
+    assert client.get("/admin").status_code == 303
