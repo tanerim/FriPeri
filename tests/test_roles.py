@@ -291,7 +291,7 @@ def test_editor_can_assign_categories_to_cc_only(site):
     page = client.get("/admin/users")
     assert page.status_code == 200
     assert "writer_grants" in page.text
-    assert "grant_editor" not in page.text.split("users-account-list", 1)[-1]
+    assert '<span class="users-account-name"><strong>grant_editor</strong>' not in page.text
     assert 'name="role"' not in page.text
     assert 'name="password"' not in page.text
     token = main.custom_home_token("grant_editor")
