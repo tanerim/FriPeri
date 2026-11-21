@@ -39,3 +39,32 @@ def test_post_detail_preserves_cover_and_post_link(site):
     assert 'class="article-detail-cover"' in response.text
     assert "/static/images/FriPeri_Logo.png" in response.text
     assert "Text" in response.text
+
+
+def test_wide_editor_block_retains_width_class_and_article_override(site):
+    """A saved Wide block must render full-width inside the article, not as a centered column."""
+    import json
+    from pathlib import Path
+
+    client, db = site
+    blocks = [
+        {"type": "text", "tone": "plain", "align": "left", "width": "wide",
+         "html": "<p>Wide published block</p>"},
+        {"type": "text", "tone": "plain", "align": "left", "width": "normal",
+         "html": "<p>Normal published block</p>"},
+    ]
+    with sqlite3.connect(db) as conn:
+        conn.execute("""
+            INSERT INTO posts (title, slug, excerpt, body, body_html, post_blocks_json,
+                               status, created_at, updated_at)
+            VALUES (?, ?, ?, '', '', ?, 'published', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+        """, ("Block layout", "block-layout", "Summary", json.dumps({"en": blocks})))
+    response = client.get("/posts/block-layout")
+    assert response.status_code == 200
+    assert "custom-text tone-plain align-left width-wide" in response.text
+    assert "custom-text tone-plain align-left width-normal" in response.text
+    assert "Wide published block" in response.text
+    css = (Path(__file__).resolve().parents[1] / "static/article-detail.css").read_text(encoding="utf-8")
+    assert ".article-detail-body > .custom-block.width-wide" in css
+    assert ".article-detail-body > .custom-block.width-normal" in css
+    assert "margin-left: 0;" in css
