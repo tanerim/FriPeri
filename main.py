@@ -2797,6 +2797,11 @@ def _same_origin_admin_request(request: Request) -> bool:
 
 @app.middleware('http')
 async def first_run_gate(request: Request, call_next):
+    if request.method in {"POST", "PUT", "PATCH", "DELETE"} and (
+        request.url.path.startswith("/admin/") or request.url.path in {"/first-run", "/admin"}
+    ):
+        if not _same_origin_admin_request(request):
+            return Response("Cross-origin administrative request rejected", status_code=403)
     # A cheap file identity check handles deletion/replacement and other workers;
     # schema checks occur only on startup or a changed installation file.
     try:
