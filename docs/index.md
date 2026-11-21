@@ -1,31 +1,45 @@
 # FriPeri documentation
 
-FriPeri is a FastAPI and SQLite-based content management and publishing system.
+This is the full documentation for **FriPeri**, a self-hosted personal publishing application built with FastAPI, Jinja2, and SQLite. The [repository README](../README.md) provides a short introduction and quick start; the guides below contain the complete instructions and reference material.
 
-## Documentation contents
+## Start here
 
-1. [Overview and features](overview.md)
-2. [Installation and initial setup](installation.md)
-3. [Complete administrator user guide](user-guide.md)
-4. [Configuration and persistent data](configuration.md)
-5. [Production deployment](deployment.md)
-6. [Maintenance, backup and recovery](maintenance.md)
-7. [Development and testing](development.md)
-8. [Contributing and troubleshooting](support.md)
-9. [Application architecture](architecture.md)
-10. [Testing and browser verification](testing.md)
-11. [HTTP route reference](http-routes.md)
-12. [SQLite data model and persistence](data-model.md)
-13. [Dependency and vulnerability review](dependency-security.md)
-14. [Security policy](../SECURITY.md)
+| Guide | What it covers |
+| --- | --- |
+| [Overview and features](overview.md) | Purpose, features, technology stack, supported scope and limitations |
+| [Installation and initial setup](installation.md) | Requirements, local setup, CLI initialization, first administrator account |
+| [Administrator user guide](user-guide.md) | Posts, categories, visual editor, homepages, media, languages, contact inbox |
+| [Troubleshooting](troubleshooting.md) | Login, database, uploads, backup, language, editor and deployment problems |
 
-## Other source references
+## Operations and maintenance
 
-- [Language migration](../translations/LANGUAGE_MIGRATION.md)
-- [Pinned Python requirements](../requirements.txt)
-- [Local regression and browser testing](testing.md)
-- [License](../LICENSE)\n- [Third-party component and asset notices](../THIRD_PARTY_NOTICES.md)
+| Guide | What it covers |
+| --- | --- |
+| [Configuration and persistent data](configuration.md) | Environment variables, defaults, secrets, paths and data locations |
+| [Production deployment](deployment.md) | systemd, reverse proxy, HTTPS and security hardening |
+| [Maintenance, backup and recovery](maintenance.md) | Secure backup/restore, updating, rollback, factory reset |
+| [Security policy](../SECURITY.md) | Private vulnerability reporting, supported versions, security measures |
+| [Dependency security review](dependency-security.md) | Package version advisories and verification requirements |
 
-The complete historical user manual remains available in the [root README](../README.md). This directory contains topic-specific guides that can be read independently.
+## Developer reference
 
-**Release rule:** Run validation locally, never through GitHub Actions. Treat uninitialized sites and files containing personal data as private. The public release is gated on dependency security review, successful installation and functional testing.
+| Guide | What it covers |
+| --- | --- |
+| [Development](development.md) | Repository structure, CSS builds and contributor validation |
+| [Local regression and browser testing](testing.md) | pytest, optional Playwright checks, manual verification |
+| [Application architecture](architecture.md) | Modules, request lifecycle, security-sensitive operations |
+| [HTTP route reference](http-routes.md) | Public, authentication and admin endpoints |
+| [SQLite data model](data-model.md) | Tables, persistence and database lifecycle |
+| [Contributing and support](support.md) | Issue reports, contribution practices and sensitive reports |
+
+## Licenses and other references
+
+- [Project MIT License](../LICENSE)
+- [Third-party components and asset notices](../THIRD_PARTY_NOTICES.md)
+- [Third-party license texts](../licenses/)
+- [Pinned Python dependencies](../requirements.txt)
+- [Language migration design](../translations/LANGUAGE_MIGRATION.md)
+
+The authenticated administrator interface also offers a read-only Markdown documentation viewer under **Configuration → Documentation**.
+
+**Release validation:** Run tests locally, not through GitHub Actions. Protect uninitialized instances and private files, including credentials, databases, messages and backups. Verify dependency advisories and installation behavior before deployment.
