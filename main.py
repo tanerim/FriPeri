@@ -2978,3 +2978,128 @@ async def create_friperi(request: Request):
     response = RedirectResponse('/login?setup=ready', status_code=303)
     response.delete_cookie('friperi_setup')
     return response
+
+
+# Account administration is intentionally not self-service. Only an admin can
+# assign roles or select a content creator's allowed categories.
+@app.get("/admin/users", response_class=HTMLResponse)
+async def admin_users(request: Request) -> Response:
+    username = require_user(request)
+    if not username:
+        return RedirectResponse("/login", status_code=303)
+    with get_db() as conn:
+        people = [dict(row) for row in conn.execute(
+            "SELECT id, username, role, created_at FROM users ORDER BY id")]
+        categories = [dict(row) for row in conn.execute(
+            "SELECT id, name FROM categories ORDER BY name")]
+        for person in people:
+            person["category_ids"] = [r[0] for r in conn.execute(
+                "SELECT category_id FROM user_categories WHERE user_id=?",
+                (person["id"],))]
+    return render_template(request, "admin/users.html", "Users", {
+        "active_admin": "users", "accounts": people,
+        "categories": categories, "editor_token": custom_home_token(username),
+    }, username)
+
+
+def _user_admin_form_valid(request: Request, form: Any) -> bool:
+    username = require_user(request)
+    return bool(username and form.get("editor_token")
+                and hmac.compare_digest(str(form.get("editor_token")), custom_home_token(username)))
+
+
+def _selected_categories(conn: sqlite3.Connection, form: Any) -> list[int] | None:
+    raw = form.getlist("categories") if hasattr(form, "getlist") else []
+    if any(not re.fullmatch(r"[0-9]+", str(value)) for value in raw):
+        return None
+    ids = sorted(set(int(value) for value in raw))
+    if ids:
+        placeholders = ",".join("?" for _ in ids)
+        found = conn.execute(f"SELECT COUNT(*) FROM categories WHERE id IN ({placeholders})", ids).fetchone()[0]
+        if found != len(ids):
+            return None
+    return ids
+
+
+@app.post("/admin/users")
+async def create_account(request: Request) -> Response:
+    form = await request.form()
+    if not _user_admin_form_valid(request, form):
+        return Response("Forbidden", status_code=403)
+    name = str(form.get("username", "")).strip()
+    password = str(form.get("password", ""))
+    role = str(form.get("role", ""))
+    if not re.fullmatch(r"[A-Za-z0-9_.-]{3,64}", name) or role not in {"cc", "editor", "admin"} or len(password) < 8:
+        return Response("Invalid username, role or password (minimum eight characters)", status_code=400)
+    with get_db() as conn:
+        ids = _selected_categories(conn, form)
+        if ids is None:
+            return Response("Invalid category assignment", status_code=400)
+        salt, secret = hash_password(password)
+        try:
+            cursor = conn.execute(
+                "INSERT INTO users (username, password_salt, password_hash, created_at, role) VALUES (?, ?, ?, ?, ?)",
+                (name, salt, secret, now_iso(), role))
+        except sqlite3.IntegrityError:
+            return Response("Username already exists", status_code=409)
+        for cid in ids if role == "cc" else []:
+            conn.execute("INSERT INTO user_categories (user_id, category_id) VALUES (?, ?)",
+                         (cursor.lastrowid, cid))
+    return RedirectResponse("/admin/users", status_code=303)
+
+
+@app.post("/admin/users/{account_id:int}")
+async def update_account(account_id: int, request: Request) -> Response:
+    form = await request.form()
+    if not _user_admin_form_valid(request, form):
+        return Response("Forbidden", status_code=403)
+    role = str(form.get("role", ""))
+    password = str(form.get("password", ""))
+    if role not in {"cc", "editor", "admin"} or (password and len(password) < 8):
+        return Response("Invalid role or password", status_code=400)
+    with get_db() as conn:
+        conn.execute("BEGIN IMMEDIATE")
+        existing = conn.execute("SELECT id, role, username FROM users WHERE id=?", (account_id,)).fetchone()
+        if existing is None:
+            return Response(status_code=404)
+        me = actor(request)
+        if existing["id"] == me["id"] and role != "admin":
+            return Response("You cannot demote your own admin account", status_code=403)
+        if existing["role"] == "admin" and role != "admin" and conn.execute(
+                "SELECT COUNT(*) FROM users WHERE role='admin'").fetchone()[0] <= 1:
+            return Response("At least one admin is required", status_code=409)
+        ids = _selected_categories(conn, form)
+        if ids is None:
+            return Response("Invalid category assignment", status_code=400)
+        conn.execute("UPDATE users SET role=? WHERE id=?", (role, account_id))
+        if password:
+            salt, secret = hash_password(password)
+            conn.execute("UPDATE users SET password_salt=?, password_hash=? WHERE id=?",
+                         (salt, secret, account_id))
+        conn.execute("DELETE FROM user_categories WHERE user_id=?", (account_id,))
+        for cid in ids if role == "cc" else []:
+            conn.execute("INSERT INTO user_categories (user_id, category_id) VALUES (?, ?)",
+                         (account_id, cid))
+    return RedirectResponse("/admin/users", status_code=303)
+
+
+@app.post("/admin/users/{account_id:int}/delete")
+async def delete_account(account_id: int, request: Request) -> Response:
+    form = await request.form()
+    if not _user_admin_form_valid(request, form):
+        return Response("Forbidden", status_code=403)
+    with get_db() as conn:
+        conn.execute("BEGIN IMMEDIATE")
+        existing = conn.execute("SELECT role FROM users WHERE id=?", (account_id,)).fetchone()
+        if existing is None:
+            return Response(status_code=404)
+        me = actor(request)
+        if me["id"] == account_id:
+            return Response("Cannot delete your own account", status_code=403)
+        if existing["role"] == "admin" and conn.execute(
+                "SELECT COUNT(*) FROM users WHERE role='admin'").fetchone()[0] <= 1:
+            return Response("At least one admin is required", status_code=409)
+        conn.execute("UPDATE posts SET author_id=NULL WHERE author_id=?", (account_id,))
+        conn.execute("DELETE FROM user_categories WHERE user_id=?", (account_id,))
+        conn.execute("DELETE FROM users WHERE id=?", (account_id,))
+    return RedirectResponse("/admin/users", status_code=303)
