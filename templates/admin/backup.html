@@ -16,6 +16,7 @@
     <section class="settings-card-v3">
       <header><h2>{{ icon('save') }}{{ t(lang, 'admin.backup_create_title') }}</h2><p>{{ t(lang, 'admin.backup_create_desc') }}</p></header>
       <form method="post" action="/admin/backup/create">
+        <input type="hidden" name="backup_csrf" value="{{ backup_csrf }}">
         <button type="submit" class="settings-primary">{{ t(lang, 'admin.backup_create_btn') }}</button>
       </form>
     </section>
@@ -24,6 +25,7 @@
     <section class="settings-card-v3">
       <header><h2>{{ icon('upload') }}{{ t(lang, 'admin.backup_upload_title') }}</h2><p>{{ t(lang, 'admin.backup_upload_desc') }}</p></header>
       <form method="post" action="/admin/backup/upload" enctype="multipart/form-data">
+        <input type="hidden" name="backup_csrf" value="{{ backup_csrf }}">
         <div class="settings-grid-v3 single-col">
           <input type="file" name="file" accept=".zip" required class="settings-file-input">
         </div>
@@ -46,6 +48,7 @@
             <td class="admin-table-actions">
               <a class="admin-secondary" href="/admin/backup/download/{{ b['name'] }}">{{ t(lang, 'admin.backup_download') }}</a>
               <form class="inline-form" method="post" action="/admin/backup/restore/{{ b['name'] }}" data-confirm="{{ t(lang, 'admin.backup_restore_confirm') }}">
+                <input type="hidden" name="backup_csrf" value="{{ backup_csrf }}">
                 <button type="submit" class="settings-danger">{{ t(lang, 'admin.backup_restore') }}</button>
               </form>
             </td>
