@@ -477,5 +477,9 @@
   "builder.reset_appearance": "Darstellung zurücksetzen",
   "builder.reset_cell": "Zellenfarben zurücksetzen",
   "builder.cell_select_help": "Eine Zelle auswählen, um ihre Farben zu ändern.",
-  "builder.selected_cell": "Ausgewählte Zelle (Zeile / Spalte)"
+  "builder.selected_cell": "Ausgewählte Zelle (Zeile / Spalte)",
+  "admin.documentation": "Dokumentation",
+  "admin.documentation_help": "Projektdokumentation aus dem docs-Verzeichnis lesen.",
+  "admin.documentation_contents": "Inhalt",
+  "admin.documentation_empty": "Keine Dokumentationsdateien gefunden."
 }
