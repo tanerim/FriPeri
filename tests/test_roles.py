@@ -149,3 +149,36 @@ def test_changed_role_invalidates_existing_session(site):
     client.cookies.clear()
     client.cookies.set(main.SESSION_COOKIE, old_session)
     assert client.get("/admin").status_code == 303
+
+
+def test_block_editor_enforces_creator_categories_and_ownership(site):
+    client, db = site
+    with sqlite3.connect(db) as conn:
+        cats = [row[0] for row in conn.execute("SELECT id FROM categories ORDER BY id LIMIT 2")]
+    assert len(cats) == 2
+    _make_user(db, "writer", categories=[cats[0]])
+    _make_user(db, "writer2", categories=[cats[0]])
+    _as(client, "writer")
+    form = {
+        "title_en": "Visual builder author",
+        "excerpt_en": "Creator-owned document",
+        "category_id": str(cats[0]),
+        "status": "draft",
+        "post_en": "[]",
+        "editor_token": main.custom_home_token("writer"),
+        "creation_key": "a" * 32,
+    }
+    created = client.post("/admin/posts/new", data=form)
+    assert created.status_code == 200, created.text
+    pid = int(created.json()["endpoint"].split("/")[3])
+    with sqlite3.connect(db) as conn:
+        assert conn.execute("SELECT author_id FROM posts WHERE id=?", (pid,)).fetchone()[0] is not None
+    denied = client.post("/admin/posts/new", data={
+        **form, "title_en": "Wrong category", "category_id": str(cats[1]),
+        "creation_key": "b" * 32,
+    })
+    assert denied.status_code == 403
+    _as(client, "writer2")
+    assert client.post(f"/admin/posts/{pid}/edit", data={
+        **form, "editor_token": main.custom_home_token("writer2"),
+    }).status_code == 403
