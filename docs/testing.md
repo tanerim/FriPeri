@@ -40,7 +40,7 @@ The integration tests use a temporary SQLite database and temporary backup/uploa
 Use a dedicated *localhost* installation with disposable content. Install the Chromium browser used by Playwright:
 
 ```bash
-python -m playwright install chromium
+python -m playwright install chromium firefox
 ```
 
 Start that disposable FriPeri instance, then in another terminal:
@@ -55,7 +55,7 @@ python -m pytest -q tests/test_browser_smoke.py
 unset FRIPERI_TEST_PASSWORD
 ```
 
-The optional browser tests check that the sidebar control sits above the logo, collapse state survives a reload, the Markdown reader loads, the mobile viewport does not exhibit horizontal overflow, and Design lacks its redundant shortcuts. Browser availability and the test service determine whether these checks can run; they are not part of the default mandatory test environment.
+The optional browser tests run in both Chromium and Firefox and check that the sidebar control sits above the logo, collapse state survives a reload, the Markdown reader loads, the mobile viewport does not exhibit horizontal overflow, and Design lacks its redundant shortcuts. Browser availability and the test service determine whether these checks can run; they are not part of the default mandatory test environment.
 
 For a local HTTP instance, set `SESSION_COOKIE_SECURE=false` on **that disposable instance only**.
 
