@@ -14,6 +14,7 @@ import zipfile
 import sqlite3
 import tempfile
 import xml.etree.ElementTree as ET
+from contextlib import asynccontextmanager
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -67,10 +68,20 @@ SECRET_KEY = os.getenv("SITE_SECRET_KEY") or secrets.token_urlsafe(48)
 ALLOWED_IMAGE_TYPES = {"image/jpeg": ".jpg", "image/png": ".png", "image/webp": ".webp"}
 
 
+@asynccontextmanager
+async def lifespan(application: FastAPI):
+    """Initialize an existing installation and load the persistent signing key."""
+    init_db()
+    application.state.initialized = is_initialized(DB_PATH)
+    refresh_secret()
+    yield
+
+
 app = FastAPI(
     title=os.getenv("SITE_NAME", "Personal Site"),
     description=os.getenv("SITE_DESCRIPTION", "Personal publishing system"),
     version="2.0.0",
+    lifespan=lifespan,
 )
 @app.api_route("/static/images/friperi-section-{digest}.svg", methods=["GET", "HEAD"], include_in_schema=False)
 async def section_svg(digest: str, request: Request) -> Response:
@@ -274,13 +285,6 @@ def init_db():
     """Upgrade an existing installation without creating a database or changing credentials."""
     if is_initialized(DB_PATH):
         migrate_database(DB_PATH)
-
-
-@app.on_event("startup")
-async def startup() -> None:
-    init_db()
-    app.state.initialized = is_initialized(DB_PATH)
-    refresh_secret()
 
 
 def refresh_secret():
@@ -789,7 +793,7 @@ def render_template(
         for key in ('posts', 'blog_posts', 'note_posts'):
             if key in data:
                 data[key] = [localize_post(post, data['lang']) for post in data[key]]
-    return templates.TemplateResponse(template_name, data, status_code=status_code)
+    return templates.TemplateResponse(request, template_name, data, status_code=status_code)
 
 
 def format_size(byte_count: int) -> str:
