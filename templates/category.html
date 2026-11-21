@@ -1,17 +1,82 @@
 {% extends "base.html" %}
+{% block extra_head %}
+<link rel="stylesheet" href="{{ static_url('category-archive.css') }}" />
+{% endblock %}
 
 {% block content %}
-<main class="page category-page category-{{ category['slug'] }}">
-  <section class="category-archive">
-    <div class="wide-container">
-      {% if category['slug'] not in ['blog', 'notes', 'notlar'] %}
-      <header class="category-head">
-        <h1>{{ category|category_label(lang) }}</h1>
-        {% set description = localized(category, 'description') %}
-        {% if description %}<p class="lead">{{ description }}</p>{% endif %}
+<main class="page category-page category-{{ category['slug'] }} category-publication">
+  <section class="category-archive" aria-labelledby="category-title">
+    <div class="wide-container category-publication-inner">
+      <header class="category-publication-header">
+        <div class="category-publication-intro">
+          <div class="category-publication-kicker">
+            <span class="category-publication-kicker-mark" aria-hidden="true"></span>
+            <span>{{ site_name }}</span>
+            <span class="category-publication-kicker-separator" aria-hidden="true">/</span>
+            <span>{{ t(lang, 'admin.categories') }}</span>
+          </div>
+          <h1 id="category-title">{{ category|category_label(lang) }}</h1>
+          {% set description = localized(category, 'description') %}
+          {% if description %}
+          <p class="category-publication-description">{{ description }}</p>
+          {% endif %}
+        </div>
+        <div class="category-publication-count" aria-label="{{ posts|length }} {{ t(lang, 'admin.posts') }}">
+          <strong>{{ '%02d'|format(posts|length) }}</strong>
+          <span>{{ t(lang, 'admin.posts') }}</span>
+        </div>
       </header>
+
+      {% if posts %}
+      <div class="category-publication-list" aria-label="{{ category|category_label(lang) }}">
+        {% for post in posts %}
+        <article class="category-publication-card{% if not post['image_path'] %} no-image{% endif %}"
+          {% if card_options.background or card_options.text_color %}
+          style="{% if card_options.background %}--archive-card-bg: {{ card_options.background }};{% endif %}{% if card_options.text_color %}--archive-card-text: {{ card_options.text_color }};{% endif %}"
+          {% endif %}>
+          {% if post['image_path'] %}
+          <a class="category-publication-image" href="/posts/{{ post['slug'] }}" tabindex="-1" aria-hidden="true">
+            <img src="{{ post['image_path'] }}" alt="" loading="lazy" />
+          </a>
+          {% endif %}
+          <div class="category-publication-card-content">
+            <div class="category-publication-meta">
+              {% if card_options.get('show_date', true) %}
+              <time datetime="{{ post['created_at'] }}">{{ post['created_at']|format_date }}</time>
+              {% endif %}
+              <span class="category-publication-meta-line" aria-hidden="true"></span>
+              <span class="category-publication-meta-type">{{ category|category_label(lang) }}</span>
+            </div>
+            {% if card_options.get('show_title', true) %}
+            <h2 class="category-publication-card-title">
+              <a href="/posts/{{ post['slug'] }}">{{ post['title'] }}</a>
+            </h2>
+            {% endif %}
+            {% if card_options.get('show_excerpt', true) and post['excerpt'] %}
+            <p class="category-publication-card-excerpt">{{ post['excerpt'] }}</p>
+            {% endif %}
+            <div class="category-publication-card-bottom">
+              <div class="category-publication-tags">
+                {% for tag in post_tags.get(post['id'], []) %}
+                <span class="category-publication-tag">{{ tag }}</span>
+                {% endfor %}
+              </div>
+              <a class="category-publication-read" href="/posts/{{ post['slug'] }}"
+                 aria-label="{{ t(lang, 'common.read') }}: {{ post['title'] }}">
+                <span>{{ t(lang, 'common.read') }}</span>
+                <span aria-hidden="true">↗</span>
+              </a>
+            </div>
+          </div>
+        </article>
+        {% endfor %}
+      </div>
+      {% else %}
+      <div class="category-publication-empty">
+        <span class="category-publication-empty-mark" aria-hidden="true">✳</span>
+        <p>{{ t(lang, 'common.empty') }}</p>
+      </div>
       {% endif %}
-      <div class="archive-list category-list">{% include "partials/post_cards.html" %}</div>
     </div>
   </section>
 </main>
