@@ -1,0 +1,55 @@
+{% extends "admin/base.html" %}
+{% block extra_head %}
+<link rel="stylesheet" href="{{ static_url('users.css') }}">
+{% endblock %}
+{% block content %}
+<main id="admin-content" class="admin-settings-page users-workspace" tabindex="-1">
+  <div class="admin-settings-container">
+    <header class="settings-page-header users-heading">
+      <div>
+        <h1>{{ t(lang, 'users.category_access_title') }}</h1>
+        <p>{{ t(lang, 'users.category_access_help') }}</p>
+      </div>
+      <span class="users-total">{{ creators|length }} {{ t(lang, 'users.role_cc')|lower }}</span>
+    </header>
+    <section class="admin-card users-list-panel">
+      <div class="users-panel-heading">
+        <div><h2>{{ t(lang, 'users.existing') }}</h2><p>{{ t(lang, 'users.grants_only_help') }}</p></div>
+      </div>
+      <div class="users-account-list">
+        {% for person in creators %}
+        <details class="users-account">
+          <summary class="users-account-summary">
+            <span class="users-account-avatar" aria-hidden="true">{{ person.username[:1]|upper }}</span>
+            <span class="users-account-name"><strong>{{ person.username }}</strong></span>
+            <span class="users-role-tag users-role-cc">{{ t(lang, 'users.role_cc') }}</span>
+            <span class="users-grant-count">{{ person.category_ids|length }} {{ t(lang, 'users.categories')|lower }}</span>
+            <span class="users-summary-action">{{ t(lang, 'common.edit') }}</span>
+          </summary>
+          <div class="users-account-editor">
+            <form method="post" action="/admin/users/{{ person.id }}/categories" class="users-form">
+              <input type="hidden" name="editor_token" value="{{ editor_token }}">
+              <fieldset class="users-permissions">
+                <legend>{{ t(lang, 'users.categories') }}</legend>
+                <div class="users-category-options">
+                  {% for cat in categories %}
+                  <label class="users-category-choice"><input type="checkbox" name="categories" value="{{ cat.id }}" {% if cat.id in person.category_ids %}checked{% endif %}><span>{{ cat.name }}</span></label>
+                  {% else %}
+                  <span class="users-help">{{ t(lang, 'users.no_categories') }}</span>
+                  {% endfor %}
+                </div>
+              </fieldset>
+              <div class="users-form-actions">
+                <button class="settings-primary" type="submit">{{ t(lang, 'users.save') }}</button>
+              </div>
+            </form>
+          </div>
+        </details>
+        {% else %}
+        <p class="users-help">{{ t(lang, 'users.no_creators') }}</p>
+        {% endfor %}
+      </div>
+    </section>
+  </div>
+</main>
+{% endblock %}
