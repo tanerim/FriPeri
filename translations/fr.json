@@ -481,5 +481,10 @@
   "admin.documentation": "Documentation",
   "admin.documentation_help": "Consultez la documentation locale du projet dans le répertoire docs.",
   "admin.documentation_contents": "Sommaire",
-  "admin.documentation_empty": "Aucun fichier de documentation trouvé."
+  "admin.documentation_empty": "Aucun fichier de documentation trouvé.",
+  "dashboard.wizard_intro": "Configurez votre site",
+  "dashboard.wizard_text": "Commencez par configurer la page d’accueil de votre site.",
+  "dashboard.wizard_action": "Configurer l’accueil",
+  "builder.section_add_placeholder": "Choisir un type de bloc…",
+  "builder.section_add_section": "Ajouter une section"
 }
