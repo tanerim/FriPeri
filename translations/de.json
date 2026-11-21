@@ -495,7 +495,7 @@
   "users.initial_password": "Anfangspasswort (mindestens 8 Zeichen)",
   "users.new_password": "Neues Passwort (leer lassen = unverändert)",
   "users.role": "Rolle",
-  "users.role_cc": "Inhaltsersteller (cc)",
+  "users.role_cc": "Content Creator",
   "users.role_editor": "Redakteur",
   "users.role_admin": "Administrator",
   "users.categories": "Kategorie-Zugriffe für Inhaltsersteller",
