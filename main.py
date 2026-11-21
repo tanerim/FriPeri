@@ -1378,7 +1378,7 @@ async def enforce_roles(request: Request, call_next):
     if path.startswith("/admin/posts"):
         allowed = method in ("GET", "HEAD", "POST") and not (
             role == "cc" and path.endswith("/delete"))
-        match = re.fullmatch(r"/admin/posts/(\\d+)/(?:edit(?:/preview|/upload)?|delete)", path)
+        match = re.fullmatch(r"/admin/posts/(\d+)/(?:edit(?:/preview|/upload)?|delete)", path)
         if allowed and match and role == "cc":
             with get_db() as conn:
                 allowed = can_write_post(conn, account, int(match.group(1)))
@@ -1386,7 +1386,7 @@ async def enforce_roles(request: Request, call_next):
         allowed = method in ("GET", "HEAD", "POST")
     elif path.startswith("/admin/categories/"):
         allowed = role == "editor" and method == "POST" and bool(
-            re.fullmatch(r"/admin/categories/\\d+/delete", path))
+            re.fullmatch(r"/admin/categories/\d+/delete", path))
     elif role == "editor":
         allowed = (path == "/admin/pages" or path.startswith("/admin/pages/")
                    or path == "/admin/about" or path.startswith("/admin/about/")
