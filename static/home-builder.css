@@ -307,3 +307,65 @@
 #builder-remove-name { margin: 12px 0 0; font-weight: 700; }
 #builder-remove-help { margin: 4px 0 18px; }
 #builder-remove-dialog .builder-actions { justify-content: flex-end; }
+
+
+/* Clearly visible controls for adding blocks and nested sections. */
+.hyperui-admin .builder-section-add-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: 12px;
+  margin: 16px 0 4px;
+  padding: 14px;
+  width: 100%;
+  background: #f0f2ff;
+  border: 1px solid #c6c7f7;
+  border-radius: 10px;
+  color: #263658;
+}
+.hyperui-admin .builder-section-add-label {
+  display: flex;
+  flex: 1 1 270px;
+  min-width: 0;
+  flex-direction: column;
+  gap: 7px;
+  font-weight: 700;
+  font-size: 13px;
+  color: #263658;
+}
+.hyperui-admin .builder-section-add-select {
+  width: 100%;
+  min-height: 43px;
+  padding: 9px 34px 9px 12px;
+  border: 1px solid #a8b1cc;
+  border-radius: 8px;
+  background: #fff;
+  color: #17243b;
+  font-size: 14px;
+  font-weight: 600;
+  opacity: 1;
+  cursor: pointer;
+}
+.hyperui-admin .builder-section-add-button {
+  min-height: 43px;
+  flex: 0 1 auto;
+  padding: 10px 16px;
+  background: #5145cd;
+  border: 1px solid #5145cd;
+  border-radius: 8px;
+  color: #fff;
+  font-weight: 700;
+  font-size: 13px;
+  cursor: pointer;
+}
+.hyperui-admin .builder-section-add-button:hover { background: #4034b4; }
+.hyperui-admin .builder-section-add-select:focus-visible,
+.hyperui-admin .builder-section-add-button:focus-visible {
+  outline: 3px solid #8d84f5;
+  outline-offset: 2px;
+}
+@media (max-width: 640px) {
+  .hyperui-admin .builder-section-add-controls { flex-direction: column; align-items: stretch; }
+  .hyperui-admin .builder-section-add-label { flex-basis: auto; width: 100%; }
+  .hyperui-admin .builder-section-add-button { width: 100%; }
+}
