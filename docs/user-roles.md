@@ -7,6 +7,8 @@ FriPeri uses **three account roles**. The initial account created during first-r
 | Capability | Content creator (`cc`) | Editor (`editor`) | Administrator (`admin`) |
 | --- | --- | --- | --- |
 | Sign in and access the dashboard | Own content | All content | All content |
+| Read built-in documentation | Yes | Yes | Yes |
+| Assign category access to content creators | No | Yes | Yes |
 | Create new posts | Assigned categories only | All categories | All categories |
 | Edit existing posts | Own posts only | Any post | Any post |
 | Delete posts | No | Yes | Yes |
@@ -22,9 +24,11 @@ FriPeri uses **three account roles**. The initial account created during first-r
 
 The editor's homepage content controls are separate from the administrator's site-wide homepage mode and feed settings. Only an administrator can switch the homepage mode or edit global configuration.
 
+Editors can open **Dashboard**, **Documentation**, and **Category access**. The Category access screen lists only accounts with the `cc` role and allows assigning or removing category grants. Editors cannot create or delete users, change roles, reset passwords, or modify administrator accounts. Changes to a creator's category grants invalidate their existing sessions; creators sign in again to obtain their updated access.
+
 ## Manage accounts
 
-Sign in as administrator and open **Configuration → Users** (`/admin/users`).
+Sign in as administrator and open **Configuration → Users** (`/admin/users`). Editors see **Configuration → Category access** at the same URL, but this is a separate limited interface that does not expose account management controls.
 
 1. Create a username (3–64 characters using letters, digits, underscore, period or hyphen) and an initial password of at least eight characters.
 2. Choose `cc`, `editor` or `admin`.
