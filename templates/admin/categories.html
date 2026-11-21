@@ -30,13 +30,13 @@
               <div>{{ t(lang, 'common.menu' if cat['show_in_menu'] else 'common.hidden') }}</div>
               <div>{{ cat["sort_order"] }}</div>
               <div class="category-row-actions">
-                <a class="settings-secondary" href="/admin/menu?edit_category={{ cat['id'] }}">
+                {% if can_delete_categories %}<a class="settings-secondary" href="/admin/menu?edit_category={{ cat['id'] }}">
                   {{ t(lang, 'common.edit') }}
                 </a>
                 <form method="post" action="/admin/categories/{{ cat.id }}/delete" data-confirm="{{ t(lang, 'admin.delete_category_confirm') }}">
                   <input type="hidden" name="confirmed" value="1" />
                   <button type="submit" class="settings-danger">{{ t(lang, 'common.delete') }}</button>
-                </form>
+                </form>{% endif %}
               </div>
             </div>
           {% else %}
