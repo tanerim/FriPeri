@@ -6,15 +6,30 @@ from html.parser import HTMLParser
 from urllib.parse import urlsplit, parse_qs
 
 MAX_DOCUMENT_BYTES = 500_000
-BLOCK_TYPES = {'heading', 'text', 'list', 'table', 'image', 'video', 'button', 'divider', 'category', 'quote', 'callout', 'stats', 'faq', 'legacy_html'}
+BLOCK_TYPES = {'section', 'heading', 'text', 'list', 'table', 'image', 'video', 'button', 'divider', 'category', 'quote', 'callout', 'stats', 'faq', 'legacy_html'}
 
 # Optional presentation settings keep existing documents on their theme defaults.
 APPEARANCE_FIELDS = {
+    'section': {'layout': ('stack', 'two', 'split', 'reverse_split', 'three', 'six', 'actions'),
+                'surface': ('standard', 'full'), 'vertical_align': ('start', 'center', 'end'),
+                'content_width': (360, 1920), 'min_height': (0, 1200), 'padding_y': (0, 200),
+                'padding_x': (0, 120), 'gap': (0, 100), 'radius': (0, 120),
+                'background_fit': ('cover', 'contain'), 'background_position': ('center', 'left', 'right', 'top', 'bottom'),
+                'overlay_color': 'color', 'overlay_opacity': (0, 100),
+                'svg_pattern': ('none', 'ribbons', 'waves', 'grid'),
+                'svg_primary': 'color', 'svg_secondary': 'color',
+                'svg_opacity': (0, 100), 'edge': ('flat', 'wave'), 'edge_color': 'color'},
+    'heading': {'font_size': (18, 160), 'font_weight': ('normal', 'bold', 'heavy'),
+                'accent_color': 'color', 'accent_style': ('color_only', 'underline')},
     'list': {'font_size': (10, 72), 'item_gap': (0, 48)},
     'table': dict.fromkeys(('cell_background', 'cell_color', 'header_background', 'header_color'), 'color'),
     'button': {'button_background': 'color', 'button_hover': 'color', 'button_text': 'color',
                'button_hover_text': 'color', 'font_size': (10, 48), 'width_mode': ('auto', 'full', 'custom'),
-               'width_px': (40, 1200), 'height': (24, 240), 'radius': (0, 120)},
+               'width_px': (40, 1200), 'height': (24, 240), 'radius': (0, 120),
+               'variant': ('solid', 'outline', 'ghost', 'text_link', 'underlined'),
+               'icon': ('external', 'arrow', 'none'), 'border_width': (0, 8),
+               'border_color': 'color', 'padding_x': (0, 96), 'padding_y': (0, 48),
+               'target': ('same_tab', 'new_tab')},
     'quote': {'font_size': (12, 72), 'attribution_size': (10, 36), 'quote_color': 'color',
               'attribution_color': 'color', 'border_color': 'color', 'border_width': (0, 12),
               'font_style': ('normal', 'italic')},
@@ -243,8 +258,13 @@ def validate_document(raw):
         data = json.loads(raw or '[]')
     except (ValueError, RecursionError) as exc:
         raise ValueError('Invalid page data') from exc
-    if not isinstance(data, list) or len(data) > 80:
+    return _validate_blocks(data, 0, [80], set())
+
+
+def _validate_blocks(data, depth, remaining, anchors):
+    if not isinstance(data, list) or len(data) > remaining[0]:
         raise ValueError('Use at most 80 blocks')
+    remaining[0] -= len(data)
     result = []
     for item in data:
         if not isinstance(item, dict) or not isinstance(item.get('type'), str) or item.get('type') not in BLOCK_TYPES:
@@ -274,6 +294,22 @@ def validate_document(raw):
             block['text'] = text(item.get('text', ''), 500)
         if kind == 'heading':
             block['level'] = item.get('level') if item.get('level') in ('h1', 'h2', 'h3') else 'h2'
+            if 'accent' in item:
+                block['accent'] = text(item['accent'], 160)
+        elif kind == 'section':
+            if depth >= 3:
+                raise ValueError('Use at most three levels of sections')
+            url = text(item.get('image', ''), 2048)
+            block['image'] = safe_url(url, media=True)
+            if url and not block['image']:
+                raise ValueError('Invalid section image URL')
+            anchor = text(item.get('anchor', ''), 80)
+            if anchor:
+                if anchor in anchors or not re.fullmatch(r'[A-Za-z][A-Za-z0-9_-]*', anchor):
+                    raise ValueError('Invalid or duplicate section anchor')
+                anchors.add(anchor)
+            block['anchor'] = anchor
+            block['children'] = _validate_blocks(item.get('children', []), depth + 1, remaining, anchors)
         elif kind == 'legacy_html':
             # Keep source verbatim; sanitize only when rendering. Original post fields also remain untouched.
             block['html'] = text(item.get('html', ''), MAX_DOCUMENT_BYTES)
@@ -330,7 +366,7 @@ def validate_document(raw):
             block['alt'] = text(item.get('alt', ''), 500)
         elif kind == 'button':
             url = text(item.get('url', ''), 2048)
-            block['url'] = safe_url(url)
+            block['url'] = url if re.fullmatch(r'#[A-Za-z][A-Za-z0-9_-]{0,79}', url) else safe_url(url)
             if url and not block['url']:
                 raise ValueError('Invalid link URL')
         result.append(block)
@@ -345,8 +381,9 @@ def read_document(raw):
 
 
 def render_blocks(blocks):
-    """Add trusted video rendering metadata without storing derived attributes."""
+    """Prepare display values for blocks and their nested content."""
     return [dict(block, video=video_source(block['url'])) if block['type'] == 'video'
+            else dict(block, children=render_blocks(block['children'])) if block['type'] == 'section'
             else dict(block, html=clean_html(block['html'])) if block['type'] == 'legacy_html'
             else block for block in blocks]
 

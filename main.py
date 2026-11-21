@@ -530,15 +530,16 @@ def prepare_custom_blocks(blocks, lang):
     result = render_blocks(blocks)
     with get_db() as conn:
         cards = category_card_settings(get_site_settings(conn))
-        for index, block in enumerate(result):
-            if block['type'] != 'category':
-                continue
-            block = block.copy()
-            rows = fetch_posts(conn, block['category'], block['count']) if block['category'] else []
-            block['posts'] = [localize_post(post, lang) for post in rows]
-            block['post_tags'] = tags_by_post_ids(conn, [post['id'] for post in rows])
-            block['card_options'] = cards.get(block['category'], {})
-            result[index] = block
+        def prepare_categories(items):
+            for index, block in enumerate(items):
+                if block['type'] == 'section':
+                    prepare_categories(block['children'])
+                elif block['type'] == 'category':
+                    rows = fetch_posts(conn, block['category'], block['count']) if block['category'] else []
+                    items[index] = dict(block, posts=[localize_post(post, lang) for post in rows],
+                                        post_tags=tags_by_post_ids(conn, [post['id'] for post in rows]),
+                                        card_options=cards.get(block['category'], {}))
+        prepare_categories(result)
     return result
 
 

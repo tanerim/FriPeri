@@ -1,0 +1,21 @@
+{% macro section_art(pattern) %}
+<svg class="section-art" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 760" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+  {% if pattern == 'ribbons' %}
+  <path class="section-art-primary" opacity=".72" d="M870-140h240C890 30 1180 290 1550 290v240C1100 590 615 175 870-140Z"/>
+  <path class="section-art-secondary" opacity=".68" d="M1060-100h220c45 235 140 345 320 470v280C1235 465 1050 220 1060-100Z"/>
+  <path class="section-art-primary" opacity=".30" d="M-130 750C265 620 330 410 474 230 595 80 718 32 910-30h90C756 85 646 157 570 342 470 590 348 741 130 830h-260Z"/>
+  {% elif pattern == 'waves' %}
+  <path class="section-art-primary" opacity=".6" d="M0 500c275-140 330 145 645 66 303-76 420-239 795-81v275H0Z"/>
+  <path class="section-art-secondary" opacity=".68" d="M0 670c341 79 476-126 757-96 247 26 415 135 683 18v168H0Z"/>
+  {% elif pattern == 'grid' %}
+  <path class="section-art-primary-stroke" fill="none" opacity=".28" d="{% for y in range(60, 761, 80) %}M0 {{ y }}h1440 {% endfor %}{% for x in range(80, 1440, 80) %}M{{ x }} 0v760 {% endfor %}"/>
+  <path class="section-art-secondary" opacity=".16" d="M1440 0v540L820 0Z"/>
+  {% endif %}
+</svg>
+{% endmacro %}
+
+{% macro section_edge() %}
+<svg class="section-edge" viewBox="0 0 1440 80" preserveAspectRatio="none" aria-hidden="true">
+  <path d="M0 45C240 8 360 68 670 42S1190 14 1440 45V80H0Z"/>
+</svg>
+{% endmacro %}
