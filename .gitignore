@@ -1,5 +1,6 @@
 # Environment blocks
 .env
+.env.*
 !.env.example
 *.pem
 *.key
