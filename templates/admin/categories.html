@@ -31,9 +31,9 @@
               <div>{{ cat["sort_order"] }}</div>
               <div class="category-row-actions">
                 {% if can_delete_categories %}
-                {% if account_role == 'admin' %}<a class="settings-secondary" href="/admin/menu?edit_category={{ cat['id'] }}">
+                <a class="settings-secondary" href="/admin/categories/{{ cat['id'] }}/edit">
                   {{ t(lang, 'common.edit') }}
-                </a>{% endif %}
+                </a>
                 <form method="post" action="/admin/categories/{{ cat.id }}/delete" data-confirm="{{ t(lang, 'admin.delete_category_confirm') }}">
                   <input type="hidden" name="confirmed" value="1" />
                   <button type="submit" class="settings-danger">{{ t(lang, 'common.delete') }}</button>
