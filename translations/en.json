@@ -600,5 +600,6 @@
   "dashboard.wizard_text": "Your site is ready for its first content. Set up the homepage to get started.",
   "dashboard.wizard_action": "Configure homepage",
   "builder.section_add_placeholder": "Choose a block type…",
-  "builder.section_add_section": "Add section"
+  "builder.section_add_section": "Add section",
+  "admin.users": "Users"
 }
