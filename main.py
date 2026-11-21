@@ -1378,7 +1378,8 @@ def allowed_category(conn: sqlite3.Connection, account: dict, raw: str) -> bool:
 @app.middleware("http")
 async def enforce_roles(request: Request, call_next):
     """Apply authorization to every admin route, including upload/preview APIs."""
-    path = request.url.path
+    # Treat /admin/ and /admin/documentation/ like their canonical routes.
+    path = request.url.path.rstrip("/") or "/"
     if not (path == "/admin" or path.startswith("/admin/")):
         return await call_next(request)
     account = actor(request)
@@ -1396,6 +1397,10 @@ async def enforce_roles(request: Request, call_next):
         if allowed and match and role == "cc":
             with get_db() as conn:
                 allowed = can_write_post(conn, account, int(match.group(1)))
+    elif path == "/admin/users" and role == "editor":
+        allowed = method in ("GET", "HEAD")
+    elif role == "editor" and re.fullmatch(r"/admin/users/[0-9]{1,18}/categories", path):
+        allowed = method == "POST"
     elif path == "/admin/categories":
         allowed = method in ("GET", "HEAD", "POST")
     elif path.startswith("/admin/categories/"):
