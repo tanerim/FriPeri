@@ -1407,7 +1407,8 @@ async def enforce_roles(request: Request, call_next):
         allowed = role == "editor" and bool(
             re.fullmatch(r"/admin/categories/[0-9]{1,18}/(?:edit|delete)", path))
     elif role == "editor":
-        allowed = (path == "/admin/pages" or path.startswith("/admin/pages/")
+        # Preserve the dashboard/documentation permission granted above.
+        allowed = allowed or (path == "/admin/pages" or path.startswith("/admin/pages/")
                    or path == "/admin/about" or path.startswith("/admin/about/")
                    or path == "/admin/custom-home" or path.startswith("/admin/custom-home/")
                    or path == "/admin/section-svg"
