@@ -3077,6 +3077,24 @@ async def admin_users(request: Request) -> Response:
     username = require_user(request)
     if not username:
         return RedirectResponse("/login", status_code=303)
+    account = actor(request)
+    if account is None:
+        return RedirectResponse("/login", status_code=303)
+    if account["role"] == "editor":
+        with get_db() as conn:
+            creators = [dict(row) for row in conn.execute(
+                "SELECT id, username FROM users WHERE role='cc' ORDER BY username COLLATE NOCASE")]
+            categories = [dict(row) for row in conn.execute(
+                "SELECT id, name FROM categories ORDER BY name COLLATE NOCASE")]
+            for person in creators:
+                person["category_ids"] = [row[0] for row in conn.execute(
+                    "SELECT category_id FROM user_categories WHERE user_id=?", (person["id"],))]
+        return render_template(request, "admin/category_access.html", "Category access", {
+            "active_admin": "users", "creators": creators,
+            "categories": categories, "editor_token": custom_home_token(username),
+        }, username)
+    if account["role"] != "admin":
+        return Response("Forbidden", status_code=403)
     with get_db() as conn:
         people = [dict(row) for row in conn.execute(
             "SELECT id, username, role, created_at FROM users ORDER BY id")]
@@ -3135,6 +3153,37 @@ async def create_account(request: Request) -> Response:
         for cid in ids if role == "cc" else []:
             conn.execute("INSERT INTO user_categories (user_id, category_id) VALUES (?, ?)",
                          (cursor.lastrowid, cid))
+    return RedirectResponse("/admin/users", status_code=303)
+
+
+@app.post("/admin/users/{account_id:int}/categories")
+async def assign_creator_categories(account_id: int, request: Request) -> Response:
+    """Editor/admin may only change category grants of content creators."""
+    account = actor(request)
+    if account is None or account["role"] not in ("admin", "editor"):
+        return Response("Forbidden", status_code=403)
+    form = await request.form()
+    if not _user_admin_form_valid(request, form):
+        return Response("Forbidden", status_code=403)
+    with get_db() as conn:
+        conn.execute("BEGIN IMMEDIATE")
+        target = conn.execute("SELECT role FROM users WHERE id=?", (account_id,)).fetchone()
+        if target is None:
+            return Response(status_code=404)
+        if target["role"] != "cc":
+            return Response("Category grants can only be assigned to content creators", status_code=403)
+        category_ids = _selected_categories(conn, form)
+        if category_ids is None:
+            return Response("Invalid category selection", status_code=400)
+        existing = {row[0] for row in conn.execute(
+            "SELECT category_id FROM user_categories WHERE user_id=?", (account_id,))}
+        if existing != set(category_ids):
+            conn.execute("DELETE FROM user_categories WHERE user_id=?", (account_id,))
+            conn.executemany(
+                "INSERT INTO user_categories (user_id, category_id) VALUES (?, ?)",
+                [(account_id, category_id) for category_id in category_ids])
+            conn.execute("UPDATE users SET session_epoch=? WHERE id=?",
+                         (time.time_ns(), account_id))
     return RedirectResponse("/admin/users", status_code=303)
 
 
