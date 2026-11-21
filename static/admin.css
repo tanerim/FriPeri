@@ -690,3 +690,33 @@
 .hyperui-admin .admin-sidebar-footer .admin-current-user{display:flex;flex-direction:column;gap:3px;min-width:0}
 .hyperui-admin .admin-sidebar-footer .admin-current-user strong{display:block;max-width:148px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px;font-weight:650;color:#e2eaf8}
 .hyperui-admin .admin-sidebar-footer .admin-current-user small{display:block;font-size:10px;color:#a9bad5}
+
+/* Two distinct lines for the signed-in identity, regardless of other footer styles. */
+.hyperui-admin .admin-sidebar-footer .admin-current-user {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  flex-wrap: nowrap;
+  gap: 4px;
+  min-width: 0;
+  max-width: 65%;
+}
+.hyperui-admin .admin-sidebar-footer .admin-current-username,
+.hyperui-admin .admin-sidebar-footer .admin-current-role {
+  display: block;
+  width: 100%;
+  line-height: 1.25;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.hyperui-admin .admin-sidebar-footer .admin-current-username {
+  color: #e2eaf8;
+  font-size: 12px;
+  font-weight: 650;
+}
+.hyperui-admin .admin-sidebar-footer .admin-current-role {
+  color: #a9bad5;
+  font-size: 11px;
+}
