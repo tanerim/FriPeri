@@ -512,5 +512,8 @@
   "categories.edit_description": "Description",
   "categories.edit_secondary_label": "Libellé dans la deuxième langue",
   "categories.edit_secondary_description": "Description dans la deuxième langue",
-  "categories.edit_save": "Enregistrer la catégorie"
+  "categories.edit_save": "Enregistrer la catégorie",
+  "users.select_category": "Choisir une catégorie autorisée",
+  "users.create_help": "Créez des comptes et attribuez les autorisations de contenu.",
+  "users.manage_help": "Sélectionnez un compte pour modifier les droits ou le mot de passe."
 }
