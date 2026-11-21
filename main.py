@@ -2595,7 +2595,9 @@ async def save_custom_home(request: Request) -> Response:
         elif form.get('homepage_mode') == 'custom':
             if 'custom_home_en' not in updates:
                 return JSONResponse({'error': t(pick_lang(request), 'builder.invalid')}, status_code=400)
-            updates['homepage_mode'] = 'custom'
+            # Editors can modify the content, but only admins change the site mode.
+            if actor(request)['role'] == 'admin':
+                updates['homepage_mode'] = 'custom'
         set_site_settings(conn, updates)
     return JSONResponse({'message': t(pick_lang(request), 'builder.about_saved' if builder_page(request) == 'about' else 'builder.saved')})
 
