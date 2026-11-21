@@ -1362,10 +1362,11 @@ def can_write_post(conn: sqlite3.Connection, account: dict, post_id: int) -> boo
 
 
 def allowed_category(conn: sqlite3.Connection, account: dict, raw: str) -> bool:
+    category_id_valid = bool(re.fullmatch(r"[0-9]{1,18}", raw))
     if account["role"] != "cc":
-        return not raw or (raw.isdigit() and conn.execute(
+        return not raw or (category_id_valid and conn.execute(
             "SELECT 1 FROM categories WHERE id=?", (int(raw),)).fetchone() is not None)
-    return bool(raw.isdigit() and conn.execute(
+    return bool(category_id_valid and conn.execute(
         "SELECT 1 FROM user_categories WHERE user_id=? AND category_id=?",
         (account["id"], int(raw))).fetchone())
 
@@ -1387,7 +1388,7 @@ async def enforce_roles(request: Request, call_next):
     if path.startswith("/admin/posts"):
         allowed = method in ("GET", "HEAD", "POST") and not (
             role == "cc" and path.endswith("/delete"))
-        match = re.fullmatch(r"/admin/posts/(\d+)/(?:edit(?:/preview|/upload)?|delete)", path)
+        match = re.fullmatch(r"/admin/posts/([0-9]{1,18})/(?:edit(?:/preview|/upload)?|delete)", path)
         if allowed and match and role == "cc":
             with get_db() as conn:
                 allowed = can_write_post(conn, account, int(match.group(1)))
@@ -1395,7 +1396,7 @@ async def enforce_roles(request: Request, call_next):
         allowed = method in ("GET", "HEAD", "POST")
     elif path.startswith("/admin/categories/"):
         allowed = role == "editor" and bool(
-            re.fullmatch(r"/admin/categories/\d+/(?:edit|delete)", path))
+            re.fullmatch(r"/admin/categories/[0-9]{1,18}/(?:edit|delete)", path))
     elif role == "editor":
         allowed = (path == "/admin/pages" or path.startswith("/admin/pages/")
                    or path == "/admin/about" or path.startswith("/admin/about/")
@@ -3090,7 +3091,7 @@ def _user_admin_form_valid(request: Request, form: Any) -> bool:
 
 def _selected_categories(conn: sqlite3.Connection, form: Any) -> list[int] | None:
     raw = form.getlist("categories") if hasattr(form, "getlist") else []
-    if any(not re.fullmatch(r"[0-9]+", str(value)) for value in raw):
+    if any(not re.fullmatch(r"[0-9]{1,18}", str(value)) for value in raw):
         return None
     ids = sorted(set(int(value) for value in raw))
     if ids:
