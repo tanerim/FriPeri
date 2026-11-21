@@ -22,7 +22,7 @@
     <aside class="admin-sidebar" id="admin-sidebar">
       <div class="admin-sidebar-header"><a class="admin-brand" href="/admin"><img class="admin-brand-logo" src="{{ static_url('images/FriPeri_Logo.png') }}" alt="FriPeri"></a><button type="button" class="admin-sidebar-toggle" aria-label="Collapse sidebar" aria-controls="admin-sidebar" aria-expanded="true" title="Collapse sidebar">{{ icon('chevron-left') }}</button></div>
       {% include 'admin/partials/admin_nav.html' %}
-      <div class="admin-sidebar-footer"><span class="admin-current-user"><strong>{{ user }}</strong><small>{{ t(lang, 'users.role_admin' if account_role == 'admin' else ('users.role_editor' if account_role == 'editor' else 'users.role_cc')) }}</small></span><a href="/logout">{{ t(lang, 'nav.logout') }} ↗</a></div>
+      <div class="admin-sidebar-footer"><div class="admin-current-user"><span class="admin-current-username">{{ user }}</span><span class="admin-current-role">{{ t(lang, 'users.role_admin' if account_role == 'admin' else ('users.role_editor' if account_role == 'editor' else 'users.role_cc')) }}</span></div><a href="/logout">{{ t(lang, 'nav.logout') }} ↗</a></div>
     </aside>
     {% endif %}
     <div class="admin-shell">
