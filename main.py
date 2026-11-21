@@ -5,6 +5,7 @@ import hmac
 import html
 import io
 import json
+import logging
 import os
 import re
 import secrets
@@ -1968,7 +1969,8 @@ def settings_form_token(request: Request, user: str) -> str:
     return hmac.new(_csrf_secret(user).encode(), f"settings:{session}".encode(), hashlib.sha256).hexdigest()
 
 
-def settings_response(request, user, settings, *, error="", status_code=200, sitemap_origin=None):
+def settings_response(request, user, settings, *, error="", status_code=200,
+                      sitemap_origin=None, sitemap_error=""):
     lang = pick_lang(request)
     return render_template(
         request,
@@ -1985,6 +1987,7 @@ def settings_response(request, user, settings, *, error="", status_code=200, sit
             "sitemap_origin": str(request.base_url).rstrip("/") if sitemap_origin is None else sitemap_origin,
             "sitemap_exists": SITEMAP_PATH.is_file(),
             "sitemap_generated": request.query_params.get("sitemap") == "generated",
+            "sitemap_error": sitemap_error,
         },
         user,
         status_code=status_code,
@@ -2062,7 +2065,7 @@ async def generate_sitemap(request: Request) -> Response:
         settings = get_site_settings(conn)
         if not valid_url(origin) or not re.fullmatch(r"https?://[^/?#@]+", origin, re.IGNORECASE):
             return settings_response(request, user, settings, sitemap_origin=origin,
-                                     error=t(pick_lang(request), "sitemap.invalid_origin"), status_code=400)
+                                     sitemap_error=t(pick_lang(request), "sitemap.invalid_origin"), status_code=400)
         paths = ["/", "/about", "/contact"]
         for prefix, query in (
             ("category", "SELECT slug FROM categories ORDER BY slug"),
@@ -2078,17 +2081,25 @@ async def generate_sitemap(request: Request) -> Response:
     xml = ET.tostring(urlset, encoding="utf-8", xml_declaration=True)
     if len(paths) > 50_000 or len(xml) > 52_428_800:
         return settings_response(request, user, settings, sitemap_origin=origin,
-                                 error=t(pick_lang(request), "sitemap.too_large"), status_code=400)
+                                 sitemap_error=t(pick_lang(request), "sitemap.too_large"), status_code=400)
 
     temporary_path = None
     try:
         with tempfile.NamedTemporaryFile(dir=STATIC_DIR, prefix=".sitemap-", delete=False) as output:
             temporary_path = Path(output.name)
             output.write(xml)
+        temporary_path.chmod(0o644)
         temporary_path.replace(SITEMAP_PATH)
+    except OSError:
+        logging.getLogger(__name__).exception("Could not write sitemap to %s", SITEMAP_PATH)
+        return settings_response(request, user, settings, sitemap_origin=origin,
+                                 sitemap_error=t(pick_lang(request), "sitemap.write_error"), status_code=500)
     finally:
         if temporary_path:
-            temporary_path.unlink(missing_ok=True)
+            try:
+                temporary_path.unlink(missing_ok=True)
+            except OSError:
+                logging.getLogger(__name__).exception("Could not remove temporary sitemap %s", temporary_path)
     return RedirectResponse("/admin/settings?sitemap=generated#sitemap", status_code=303)
 
 

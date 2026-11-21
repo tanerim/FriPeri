@@ -101,6 +101,7 @@
         <p>{{ t(lang, 'sitemap.help') }}</p>
       </header>
       {% if sitemap_generated %}<p class="notice" role="status">{{ t(lang, 'sitemap.generated') }}</p>{% endif %}
+      {% if sitemap_error %}<p class="error" role="alert">{{ sitemap_error }}</p>{% endif %}
       <div class="settings-grid-v3">
         <label>
           <span>{{ t(lang, 'sitemap.origin') }}</span>

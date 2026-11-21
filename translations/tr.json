@@ -1,4 +1,5 @@
 {
+  "sitemap.write_error": "Site haritası kaydedilemedi. Uygulamayı çalıştıran kullanıcının static dizinine yazma iznini ve sunucu günlüklerini kontrol edin.",
   "admin.head_snippet": "Sayfa başlığı kodu (<head>)",
   "admin.head_snippet_help": "Google Search Console doğrulama etiketi veya reklam ve analiz kodu gibi güvendiğiniz HTML kodlarını yapıştırın. Alanı boş kaydederek kodu kaldırabilirsiniz.",
   "sitemap.title": "Site haritası",

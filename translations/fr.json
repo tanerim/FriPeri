@@ -1,4 +1,5 @@
 {
+  "sitemap.write_error": "Le plan du site n’a pas pu être enregistré. Vérifiez les journaux du serveur et les droits d’écriture du compte de l’application sur le dossier static.",
   "admin.head_snippet": "Code de l’en-tête (<head>)",
   "admin.head_snippet_help": "Collez du HTML de confiance, par exemple une balise de validation Google Search Console ou un script publicitaire ou de mesure d’audience. Enregistrez le champ vide pour supprimer le code.",
   "sitemap.title": "Plan du site",
