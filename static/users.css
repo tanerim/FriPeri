@@ -1,0 +1,48 @@
+/* Users and permissions: compact directory without oversized repeated forms. */
+.users-workspace .admin-settings-container{max-width:1180px}
+.users-workspace .users-heading{display:flex;justify-content:space-between;align-items:center}
+.users-workspace .users-total{color:#55637a;font-size:12px;background:#e8edf8;border:1px solid #dce4f1;padding:7px 12px;border-radius:999px;white-space:nowrap}
+.users-workspace .users-create-panel{margin-bottom:20px}
+.users-workspace .users-panel-heading{margin-bottom:18px}
+.users-workspace .users-panel-heading h2{font-size:17px}
+.users-workspace .users-panel-heading p{margin:5px 0 0;color:#68768c;font-size:12px}
+.users-workspace .users-create-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr) minmax(180px,.8fr);gap:14px}
+.users-workspace .users-edit-grid{grid-template-columns:repeat(2,minmax(0,1fr));max-width:840px}
+.users-workspace .users-field{min-width:0;display:flex;flex-direction:column;gap:7px;color:#344762;font-size:12px;font-weight:600}
+.users-workspace .users-field :is(input,select){width:100%;min-width:0;height:42px;border:1px solid #d5deec;border-radius:8px;background:#fff;color:#263750;padding:8px 11px;font-size:13px}
+.users-workspace .users-field :is(input,select):focus-visible{outline:2px solid #8e89ef;outline-offset:1px}
+.users-workspace .users-permissions{min-width:0;margin:16px 0 12px;padding:11px 14px 14px;border:1px solid #dce3ef;border-radius:9px;background:#f9fbff}
+.users-workspace .users-permissions legend{padding:0 6px;font-size:12px;font-weight:650;color:#455774}
+.users-workspace .users-category-options{display:flex;flex-wrap:wrap;gap:8px}
+.users-workspace .users-category-choice{display:inline-flex;align-items:center;gap:8px;border:1px solid #dbe4ef;padding:7px 11px;border-radius:8px;background:#fff;font-size:12px;font-weight:550;color:#364965;cursor:pointer}
+.users-workspace .users-category-choice:has(input:checked){background:#eeefff;border-color:#a7a5f0}
+.users-workspace .users-category-choice input{accent-color:#5147ca}
+.users-workspace [data-creator-grants][hidden]{display:none!important}
+.users-workspace .users-form-actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:14px}
+.users-workspace .users-account-list{border:1px solid #e0e6f0;border-radius:10px;overflow:hidden}
+.users-workspace .users-account{border-bottom:1px solid #e4eaf2;background:#fff}
+.users-workspace .users-account:last-child{border-bottom:0}
+.users-workspace .users-account[open]{background:#fcfdff}
+.users-workspace .users-account-summary{display:flex;align-items:center;gap:14px;min-height:68px;padding:12px 17px;cursor:pointer;list-style:none}
+.users-workspace .users-account-summary::-webkit-details-marker{display:none}
+.users-workspace .users-account-summary:hover{background:#f7f9fe}
+.users-workspace .users-account-summary:focus-visible{outline:2px solid #7771da;outline-offset:-3px}
+.users-workspace .users-account-avatar{flex:none;width:37px;height:37px;display:grid;place-items:center;border-radius:10px;background:#e8eafd;color:#4338b6;font-size:17px;font-weight:700}
+.users-workspace .users-account-name{display:flex;flex-direction:column;gap:3px;min-width:120px}
+.users-workspace .users-account-name strong{font-size:13px;color:#26334b;overflow-wrap:anywhere}
+.users-workspace .users-account-name small{font-size:11px;color:#8995a6}
+.users-workspace .users-role-tag{display:inline-flex;align-items:center;padding:5px 9px;border-radius:999px;font-size:11px;font-weight:700;background:#ecf0fa;color:#4d5574;white-space:nowrap}
+.users-workspace .users-role-admin{background:#ede9fe;color:#603eb1}
+.users-workspace .users-role-editor{background:#e6f6f2;color:#226f65}
+.users-workspace .users-role-cc{background:#edf3ff;color:#3d63aa}
+.users-workspace .users-grant-count{color:#6b7990;font-size:11px}
+.users-workspace .users-summary-action{margin-left:auto;font-size:12px;color:#5145c9;font-weight:650}
+.users-workspace .users-summary-action:after{content:"⌄";display:inline-block;margin-left:9px;transition:transform .15s}
+.users-workspace .users-account[open] .users-summary-action:after{transform:rotate(180deg)}
+.users-workspace .users-account-editor{padding:17px 20px 20px;border-top:1px solid #e7edf5}
+.users-workspace .users-delete{margin-left:auto}
+.admin-sidebar-footer .admin-current-user{display:flex;flex-direction:column;gap:3px;min-width:0}
+.admin-sidebar-footer .admin-current-user strong{font-size:12px;font-weight:650;color:#e2eaf8;max-width:125px;text-overflow:ellipsis;overflow:hidden;white-space:nowrap}
+.admin-sidebar-footer .admin-current-user small{font-size:10px;color:#a9bad5}
+@media(max-width:1050px){.users-workspace .users-create-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:680px){.users-workspace .users-create-grid,.users-workspace .users-edit-grid{grid-template-columns:1fr}.users-workspace .users-account-summary{flex-wrap:wrap;gap:8px 12px}.users-workspace .users-account-name{min-width:0}.users-workspace .users-grant-count{display:none}.users-workspace .users-delete{margin-left:0}}
