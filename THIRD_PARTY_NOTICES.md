@@ -56,6 +56,8 @@ The following **direct pinned requirements** are declared in [requirements.txt](
 | watchfiles | 1.2.0 | [PyPI](https://pypi.org/project/watchfiles/) |
 | websockets | 17.1 | [PyPI](https://pypi.org/project/websockets/) |
 
+**Environment-only license notice:** [packageurl-python 0.17.6](https://pypi.org/project/packageurl-python/0.17.6/) is MIT licensed (copyright the purl authors). Its installed distribution reports MIT but does not expose a separate license file in our local audit. We preserve the versioned upstream copyright and full MIT terms in [licenses/packageurl-python-MIT.txt](licenses/packageurl-python-MIT.txt). This package is part of the Python tooling environment rather than a direct FriPeri runtime requirement.
+
 Developer-only requirements include `httpx` (defined in [requirements-dev.txt](requirements-dev.txt)) and any dependencies it resolves. Browser binaries installed via `python -m playwright install` also have their own notices (Chromium and Firefox have separate licenses) and are **not included in this Git repository**.
 
 For a fresh, current list of licenses and notices **actually installed** in an environment, run:
@@ -80,7 +82,7 @@ FriPeri supports media uploads, links, optional iframe embeds (YouTube/Vimeo), a
 
 ## Release checklist
 
-1. Retain `LICENSE`, `licenses/HyperUI-MIT.txt`, `licenses/TailwindCSS-MIT.txt`, and this file in every source distribution.
+1. Retain `LICENSE`, `licenses/HyperUI-MIT.txt`, `licenses/TailwindCSS-MIT.txt`, `licenses/packageurl-python-MIT.txt`, and this file in every source distribution.
 2. Run the installed-dependency audit, inspect third-party package metadata and license files, and resolve unknown/missing entries before distributing a bundled runtime.
 3. If shipping Playwright browsers, system fonts, native binaries or other bundled dependencies, include their own applicable license notices.
 4. Confirm the provenance of inline SVG icons and any other newly introduced images; add notices if an external source is identified. FriPeri logo ownership has been confirmed by the project owner.
