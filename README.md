@@ -76,6 +76,12 @@ cd friperi
 
 If you downloaded an archive, extract it and open a terminal in the directory containing `main.py` and `requirements.txt`.
 
+For a specific website design you can colen repository with site name
+```bash
+git clone https://github.com/tanerim/friperi.git MyWebSite
+cd MyWebSite
+```
+
 ### 2. Create a virtual environment
 
 ```bash
