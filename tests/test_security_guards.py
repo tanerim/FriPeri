@@ -38,6 +38,9 @@ def test_login_throttle_and_account_reset():
     for _ in range(limiter.MAX_FAILURES):
         limiter.failed("192.0.2.1", "admin")
     assert limiter.blocked("192.0.2.1", "admin")
+    assert not limiter.blocked("192.0.2.2", "admin")
+    for n in range(limiter.MAX_ACCOUNT_FAILURES - limiter.MAX_FAILURES):
+        limiter.failed(f"198.51.100.{n}", "admin")
     assert limiter.blocked("192.0.2.2", "admin")
     assert limiter.blocked("192.0.2.1", "other")
     limiter.succeeded("192.0.2.1", "admin")
