@@ -1,55 +1,106 @@
 {% extends "admin/base.html" %}
+{% block extra_head %}
+<link rel="stylesheet" href="{{ static_url('users.css') }}">
+<script src="{{ static_url('users.js') }}" defer></script>
+{% endblock %}
 {% block content %}
-<main id="admin-content" class="admin-settings-page" tabindex="-1">
- <div class="admin-settings-container">
-  <header class="settings-page-header">
-   <div><h1>{{ t(lang, 'users.title') }}</h1><p>{{ t(lang, 'users.intro') }}</p></div>
-  </header>
-  <section class="admin-card" style="margin-bottom:24px">
-   <h2>{{ t(lang, 'users.create_title') }}</h2>
-   <form action="/admin/users" method="post" class="settings-form-v3">
-    <input type="hidden" name="editor_token" value="{{ editor_token }}">
-    <div class="settings-grid-v3">
-     <label><span>{{ t(lang, 'users.username') }}</span><input name="username" required minlength="3" maxlength="64" pattern="[A-Za-z0-9_.-]+" autocomplete="off"></label>
-     <label><span>{{ t(lang, 'users.initial_password') }}</span><input name="password" type="password" minlength="8" required autocomplete="new-password"></label>
-     <label><span>{{ t(lang, 'users.role') }}</span><select name="role" required><option value="cc">{{ t(lang, 'users.role_cc') }}</option><option value="editor">{{ t(lang, 'users.role_editor') }}</option><option value="admin">{{ t(lang, 'users.role_admin') }}</option></select></label>
-    </div>
-    <fieldset style="border:1px solid #dbe2e9;border-radius:9px;padding:14px;margin:16px 0">
-     <legend>{{ t(lang, 'users.categories') }}</legend>
-     {% for cat in categories %}
-     <label style="display:inline-flex;align-items:center;gap:6px;margin:6px 18px 6px 0"><input type="checkbox" name="categories" value="{{ cat.id }}"> {{ cat.name }}</label>
-     {% else %}<span>{{ t(lang, 'users.no_categories') }}</span>{% endfor %}
-    </fieldset>
-    <button class="settings-primary" type="submit">{{ t(lang, 'users.create') }}</button>
-   </form>
-  </section>
-  <section class="admin-card">
-   <h2>{{ t(lang, 'users.existing') }}</h2>
-   {% for person in accounts %}
-   <form method="post" action="/admin/users/{{ person.id }}" class="settings-form-v3" style="border-top:1px solid #dbe2e9;padding:20px 0">
-    <input type="hidden" name="editor_token" value="{{ editor_token }}">
-    <h3>{{ person.username }} <small style="font-weight:normal">#{{ person.id }}</small></h3>
-    <div class="settings-grid-v3">
-     <label><span>{{ t(lang, 'users.role') }}</span><select name="role">
-      <option value="cc" {% if person.role == 'cc' %}selected{% endif %}>{{ t(lang, 'users.role_cc') }}</option>
-      <option value="editor" {% if person.role == 'editor' %}selected{% endif %}>{{ t(lang, 'users.role_editor') }}</option>
-      <option value="admin" {% if person.role == 'admin' %}selected{% endif %}>{{ t(lang, 'users.role_admin') }}</option>
-     </select></label>
-     <label><span>{{ t(lang, 'users.new_password') }}</span><input type="password" name="password" minlength="8" autocomplete="new-password"></label>
-    </div>
-    <fieldset style="border:1px solid #dbe2e9;border-radius:9px;padding:12px;margin:14px 0">
-     <legend>{{ t(lang, 'users.categories') }}</legend>
-     {% for cat in categories %}
-     <label style="display:inline-flex;align-items:center;gap:6px;margin:6px 18px 6px 0"><input type="checkbox" name="categories" value="{{ cat.id }}" {% if cat.id in person.category_ids %}checked{% endif %}> {{ cat.name }}</label>
-     {% endfor %}
-    </fieldset>
-    <button class="settings-primary" type="submit">{{ t(lang, 'users.save') }}</button>
-    {% if person.username != user %}
-    <button class="settings-danger" type="submit" formaction="/admin/users/{{ person.id }}/delete" onclick='return confirm({{ t(lang, "users.confirm_delete")|tojson }})'>{{ t(lang, 'users.delete') }}</button>
-    {% endif %}
-   </form>
-   {% else %}<p>{{ t(lang, 'users.empty') }}</p>{% endfor %}
-  </section>
- </div>
+<main id="admin-content" class="admin-settings-page users-workspace" tabindex="-1">
+  <div class="admin-settings-container">
+    <header class="settings-page-header users-heading">
+      <div>
+        <h1>{{ t(lang, 'users.title') }}</h1>
+        <p>{{ t(lang, 'users.intro') }}</p>
+      </div>
+      <span class="users-total">{{ accounts|length }} {{ t(lang, 'users.existing')|lower }}</span>
+    </header>
+
+    <section class="admin-card users-create-panel">
+      <div class="users-panel-heading">
+        <div><h2>{{ t(lang, 'users.create_title') }}</h2>
+        <p>{{ t(lang, 'users.create_help') }}</p></div>
+      </div>
+      <form action="/admin/users" method="post" class="users-form">
+        <input type="hidden" name="editor_token" value="{{ editor_token }}">
+        <div class="users-create-grid">
+          <label class="users-field"><span>{{ t(lang, 'users.username') }}</span>
+            <input name="username" required minlength="3" maxlength="64" pattern="[A-Za-z0-9_.-]+" autocomplete="off" placeholder="username">
+          </label>
+          <label class="users-field"><span>{{ t(lang, 'users.initial_password') }}</span>
+            <input name="password" type="password" minlength="8" required autocomplete="new-password" placeholder="••••••••">
+          </label>
+          <label class="users-field"><span>{{ t(lang, 'users.role') }}</span>
+            <select name="role" required data-user-role>
+              <option value="cc">{{ t(lang, 'users.role_cc') }}</option>
+              <option value="editor">{{ t(lang, 'users.role_editor') }}</option>
+              <option value="admin">{{ t(lang, 'users.role_admin') }}</option>
+            </select>
+          </label>
+        </div>
+        <fieldset class="users-permissions" data-creator-grants>
+          <legend>{{ t(lang, 'users.categories') }}</legend>
+          <div class="users-category-options">
+            {% for cat in categories %}
+            <label class="users-category-choice"><input type="checkbox" name="categories" value="{{ cat.id }}"><span>{{ cat.name }}</span></label>
+            {% else %}
+            <span class="users-help">{{ t(lang, 'users.no_categories') }}</span>
+            {% endfor %}
+          </div>
+        </fieldset>
+        <div class="users-form-actions"><button class="settings-primary" type="submit">{{ t(lang, 'users.create') }}</button></div>
+      </form>
+    </section>
+
+    <section class="admin-card users-list-panel">
+      <div class="users-panel-heading">
+        <div><h2>{{ t(lang, 'users.existing') }}</h2><p>{{ t(lang, 'users.manage_help') }}</p></div>
+      </div>
+      <div class="users-account-list">
+        {% for person in accounts %}
+        <details class="users-account" {% if active_user_id is defined and active_user_id == person.id %}open{% endif %}>
+          <summary class="users-account-summary">
+            <span class="users-account-avatar" aria-hidden="true">{{ person.username[:1]|upper }}</span>
+            <span class="users-account-name"><strong>{{ person.username }}</strong><small>#{{ person.id }}</small></span>
+            <span class="users-role-tag users-role-{{ person.role }}">{{ t(lang, 'users.role_admin' if person.role == 'admin' else ('users.role_editor' if person.role == 'editor' else 'users.role_cc')) }}</span>
+            {% if person.role == 'cc' %}<span class="users-grant-count">{{ person.category_ids|length }} {{ t(lang, 'users.categories')|lower }}</span>{% endif %}
+            <span class="users-summary-action">{{ t(lang, 'common.edit') }}</span>
+          </summary>
+          <div class="users-account-editor">
+            <form method="post" action="/admin/users/{{ person.id }}" class="users-form">
+              <input type="hidden" name="editor_token" value="{{ editor_token }}">
+              <div class="users-create-grid users-edit-grid">
+                <label class="users-field"><span>{{ t(lang, 'users.role') }}</span>
+                  <select name="role" data-user-role {% if person.username == user %}data-current-user="true"{% endif %}>
+                    <option value="cc" {% if person.role == 'cc' %}selected{% endif %}>{{ t(lang, 'users.role_cc') }}</option>
+                    <option value="editor" {% if person.role == 'editor' %}selected{% endif %}>{{ t(lang, 'users.role_editor') }}</option>
+                    <option value="admin" {% if person.role == 'admin' %}selected{% endif %}>{{ t(lang, 'users.role_admin') }}</option>
+                  </select>
+                </label>
+                <label class="users-field"><span>{{ t(lang, 'users.new_password') }}</span>
+                  <input type="password" name="password" minlength="8" autocomplete="new-password" placeholder="••••••••">
+                </label>
+              </div>
+              <fieldset class="users-permissions" data-creator-grants>
+                <legend>{{ t(lang, 'users.categories') }}</legend>
+                <div class="users-category-options">
+                  {% for cat in categories %}
+                  <label class="users-category-choice"><input type="checkbox" name="categories" value="{{ cat.id }}" {% if cat.id in person.category_ids %}checked{% endif %}><span>{{ cat.name }}</span></label>
+                  {% else %}<span class="users-help">{{ t(lang, 'users.no_categories') }}</span>{% endfor %}
+                </div>
+              </fieldset>
+              <div class="users-form-actions">
+                <button class="settings-primary" type="submit">{{ t(lang, 'users.save') }}</button>
+                {% if person.username != user %}
+                <button class="settings-danger users-delete" type="submit" formaction="/admin/users/{{ person.id }}/delete" formnovalidate onclick='return confirm({{ t(lang, "users.confirm_delete")|tojson }})'>{{ t(lang, 'users.delete') }}</button>
+                {% endif %}
+              </div>
+            </form>
+          </div>
+        </details>
+        {% else %}
+        <p class="users-help">{{ t(lang, 'users.empty') }}</p>
+        {% endfor %}
+      </div>
+    </section>
+  </div>
 </main>
 {% endblock %}
