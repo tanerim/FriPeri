@@ -629,5 +629,9 @@
   "categories.edit_save": "Save category",
   "users.select_category": "Choose an assigned category",
   "users.create_help": "Create accounts and grant content permissions.",
-  "users.manage_help": "Select an account to edit permissions or reset its password."
+  "users.manage_help": "Select an account to edit permissions or reset its password.",
+  "users.category_access_title": "Category access",
+  "users.category_access_help": "Assign categories to content creators. Account roles and passwords remain administrator-only.",
+  "users.grants_only_help": "Only category permissions can be changed here.",
+  "users.no_creators": "No content creator accounts yet."
 }
