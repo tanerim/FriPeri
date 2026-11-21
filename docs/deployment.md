@@ -49,15 +49,13 @@ Ensure proxy upload limits accommodate your intended image and video uploads, in
 
 Do not use Uvicorn's development `--reload` option for the service. If exposing `/health`, note that its response includes the configured database and upload paths.
 
-
----
-
-[Documentation index](index.md) · [Complete README](../README.md)
-
-
 ## Security hardening notes
 
 - Login failures are rate-limited per worker (eight attempts per IP or thirty per account within 15 minutes). **Multi-worker or multi-host production deployments must also apply a shared rate limit at the reverse proxy**, because the in-process limiter cannot coordinate between instances. Configure forwarded client IPs only through trusted proxies.
 - Browser-origin checks cover state-changing admin requests. Preserve the original Host header through TLS termination; cross-site and sibling-domain admin form submissions are rejected. Browser-based backup forms also include session-bound tokens.
 - Enforce HTTPS, keep `SESSION_COOKIE_SECURE=true`, and protect uninitialized instances from public access. Do not expose backup archives or runtime databases via the static web root.
 - For restores, stop concurrent writes and use a maintenance window. The restored `.env` requires a restart and session credentials may change.
+
+---
+
+[Documentation index](index.md) · [Project README](../README.md)
