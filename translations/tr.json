@@ -111,7 +111,7 @@
   "menu.custom_pages": "Özel sayfalar",
   "menu.pages_help": "Sayfaların üst menüsünü, sırasını ve görünürlüğünü seçin. Yalnızca yayınlanmış sayfalar görünür. Gizlenen grupların alt öğeleri de gizlenir; silinen grubun alt öğeleri ana seviyeye taşınır.",
   "menu.hierarchy_error": "Menü adlarını, adreslerini ve sıralarını kontrol edin. Bir öğe kendi altına taşınamaz; en fazla beş seviye kullanın.",
-  "admin.pages": "Custom Page",
+  "admin.pages": "Sayfalar",
   "pages.intro": "Görsel sayfa oluşturucuyla bağımsız sayfalar oluşturun.",
   "pages.new": "Yeni sayfa",
   "pages.title": "Sayfa başlığı",
@@ -389,7 +389,6 @@
   "crop.help": "Görseli sürükleyerek veya kaydırıcılarla kadrajı ayarlayın. Uygulamadan önce döndürebilir, çevirebilir veya sıfırlayabilirsiniz.",
   "crop.error": "Görsel açılamadı veya kırpılamadı. PNG, JPEG veya WebP deneyin.",
   "admin.about_page": "Hakkında Sayfası",
-  "admin.pages": "Sayfalar",
   "admin.pages_copy": "Navigasyon menüsünde hangi statik sayfaların görüneceğini kontrol edin.",
   "admin.show_about": "\"About\"ı menüde göster",
   "admin.social_links_title": "Sosyal Bağlantılar",
@@ -517,5 +516,9 @@
   "builder.reset_appearance": "Görünümü sıfırla",
   "builder.reset_cell": "Hücre renklerini sıfırla",
   "builder.cell_select_help": "Renklerini değiştirmek için bir hücre seçin.",
-  "builder.selected_cell": "Seçili hücre (satır / sütun)"
+  "builder.selected_cell": "Seçili hücre (satır / sütun)",
+  "admin.documentation": "Belgelendirme",
+  "admin.documentation_help": "docs dizinindeki proje belgelerini okuyun.",
+  "admin.documentation_contents": "İçindekiler",
+  "admin.documentation_empty": "Belgelendirme dosyası bulunamadı."
 }
