@@ -32,9 +32,9 @@ The navigation collapses on small screens. The admin interface uses its own colo
 4. Select a category, or leave the content uncategorized (editor/admin only). Content creators must choose an assigned category.
 5. Add optional tags separated by commas and an optional preview image.
 6. If a secondary language is configured, use the editor's language selector to add its title, excerpt, and blocks.
-7. Choose **Draft** or **Published**, then save using the corresponding action.
+7. Choose **Save as draft** to keep the post unpublished, or **Publish** to make it publicly available. The editor has separate buttons for these actions.
 
-Published content appears in its category and in relevant homepage lists. Drafts are excluded from public lists and are not accessible to anonymous visitors through their post URLs. A signed-in administrator can view draft detail pages.
+Published content appears in its category and in relevant homepage lists. Drafts are excluded from public lists and are not accessible to anonymous visitors through their post URLs. Administrators and editors can view draft detail pages; content creators can view only their own drafts.
 
 Each post receives a URL derived from its title, such as `/posts/my-first-post`. Open an existing item from the dashboard or content list to edit it. Deleting content removes the post; use a draft when you want to keep the content without publishing it.
 
