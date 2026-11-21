@@ -89,3 +89,28 @@ python -m pip_audit
 ```
 
 The first audit checks repository pins and resolved dependencies; the second examines the current Python environment. Preserve audit results in release notes. Avoid blanket suppression of findings.
+
+
+## November 21 audit remediation: repository pins
+
+The user's local `pip-audit -r requirements.txt` output reported **10 advisory rows for Starlette 0.49.3**, with fixes from 1.0.1 through 1.3.1 (some rows were duplicates). The full environment audit also reported **three advisory rows for setuptools 79.0.1**, in addition to the Starlette findings.
+
+In response, `requirements.txt` has been updated to:
+
+- `fastapi==0.165.0`
+- `starlette==1.10.0`
+
+FastAPI 0.165.0 declares `starlette>=1.6.0`, so the two constraints are compatible. Starlette 1.10.0 was available on PyPI before this update. Because the changes cross major Starlette versions, run the complete integration and browser suite before deploying.
+
+**Setuptools is not in FriPeri's runtime requirements.** The environment-level advisory is addressed separately by upgrading the virtual environment's `setuptools` to at least 84.1.0, preferably the verified available release `84.2.1`:
+
+```bash
+python -m pip install --upgrade 'setuptools==84.2.1'
+python -m pip install -r requirements-dev.txt
+python -m pip check
+python -m pytest -q tests/
+python -m pip_audit -r requirements.txt
+python -m pip_audit
+```
+
+A clean audit must be observed on the installed system. The code changes alone do not certify that the deployed environment is vulnerability-free.
