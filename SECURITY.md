@@ -35,3 +35,11 @@ The maintainer will assess the report and coordinate a fix or workaround. Respon
 This document describes a reporting route and safe-deployment recommendations. It is **not** a certification, penetration-test report or guarantee that the application is free of vulnerabilities. Third-party Python and JavaScript dependencies remain subject to upstream security advisories.
 
 See [installation and deployment](docs/installation.md), [maintenance](docs/maintenance.md) and [dependency security review](docs/dependency-security.md).
+
+
+## Additional implementation controls (2026-11-21)
+
+- Administrator login has per-process IP/account failed-attempt throttling. Add shared reverse-proxy rate limiting for multiple server workers.
+- Administrative mutation requests undergo browser same-origin checks; backup create/upload/restore forms also use session-bound CSRF tokens.
+- Backups use the SQLite backup API and strict ZIP validation with size limits. Archive files are owner-readable only. Plan restores within a maintenance window because database and uploaded files cannot be replaced as one atomic operation.
+- The runtime dependency versions were updated in `requirements.txt`; they still require validation with `pip check`, `pip-audit` and functional tests on the deployment system.
