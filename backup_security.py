@@ -39,7 +39,7 @@ def _allowed_member(name: str) -> bool:
     if "\\" in name or name.startswith("/") or "//" in name or name.endswith("/"):
         return False
     p = PurePosixPath(name)
-    if any(part in ("", ".", "..") for part in p.parts):
+    if any(part in ("", ".", "..") for part in name.split("/")):
         return False
     if name in {"db/site.db", "env/.env"}:
         return True
@@ -107,7 +107,10 @@ def create_backup(destination: Path, db_path: Path, static_dir: Path, upload_dir
     with tempfile.TemporaryDirectory(prefix=".backup-stage-", dir=destination.parent) as temp:
         snapshot = Path(temp) / "site.db"
         _sqlite_snapshot(db_path, snapshot)
-        with destination.open("xb") as output:
+        # Archives include .env and administrator hashes: create with owner-only permissions.
+        flags = os.O_WRONLY | os.O_CREAT | os.O_EXCL
+        fd = os.open(destination, flags, 0o600)
+        with os.fdopen(fd, "wb") as output:
             with zipfile.ZipFile(output, "w", zipfile.ZIP_DEFLATED, allowZip64=True) as zf:
                 zf.write(snapshot, "db/site.db")
                 for folder in (static_dir / "images", upload_dir):
