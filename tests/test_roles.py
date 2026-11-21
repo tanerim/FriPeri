@@ -91,7 +91,7 @@ def test_editor_can_manage_content_but_not_site_users(site):
     _as(client, "ed")
     assert client.get("/admin/pages").status_code == 200
     assert client.get("/admin/posts").status_code == 200
-    assert client.get("/admin/users").status_code == 403
+    assert client.get("/admin/users").status_code == 200
     assert client.get("/admin/backup").status_code == 403
     assert client.post("/admin/settings", data={}).status_code == 403
 
@@ -198,7 +198,7 @@ def test_editor_sign_in_lands_in_content_workspace(site):
     assert page.status_code == 200
     assert "another_editor" in page.text
     assert client.get("/admin/pages").status_code == 200
-    assert client.get("/admin/users").status_code == 403
+    assert client.get("/admin/users").status_code == 200
 
 
 def test_creator_publishes_to_category_just_created(site):
@@ -261,3 +261,72 @@ def test_creator_cannot_view_another_creator_draft(site):
     assert client.get(f"/posts/{slug}").status_code == 200
     _as(client, "draft_other")
     assert client.get(f"/posts/{slug}").status_code == 404
+
+
+def test_editor_dashboard_documentation_and_footer_identity(site):
+    client, db = site
+    _make_user(db, "the_editor", role="editor")
+    _as(client, "the_editor")
+    for url in ("/admin", "/admin/documentation"):
+        response = client.get(url)
+        assert response.status_code == 200, (url, response.text[:300])
+    # Trailing-slash requests must not fail with insufficient permissions.
+    for url in ("/admin/", "/admin/documentation/"):
+        response = client.get(url)
+        assert response.status_code in (200, 307, 308), (url, response.status_code)
+    page = client.get("/admin")
+    assert 'class="admin-current-username">the_editor</span>' in page.text
+    assert 'class="admin-current-role">Editor</span>' in page.text
+
+
+def test_editor_can_assign_categories_to_cc_only(site):
+    client, db = site
+    with sqlite3.connect(db) as conn:
+        cats = [row[0] for row in conn.execute("SELECT id FROM categories ORDER BY id LIMIT 2")]
+        admin_id = conn.execute("SELECT id FROM users WHERE role='admin' LIMIT 1").fetchone()[0]
+    assert len(cats) == 2
+    cc_id = _make_user(db, "writer_grants", categories=[cats[0]])
+    ed_id = _make_user(db, "grant_editor", role="editor")
+    _as(client, "grant_editor")
+    page = client.get("/admin/users")
+    assert page.status_code == 200
+    assert "writer_grants" in page.text
+    assert "grant_editor" not in page.text.split("users-account-list", 1)[-1]
+    assert 'name="role"' not in page.text
+    assert 'name="password"' not in page.text
+    token = main.custom_home_token("grant_editor")
+    response = client.post(f"/admin/users/{cc_id}/categories", data={
+        "editor_token": token, "categories": str(cats[1]),
+    })
+    assert response.status_code == 303, response.text[:300]
+    with sqlite3.connect(db) as conn:
+        ids = [row[0] for row in conn.execute(
+            "SELECT category_id FROM user_categories WHERE user_id=?", (cc_id,))]
+    assert ids == [cats[1]]
+    assert client.post(f"/admin/users/{admin_id}/categories", data={
+        "editor_token": token, "categories": str(cats[0]),
+    }).status_code == 403
+    assert client.post(f"/admin/users/{ed_id}/categories", data={
+        "editor_token": token, "categories": str(cats[0]),
+    }).status_code == 403
+    assert client.post(f"/admin/users/{cc_id}", data={
+        "editor_token": token, "role": "admin",
+    }).status_code == 403
+    assert client.post(f"/admin/users/{cc_id}/delete", data={
+        "editor_token": token,
+    }).status_code == 403
+    assert client.post("/admin/users", data={
+        "editor_token": token, "username": "newadmin",
+        "password": "strong-password", "role": "admin",
+    }).status_code == 403
+
+
+def test_creator_cannot_assign_categories_to_other_users(site):
+    client, db = site
+    cc1 = _make_user(db, "writer_permissions")
+    cc2 = _make_user(db, "other_permissions")
+    _as(client, "writer_permissions")
+    assert client.get("/admin/users").status_code == 403
+    assert client.post(f"/admin/users/{cc2}/categories", data={
+        "editor_token": main.custom_home_token("writer_permissions"),
+    }).status_code == 403
