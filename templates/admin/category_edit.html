@@ -1,0 +1,27 @@
+{% extends "admin/base.html" %}
+{% block content %}
+<main id="admin-content" class="admin-settings-page" tabindex="-1">
+ <div class="admin-settings-container">
+  <header class="settings-page-header"><div><h1>Edit category</h1><p>Update its name and descriptions. The existing URL slug is preserved.</p></div></header>
+  <form method="post" action="/admin/categories/{{ category.id }}/edit" class="admin-card settings-form-v3">
+   <input type="hidden" name="editor_token" value="{{ editor_token }}">
+   <input type="hidden" name="content_language_code" value="{{ secondary_language.code if secondary_language else '' }}">
+   <div class="settings-grid-v3 single-col">
+    <label><span>Category name</span><input name="name" value="{{ category.name }}" maxlength="120" required></label>
+    <label><span>Description</span><textarea name="description" maxlength="4000">{{ category.description }}</textarea></label>
+    {% if secondary_language %}
+    <label><span>Secondary language label</span><input name="menu_label_secondary" value="{{ category.menu_label_secondary }}" maxlength="160"></label>
+    <label><span>Secondary language description</span><textarea name="description_secondary" maxlength="4000">{{ category.description_secondary }}</textarea></label>
+    {% else %}
+    <input type="hidden" name="menu_label_secondary" value="{{ category.menu_label_secondary }}">
+    <input type="hidden" name="description_secondary" value="{{ category.description_secondary }}">
+    {% endif %}
+   </div>
+   <div class="page-actions">
+    <button class="settings-primary" type="submit">Save category</button>
+    <a class="settings-secondary" href="/admin/categories">Cancel</a>
+   </div>
+  </form>
+ </div>
+</main>
+{% endblock %}
