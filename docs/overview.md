@@ -30,9 +30,8 @@ Running the application does not require Node.js, a frontend build, an external 
 
 ### Current scope
 
-This README describes the implementation in this checkout. English is the fixed primary language, with at most one active secondary language. Translation is manual. The application provides administrator login, but no public registration or role-management interface. Contact submissions do not send email. There are no built-in public search, RSS, commenting, or scheduled-publishing screens/routes in this checkout.
-
+This guide describes the implementation in this checkout. English is the fixed primary language, with at most one active secondary language. Translation is manual. The application provides administrator login, but no public registration or role-management interface. Contact submissions do not send email. There are no built-in public search, RSS, commenting, or scheduled-publishing screens/routes in this checkout.
 
 ---
 
-[Documentation index](index.md) · [Complete README](../README.md)
+[Documentation index](index.md) · [Project README](../README.md)
