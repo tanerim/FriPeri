@@ -606,3 +606,39 @@
 .hyperui-admin .documentation-prose blockquote { border-left: 3px solid #6b61d4; padding: 8px 18px; margin: 18px 0; color: #56627b; background: #f7f7fc; }
 .hyperui-admin .documentation-prose img { max-width: 100%; height: auto; }
 @media (max-width: 900px) { .hyperui-admin .documentation-layout { grid-template-columns: 1fr; } .hyperui-admin .documentation-list { position: static; max-height: 230px; } .hyperui-admin .documentation-article { padding: 18px; } }
+
+
+/* Sidebar toggle: full-width control above the logo, never beside it. */
+@media (min-width: 1024px) {
+  .hyperui-admin .admin-sidebar-header {
+    flex-direction: column;
+    align-items: stretch;
+    min-height: 0;
+  }
+  .hyperui-admin .admin-sidebar-header .admin-sidebar-toggle {
+    order: -1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex: none;
+    width: 100%;
+    height: 38px;
+    margin: 0;
+    border: 0;
+    border-bottom: 1px solid #34416b;
+    border-radius: 0;
+    background: transparent;
+  }
+  .hyperui-admin .admin-sidebar-header .admin-sidebar-toggle:hover {
+    background: #2b3856;
+  }
+  .hyperui-admin .admin-sidebar-header .admin-brand {
+    flex: none;
+    width: 100%;
+    padding-right: 24px;
+  }
+  .hyperui-admin.admin-sidebar-collapsed .admin-sidebar-header .admin-sidebar-toggle {
+    width: 100%;
+    margin: 0;
+  }
+}
