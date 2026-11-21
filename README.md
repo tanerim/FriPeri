@@ -40,18 +40,29 @@ Open **http://127.0.0.1:8000** to complete first-run setup and create your admin
 
 ## Documentation
 
-| Getting started & content | Operations & development |
-| --- | --- |
-| [Overview and features](docs/overview.md) | [Configuration and data storage](docs/configuration.md) |
-| [Installation and setup](docs/installation.md) | [Production deployment](docs/deployment.md) |
-| [Administrator user guide](docs/user-guide.md) | [Maintenance, backup and recovery](docs/maintenance.md) |
-| [Troubleshooting](docs/troubleshooting.md) | [Development and testing](docs/development.md) |
-| [Contributing and support](docs/support.md) | [Security policy](SECURITY.md) |
-| [Documentation index](docs/index.md) | [Third-party licenses and notices](THIRD_PARTY_NOTICES.md) |
+Everything you need to set up, manage, and extend FriPeri. Browse the [complete documentation](docs/index.md) or jump directly to a guide below.
 
-More technical references—including [application architecture](docs/architecture.md), [HTTP routes](docs/http-routes.md), [database structure](docs/data-model.md), [local test instructions](docs/testing.md), and [dependency security](docs/dependency-security.md)—are linked from the [documentation index](docs/index.md).
+### Getting started
 
-The application also has an authenticated, read-only documentation viewer under **Configuration → Documentation**.
+- **[Overview and features](docs/overview.md)** — What FriPeri does and how it works.
+- **[Installation and setup](docs/installation.md)** — Requirements, first-run setup, and CLI installation.
+- **[Administrator user guide](docs/user-guide.md)** — Publishing, pages, homepage design, and languages.
+
+### Running your site
+
+- **[Configuration and data storage](docs/configuration.md)** — Site settings, environment variables, and persistence.
+- **[Production deployment](docs/deployment.md)** — HTTPS, systemd, and reverse proxy setup.
+- **[Maintenance, backup and recovery](docs/maintenance.md)** — Updates, backups, and restoration.
+- **[Troubleshooting](docs/troubleshooting.md)** — Solutions to common problems.
+
+### Development and project resources
+
+- **[Development and testing](docs/development.md)** — Source layout, styling, and validation.
+- **[Technical reference](docs/index.md#developer-reference)** — Architecture, HTTP routes, database model, and browser tests.
+- **[Contributing and support](docs/support.md)** — Bug reports and contribution guidelines.
+- **[Security policy](SECURITY.md)** · **[Dependency security](docs/dependency-security.md)** · **[Third-party notices](THIRD_PARTY_NOTICES.md)**
+
+The administrator interface also includes a read-only documentation viewer under **Configuration → Documentation**.
 
 ## Development and verification
 
@@ -73,4 +84,4 @@ FriPeri source code is released under the [MIT License](LICENSE).
 
 Copyright © 2026 **Taner Sezer — NextNLP**.
 
-The project incorporates adapted HyperUI patterns and compiled Tailwind CSS, each under its own MIT notice. See [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) and [licenses/](licenses/) for third-party attribution and additional asset-rights information.
+For third-party licenses and attribution, see the [licenses directory](licenses/).
