@@ -14,8 +14,8 @@ pytestmark = pytest.mark.skipif(
 )
 
 
-@pytest.fixture
-def admin_page():
+@pytest.fixture(params=["chromium", "firefox"])
+def admin_page(request):
     from playwright.sync_api import sync_playwright
     base = os.environ["FRIPERI_TEST_BASE_URL"].rstrip("/")
     host = urlparse(base).hostname
@@ -26,7 +26,7 @@ def admin_page():
     if not username or not password:
         pytest.skip("Local test credentials not supplied")
     with sync_playwright() as playwright:
-        browser = playwright.chromium.launch(headless=True)
+        browser = getattr(playwright, request.param).launch(headless=True)
         context = browser.new_context(viewport={"width": 1440, "height": 900})
         page = context.new_page()
         page.goto(base + "/login")
