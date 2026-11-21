@@ -1,21 +1,44 @@
 {% extends "base.html" %}
 
-{% block extra_head %}<link rel="stylesheet" href="{{ static_url('custom-home.css') }}" />{% endblock %}
+{% block extra_head %}
+<link rel="stylesheet" href="{{ static_url('custom-home.css') }}" />
+<link rel="stylesheet" href="{{ static_url('article-detail.css') }}" />
+{% endblock %}
+
 {% block content %}
-<main class="page"><div class="article-shell">
-  <article class="article">
-    <p class="eyebrow">{{ post["category_name"] or (t(lang, 'common.uncategorized')) }} · {{ post["created_at"]|format_date }}</p>
-    <h1>{{ post["title"] }}</h1>
-    <p class="lead">{{ post["excerpt"] }}</p>
-    <div class="tag-row">
-      {% for tag in tags %}
-        <span class="tag">{{ tag }}</span>
-      {% endfor %}
-    </div>
-    {% if post["image_path"] %}
-      <img src="{{ post['image_path'] }}" alt="" />
-    {% endif %}
-    <div class="article-body">{% if custom_blocks is not none %}{% include 'partials/content_blocks.html' %}{% else %}{{ body_html|safe }}{% endif %}</div>
-  </article>
-</div></main>
+<main class="page article-detail-page">
+  <div class="article-detail-container">
+    <article class="article article-detail" aria-labelledby="article-title">
+      <header class="article-detail-header">
+        <div class="article-detail-meta">
+          <span class="article-detail-meta-mark" aria-hidden="true"></span>
+          <span>{{ post["category_name"] or t(lang, 'common.uncategorized') }}</span>
+          <span class="article-detail-meta-divider" aria-hidden="true"></span>
+          <time datetime="{{ post['created_at'] }}">{{ post["created_at"]|format_date }}</time>
+        </div>
+        <h1 id="article-title">{{ post["title"] }}</h1>
+        {% if post["excerpt"] %}
+        <p class="article-detail-lead">{{ post["excerpt"] }}</p>
+        {% endif %}
+        {% if tags %}
+        <div class="article-detail-tags" aria-label="Tags">
+          {% for tag in tags %}
+          <span class="article-detail-tag">{{ tag }}</span>
+          {% endfor %}
+        </div>
+        {% endif %}
+      </header>
+      {% if post["image_path"] %}
+      <figure class="article-detail-cover"><img src="{{ post['image_path'] }}" alt="" /></figure>
+      {% endif %}
+      <div class="article-body article-detail-body">
+        {% if custom_blocks is not none %}
+          {% include 'partials/content_blocks.html' %}
+        {% else %}
+          {{ body_html|safe }}
+        {% endif %}
+      </div>
+    </article>
+  </div>
+</main>
 {% endblock %}
