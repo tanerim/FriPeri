@@ -9,9 +9,9 @@
 - `static/images/`: bundled site images.
 - `.env`: stored in the archive as `env/.env`.
 
-**The panel uses these fixed paths, even if `SITE_DB_PATH`, `SITE_UPLOAD_DIR`, or `SITE_STATIC_DIR` is overridden.** Use a manual backup of the actual configured paths for such installations. ZIP backups do not include the application source, templates, or all static assets. They may contain credentials and private messages; keep downloaded archives private.
+**Current releases use the configured `SITE_DB_PATH`, `SITE_UPLOAD_DIR`, and `SITE_STATIC_DIR` when building and restoring backups.** Older versions used fixed paths; consult the hardened-backup notes below and verify the configured paths before restoring a legacy archive. ZIP backups do not include the application source, templates, or all static assets. They may contain credentials and private messages; keep downloaded archives private.
 
-Restore only trusted FriPeri archives. Restoration overwrites matching files and does not remove extra files absent from the archive. It is not an atomic deployment or a guaranteed consistent live SQLite snapshot. Avoid concurrent writes during panel backup/restore, keep a separate backup beforehand, and restart after restoring to reload configuration and session state.
+Restore only trusted FriPeri archives. Restoration overwrites matching files and does not remove extra files absent from the archive. SQLite is captured using its backup API, including committed WAL content. Restoring the database and media together is not atomic: stop writes during restoration, keep a separate backup, and restart afterward to reload configuration and session state.
 
 For a straightforward consistent backup:
 
@@ -52,12 +52,6 @@ ZIP archives in `backups/` are outside the reset scope and remain on disk.
 
 Start the application again and open the website to return to first-run setup.
 
-
----
-
-[Documentation index](index.md) · [Complete README](../README.md)
-
-
 ## Hardened backup and restore (2026-11)
 
 - Backup archives use the configured `SITE_DB_PATH`, `SITE_STATIC_DIR`, `SITE_UPLOAD_DIR` and project `.env` where present. SQLite is captured with its official backup API, including committed WAL content.
@@ -76,3 +70,7 @@ python -m pytest -q tests/test_backup_security.py tests/test_security_guards.py
 python -m pip check
 python -m pip_audit -r requirements.txt
 ```
+
+---
+
+[Documentation index](index.md) · [Project README](../README.md)
