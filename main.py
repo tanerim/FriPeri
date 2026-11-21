@@ -997,8 +997,10 @@ async def post_detail(slug: str, request: Request) -> Response:
     if not post:
         return HTMLResponse(t(pick_lang(request), "common.not_found"), status_code=404)
     user = current_user(request)
-    if post["status"] != "published" and not user:
-        return HTMLResponse(t(pick_lang(request), "common.not_found"), status_code=404)
+    if post["status"] != "published":
+        account = actor(request)
+        if not account or (account["role"] == "cc" and post["author_id"] != account["id"]):
+            return HTMLResponse(t(pick_lang(request), "common.not_found"), status_code=404)
     with get_db() as conn:
         settings = get_site_settings(conn)
     docs = post_documents(dict(post), settings)
