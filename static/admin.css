@@ -685,3 +685,8 @@
   .hyperui-admin .admin-shell,
   .hyperui-admin .admin-sidebar-toggle .admin-icon { transition: none !important; }
 }
+
+/* Signed-in identity, shown consistently in every admin screen. */
+.hyperui-admin .admin-sidebar-footer .admin-current-user{display:flex;flex-direction:column;gap:3px;min-width:0}
+.hyperui-admin .admin-sidebar-footer .admin-current-user strong{display:block;max-width:148px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px;font-weight:650;color:#e2eaf8}
+.hyperui-admin .admin-sidebar-footer .admin-current-user small{display:block;font-size:10px;color:#a9bad5}
