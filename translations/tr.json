@@ -554,5 +554,9 @@
   "categories.edit_save": "Kategoriyi kaydet",
   "users.select_category": "İzinli bir kategori seçin",
   "users.create_help": "Hesap oluşturun ve içerik yetkilerini belirleyin.",
-  "users.manage_help": "Yetkilerini düzenlemek veya şifresini yenilemek için hesabı açın."
+  "users.manage_help": "Yetkilerini düzenlemek veya şifresini yenilemek için hesabı açın.",
+  "users.category_access_title": "Kategori yetkileri",
+  "users.category_access_help": "İçerik üreticilerine kategori atayın. Hesap rolleri ve şifreler yalnızca yönetici tarafından değiştirilir.",
+  "users.grants_only_help": "Bu ekranda yalnızca kategori izinleri değiştirilebilir.",
+  "users.no_creators": "Henüz içerik üreticisi hesabı yok."
 }
