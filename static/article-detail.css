@@ -102,7 +102,7 @@
 }
 .article-detail-page .article-detail-body {
   width: 100%;
-  max-width: 940px;
+  max-width: 100%;
   min-width: 0;
   margin: 0;
   padding: 0;
@@ -180,4 +180,31 @@
   .article-detail-page * {
     scroll-behavior: auto;
   }
+}
+
+/*
+ * Block-editor Width is a layout choice, not merely text alignment.
+ * The article container must not cap Wide blocks at 940px, and the
+ * homepage's margin:auto must not center every article block.
+ */
+.article-detail-page .article-detail-body > .custom-block {
+  margin-left: 0;
+  margin-right: 0;
+  min-width: 0;
+  max-width: 100%;
+}
+.article-detail-page .article-detail-body > .custom-block.width-normal {
+  width: min(100%, 840px);
+}
+.article-detail-page .article-detail-body > .custom-block.width-wide {
+  width: 100%;
+}
+/* Do not reapply the homepage's narrow headline-following-text treatment. */
+.article-detail-page .article-detail-body > .custom-heading:has(h1) + .custom-text .custom-rich-text {
+  width: 100%;
+  max-width: none;
+  margin-inline: 0;
+}
+.article-detail-page .article-detail-body > .custom-block.align-left {
+  text-align: left;
 }
