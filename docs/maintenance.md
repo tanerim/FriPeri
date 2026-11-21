@@ -56,3 +56,23 @@ Start the application again and open the website to return to first-run setup.
 ---
 
 [Documentation index](index.md) · [Complete README](../README.md)
+
+
+## Hardened backup and restore (2026-11)
+
+- Backup archives use the configured `SITE_DB_PATH`, `SITE_STATIC_DIR`, `SITE_UPLOAD_DIR` and project `.env` where present. SQLite is captured with its official backup API, including committed WAL content.
+- Created and uploaded archives are owner-only (`0600`) and receive unique filenames. Backups contain credentials and potentially personal data; restrict filesystem and archive access.
+- Backup create, upload and restore require an authenticated admin and a session-bound anti-CSRF form token. Other admin mutations are additionally protected by a same-origin browser request check.
+- ZIP upload limit: **256 MiB**; maximum uncompressed archive payload **512 MiB**, **2,000** entries and **128 MiB** per member. Only recognized database, environment and media paths are accepted. Unknown source-code or executable paths, symlinks, traversal and duplicate members are rejected.
+- Archive integrity is checked before restore. SQLite `PRAGMA quick_check` and required tables are validated before changing the live database; restoration uses SQLite's backup API, not a raw byte copy.
+- **Maintenance window required:** database and media files cannot be atomically replaced together. Stop or isolate writes during restoration. A failed media write after the database has been replaced can still leave a partially restored installation. Make a separate pre-restore snapshot and verify backups before any destructive operation.
+- The database may contain a restored session secret and administrator credentials. Expect to sign in again. Changes to `.env` take effect after a service restart.
+- Older backup ZIP files that violate the new whitelist or size limits will be rejected; migrate them after reviewing the archive in a controlled environment.
+
+### Local security tests
+
+```bash
+python -m pytest -q tests/test_backup_security.py tests/test_security_guards.py
+python -m pip check
+python -m pip_audit -r requirements.txt
+```
