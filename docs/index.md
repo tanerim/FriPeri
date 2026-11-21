@@ -9,6 +9,7 @@ This is the full documentation for **FriPeri**, a self-hosted personal publishin
 | [Overview and features](overview.md) | Purpose, features, technology stack, supported scope and limitations |
 | [Installation and initial setup](installation.md) | Requirements, local setup, CLI initialization, first administrator account |
 | [Administrator user guide](user-guide.md) | Posts, categories, visual editor, homepages, media, languages, contact inbox |
+| [Users, roles, and category permissions](user-roles.md) | Content creator, editor, administrator, category grants and post ownership |
 | [Troubleshooting](troubleshooting.md) | Login, database, uploads, backup, language, editor and deployment problems |
 
 ## Operations and maintenance
