@@ -12,6 +12,8 @@
   const canvas = document.getElementById('builder-canvas');
   const status = document.getElementById('builder-status');
   const saveButton = document.getElementById('builder-save');
+  const saveDraftButton = document.getElementById('builder-save-draft');
+  let forcedPostStatus = null;
   const previewButton = document.getElementById('builder-preview');
   const removeDialog = document.getElementById('builder-remove-dialog');
   const collapsedBlocks = new WeakSet();
@@ -48,6 +50,7 @@
     document.getElementById('builder-undo').disabled = cursor === 0;
     document.getElementById('builder-redo').disabled = cursor === history.length - 1;
     saveButton.disabled = previewButton.disabled = busy > 0;
+    if (saveDraftButton) saveDraftButton.disabled = busy > 0;
     canvas.inert = busy > 0;
     document.getElementById('builder-add-blocks').inert = busy > 0;
     document.getElementById('builder-section-presets').inert = busy > 0;
@@ -1016,8 +1019,20 @@
     mutate(()=>{blocks().push({...newBlock('heading'),text:t('starter_title'),level:'h1',tone:'soft',align:'center',width:'wide'},{...newBlock('text'),html:el('p','',t('starter_text')).outerHTML,align:'center'},{...newBlock('button'),text:t('starter_button'),url:'/contact',align:'center'});});
   });
   function formData() { const data=new FormData();data.set('editor_token',config.token);data.set('content_language_code',config.languageCode);data.set('homepage_mode','custom');return data; }
+  saveDraftButton?.addEventListener('click', () => {
+    forcedPostStatus = 'draft';
+    saveButton.click();
+  });
   saveButton.addEventListener('click',async()=>{
     if(busy) return;
+    if (page === 'post' && details) {
+      const statusField = details.querySelector('[name="status"]');
+      if (statusField) {
+        statusField.value = forcedPostStatus || 'published';
+        statusField.dispatchEvent(new Event('change', {bubbles: true}));
+      }
+      forcedPostStatus = null;
+    }
     if(details && !details.checkValidity()) {
       const invalid = details.querySelector(':invalid');
       const panel = invalid?.closest('[data-builder-language-fields]');
