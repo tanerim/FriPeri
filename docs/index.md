@@ -14,10 +14,10 @@ FriPeri is a FastAPI and SQLite-based content management and publishing system.
 8. [Contributing and troubleshooting](support.md)
 9. [Application architecture](architecture.md)
 10. [Testing and browser verification](testing.md)
-10. [HTTP route reference](http-routes.md)
-11. [SQLite data model and persistence](data-model.md)
-12. [Dependency and vulnerability review](dependency-security.md)
-13. [Security policy](../SECURITY.md)
+11. [HTTP route reference](http-routes.md)
+12. [SQLite data model and persistence](data-model.md)
+13. [Dependency and vulnerability review](dependency-security.md)
+14. [Security policy](../SECURITY.md)
 
 ## Other source references
 
