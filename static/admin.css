@@ -552,3 +552,57 @@
 .hyperui-admin .auth-brand:hover { background: #effafa; }
 .hyperui-admin .auth-brand:hover small { color: #087e86; text-decoration: underline; }
 .hyperui-admin .auth-brand:focus-visible { outline: 3px solid #169ca4; outline-offset: 3px; }
+
+
+/* Collapsible admin sidebar: the original fixed layout stays intact when expanded. */
+@media (min-width: 1024px) {
+  .hyperui-admin .admin-sidebar-header { display: flex; align-items: center; position: relative; min-height: 84px; border-bottom: 1px solid #34416b; }
+  .hyperui-admin .admin-sidebar-header .admin-brand { min-width: 0; flex: 1; border-bottom: 0; padding-right: 4px; }
+  .hyperui-admin .admin-sidebar-toggle { flex: 0 0 34px; height: 34px; margin-right: 10px; display: grid; place-items: center; border: 1px solid #465474; border-radius: 8px; color: #edf0fa; cursor: pointer; background: #2b3856; }
+  .hyperui-admin .admin-sidebar-toggle:hover { background: #3d4b6e; }
+  .hyperui-admin .admin-sidebar-toggle:focus-visible { outline: 2px solid #c4baff; outline-offset: 2px; }
+  .hyperui-admin .admin-sidebar-toggle .admin-icon { width: 19px; height: 19px; transition: transform .18s ease; }
+  .hyperui-admin .admin-sidebar, .hyperui-admin .admin-shell { transition: width .18s ease, margin-left .18s ease; }
+  .hyperui-admin.admin-sidebar-collapsed .admin-sidebar { width: 72px; }
+  .hyperui-admin.admin-sidebar-collapsed .admin-shell { margin-left: 72px; }
+  .hyperui-admin.admin-sidebar-collapsed .admin-sidebar-header { justify-content: center; }
+  .hyperui-admin.admin-sidebar-collapsed .admin-brand { display: none; }
+  .hyperui-admin.admin-sidebar-collapsed .admin-sidebar-toggle { margin: 0; }
+  .hyperui-admin.admin-sidebar-collapsed .admin-sidebar-toggle .admin-icon { transform: rotate(180deg); }
+  .hyperui-admin.admin-sidebar-collapsed .admin-nav-heading, .hyperui-admin.admin-sidebar-collapsed .admin-sidebar-footer, .hyperui-admin.admin-sidebar-collapsed .admin-nav-link span { display: none; }
+  .hyperui-admin.admin-sidebar-collapsed .admin-navigation { padding: 12px 7px; }
+  .hyperui-admin.admin-sidebar-collapsed .admin-nav-group { margin-bottom: 12px; }
+  .hyperui-admin.admin-sidebar-collapsed .admin-nav-link { justify-content: center; padding: 8px 4px; }
+  .hyperui-admin.admin-sidebar-collapsed .admin-nav-link svg { flex: 0 0 29px; }
+}
+@media (max-width: 1023px) {
+  .hyperui-admin .admin-sidebar-header { display: flex; align-items: center; justify-content: space-between; }
+  .hyperui-admin .admin-sidebar-header .admin-brand { min-width: 0; }
+  .hyperui-admin .admin-sidebar-toggle { display: none; }
+}
+/* Documentation reader */
+.hyperui-admin .documentation-layout { display: grid; grid-template-columns: minmax(210px,260px) minmax(0,1fr); gap: 24px; align-items: start; margin-top: 20px; }
+.hyperui-admin .documentation-list { background: #fff; border: 1px solid #dfe4ef; border-radius: 12px; padding: 14px; position: sticky; top: 18px; max-height: calc(100vh - 44px); overflow-y: auto; }
+.hyperui-admin .documentation-list h2 { color: #374366; font-size: 13px; font-weight: 750; margin: 0 0 12px; }
+.hyperui-admin .documentation-list a { color: #3e4d6b; display: block; font-size: 13px; line-height: 1.5; padding: 9px 11px; border-radius: 7px; margin-bottom: 3px; overflow-wrap: anywhere; }
+.hyperui-admin .documentation-list a:hover { background: #edf0fb; }
+.hyperui-admin .documentation-list a[aria-current="page"] { color: #fff; background: #5145cd; }
+.hyperui-admin .documentation-article { min-width: 0; padding: 26px 30px; background: #fff; border: 1px solid #dfe4ef; border-radius: 12px; }
+.hyperui-admin .documentation-prose { font-size: 14px; line-height: 1.75; color: #29344a; overflow-wrap: anywhere; }
+.hyperui-admin .documentation-prose :is(h1,h2,h3,h4) { color: #18253e; font-weight: 750; line-height: 1.35; scroll-margin-top: 20px; }
+.hyperui-admin .documentation-prose h1 { font-size: 26px; margin: 0 0 22px; }
+.hyperui-admin .documentation-prose h2 { font-size: 20px; margin: 30px 0 12px; }
+.hyperui-admin .documentation-prose h3 { font-size: 16px; margin: 24px 0 10px; }
+.hyperui-admin .documentation-prose p, .hyperui-admin .documentation-prose ul, .hyperui-admin .documentation-prose ol { margin: 0 0 15px; }
+.hyperui-admin .documentation-prose :is(ul,ol) { padding-left: 24px; }
+.hyperui-admin .documentation-prose li { margin: 4px 0; }
+.hyperui-admin .documentation-prose a { color: #4338ca; text-decoration: underline; text-underline-offset: 2px; }
+.hyperui-admin .documentation-prose pre { padding: 16px; background: #111c30; color: #eef4ff; border-radius: 8px; overflow-x: auto; margin: 14px 0 20px; }
+.hyperui-admin .documentation-prose pre code { background: transparent; color: inherit; padding: 0; white-space: pre; }
+.hyperui-admin .documentation-prose code { padding: 2px 5px; font-size: .92em; background: #edf0f7; border-radius: 4px; }
+.hyperui-admin .documentation-prose table { display: block; max-width: 100%; width: max-content; overflow-x: auto; border-collapse: collapse; margin: 16px 0 24px; }
+.hyperui-admin .documentation-prose th, .hyperui-admin .documentation-prose td { border: 1px solid #dce2ed; padding: 8px 12px; vertical-align: top; text-align: left; }
+.hyperui-admin .documentation-prose th { background: #f1f3f9; font-weight: 700; }
+.hyperui-admin .documentation-prose blockquote { border-left: 3px solid #6b61d4; padding: 8px 18px; margin: 18px 0; color: #56627b; background: #f7f7fc; }
+.hyperui-admin .documentation-prose img { max-width: 100%; height: auto; }
+@media (max-width: 900px) { .hyperui-admin .documentation-layout { grid-template-columns: 1fr; } .hyperui-admin .documentation-list { position: static; max-height: 230px; } .hyperui-admin .documentation-article { padding: 18px; } }
