@@ -235,11 +235,6 @@ The public `/contact` form stores each valid submission in the site's SQLite dat
 
 Existing installations receive the additive `contact_messages` table at startup. Include the database in your normal backups to preserve messages. Validation and the existing anti-spam checks remain in place; if a submission cannot be saved, the form retains its contents for retrying.
 
-
----
-
-[Documentation index](index.md) · [Complete README](../README.md)
-
 ## Reading the built-in documentation
 
 The **Configuration → Documentation** item opens `/admin/documentation`. An authenticated administrator can browse the Markdown guides stored in the project's `docs/` directory without leaving the admin interface. The reader includes a table of contents, supports tables, fenced code blocks and normal links, and links between files in `docs/` navigate within the viewer.
@@ -247,3 +242,7 @@ The **Configuration → Documentation** item opens `/admin/documentation`. An au
 Adding or changing an ordinary `.md` file under `docs/` updates the list on the next request; no database migration is required. Documentation is read-only in the admin interface and is deployed alongside the application source. Other local files, including secrets and database contents, are not exposed by the reader.
 
 On desktop, a **left-pointing arrow** at the top of the sidebar collapses the menu to icons. The arrow turns right to expand it again. The state persists for that browser. On narrower screens the original responsive navigation remains in place.
+
+---
+
+[Documentation index](index.md) · [Project README](../README.md)
