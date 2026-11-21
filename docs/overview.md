@@ -15,6 +15,7 @@ The public website and administration panel are included in the same repository.
 - **Website customization:** nested navigation with up to five levels, category links, custom links, public site colors, footer text, welcome text, and contact details.
 - **Social profiles:** URLs and visibility controls for 11 supported platforms.
 - **Multilingual content:** English as the primary language, with one optional secondary language and English fallback.
+- **Role-based accounts:** content creators restricted to their own posts and assigned categories, editors who manage content, and administrators who manage site settings and users.
 - **An administration dashboard:** recent content, published and draft totals, category counts, and shortcuts to common tasks.
 - **Browser-based installation:** the first-run form creates the database and administrator account.
 - **Contact inbox:** contact-form submissions stored in SQLite and read from the administration panel.
@@ -30,7 +31,7 @@ Running the application does not require Node.js, a frontend build, an external 
 
 ### Current scope
 
-This guide describes the implementation in this checkout. English is the fixed primary language, with at most one active secondary language. Translation is manual. The application provides administrator login, but no public registration or role-management interface. Contact submissions do not send email. There are no built-in public search, RSS, commenting, or scheduled-publishing screens/routes in this checkout.
+This guide describes the implementation in this checkout. English is the fixed primary language, with at most one active secondary language. Translation is manual. The application provides administrator-managed accounts with three roles; there is no public self-registration. See [Users and permissions](user-roles.md). Contact submissions do not send email. There are no built-in public search, RSS, commenting, or scheduled-publishing screens/routes in this checkout.
 
 ---
 
