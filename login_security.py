@@ -8,6 +8,7 @@ from time import monotonic
 
 WINDOW_SECONDS = 15 * 60
 MAX_FAILURES = 8
+MAX_ACCOUNT_FAILURES = 30
 MAX_TRACKED_KEYS = 10000
 _attempts: dict[str, deque[float]] = {}
 _lock = Lock()
@@ -28,7 +29,8 @@ def _prune(key: str, now: float) -> deque[float]:
 def blocked(address: str, username: str) -> bool:
     now = monotonic()
     with _lock:
-        return any(len(_prune(key, now)) >= MAX_FAILURES for key in _keys(address, username))
+        ip_key, account_key = _keys(address, username)
+        return len(_prune(ip_key, now)) >= MAX_FAILURES or len(_prune(account_key, now)) >= MAX_ACCOUNT_FAILURES
 
 
 def failed(address: str, username: str) -> None:
