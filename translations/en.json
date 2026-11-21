@@ -595,5 +595,10 @@
   "admin.documentation": "Documentation",
   "admin.documentation_help": "Read the local project documentation from the docs directory.",
   "admin.documentation_contents": "Contents",
-  "admin.documentation_empty": "No documentation files were found."
+  "admin.documentation_empty": "No documentation files were found.",
+  "dashboard.wizard_intro": "Start configuring your site",
+  "dashboard.wizard_text": "Your site is ready for its first content. Set up the homepage to get started.",
+  "dashboard.wizard_action": "Configure homepage",
+  "builder.section_add_placeholder": "Choose a block type…",
+  "builder.section_add_section": "Add section"
 }
