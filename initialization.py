@@ -154,6 +154,15 @@ def migrate_database(path: Path, settings=None, username=None, password=None) ->
             message TEXT NOT NULL,
             created_at TEXT NOT NULL
         )""")
+        # Role-based access control: legacy users retain full administrator access.
+        add_column(conn, "users", "role", "TEXT NOT NULL DEFAULT 'admin'")
+        add_column(conn, "posts", "author_id", "INTEGER REFERENCES users(id) ON DELETE SET NULL")
+        conn.execute("""CREATE TABLE IF NOT EXISTS user_categories (
+            user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+            category_id INTEGER NOT NULL REFERENCES categories(id) ON DELETE CASCADE,
+            PRIMARY KEY (user_id, category_id)
+        )""")
+        conn.execute("CREATE INDEX IF NOT EXISTS posts_author_id_idx ON posts(author_id)")
         add_column(conn, "posts", "body_html", "TEXT NOT NULL DEFAULT ''")
         add_column(conn, "posts", "image_path", "TEXT NOT NULL DEFAULT ''")
         legacy_categories = "category_id" not in table_columns(conn, "posts")
