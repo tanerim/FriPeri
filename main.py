@@ -1492,6 +1492,9 @@ async def save_block_post(request, form, post_id=None):
     if post_id is None and not re.fullmatch(r'[a-f0-9]{32}', creation_key):
         return error(t(lang, 'builder.invalid'))
     with get_db() as conn:
+        account = actor(request)
+        if account is None:
+            return error("Sign in required", 401)
         # Serializes retries of a new editor session, including a lost response.
         conn.execute('BEGIN IMMEDIATE')
         if post_id is None:
@@ -1500,8 +1503,10 @@ async def save_block_post(request, form, post_id=None):
         post = conn.execute('SELECT * FROM posts WHERE id=?', (post_id,)).fetchone() if post_id else None
         if post_id and post is None:
             return error(t(lang, 'common.not_found'), 404)
-        if category and (not category.isdigit() or not conn.execute('SELECT 1 FROM categories WHERE id=?', (category,)).fetchone()):
-            return error(t(lang, 'admin.category_invalid'))
+        if post and not can_write_post(conn, account, post['id']):
+            return error("Forbidden", 403)
+        if not allowed_category(conn, account, category):
+            return error(t(lang, 'admin.category_invalid'), 403)
         settings = get_site_settings(conn)
         documents = json.loads(post['post_blocks_json'] or '{}') if post else {}
         try:
@@ -1525,10 +1530,10 @@ async def save_block_post(request, form, post_id=None):
         else:
             slug = unique_slug(conn, 'posts', title)
             cursor = conn.execute("""INSERT INTO posts (title, slug, excerpt, body, body_html, category_id, status, image_path,
-                                   post_blocks_json, editor_creation_key, created_at, updated_at)
-                                   VALUES (?, ?, ?, '', '', ?, ?, ?, ?, ?, ?, ?)""",
+                                   post_blocks_json, editor_creation_key, created_at, updated_at, author_id)
+                                   VALUES (?, ?, ?, '', '', ?, ?, ?, ?, ?, ?, ?, ?)""",
                                   (title, slug, excerpt, int(category) if category else None, status, image_path,
-                                   json.dumps(documents, ensure_ascii=False), creation_key, now_iso(), now_iso()))
+                                   json.dumps(documents, ensure_ascii=False), creation_key, now_iso(), now_iso(), account['id']))
             post_id = cursor.lastrowid
         save_secondary_post(conn, post_id, secondary)
         set_post_tags(conn, post_id, str(form.get('tags', '')))
@@ -1548,7 +1553,12 @@ def post_form_response(
     lang = pick_lang(request)
     values = values or {}
     with get_db() as conn:
+        account = actor(request)
         categories = fetch_categories(conn)
+        if account and account["role"] == "cc":
+            categories = [cat for cat in categories if conn.execute(
+                "SELECT 1 FROM user_categories WHERE user_id=? AND category_id=?",
+                (account["id"], cat["id"])).fetchone()]
         settings = get_site_settings(conn)
     return render_template(
         request,
@@ -1579,9 +1589,15 @@ async def admin_posts(request: Request) -> Response:
         return RedirectResponse("/login", status_code=303)
     lang = pick_lang(request)
     with get_db() as conn:
-        posts = conn.execute(
-            "SELECT p.*, c.name AS category_name FROM posts p LEFT JOIN categories c ON c.id = p.category_id ORDER BY p.id DESC"
-        ).fetchall()
+        account = actor(request)
+        if account and account["role"] == "cc":
+            posts = conn.execute(
+                "SELECT p.*, c.name AS category_name FROM posts p LEFT JOIN categories c ON c.id=p.category_id WHERE p.author_id=? ORDER BY p.id DESC",
+                (account["id"],)).fetchall()
+        else:
+            posts = conn.execute(
+                "SELECT p.*, c.name AS category_name FROM posts p LEFT JOIN categories c ON c.id = p.category_id ORDER BY p.id DESC"
+            ).fetchall()
     return render_template(request, "admin/posts.html", t(lang, "admin.new_content"), {"posts": posts, "active_admin": "posts"}, user)
 
 
@@ -1638,15 +1654,18 @@ async def create_post(request: Request) -> Response:
     if not title or not excerpt or body_html == "<p></p>":
         values = {"title": title, "excerpt": excerpt, "category_id": category_id, "tags": tags, "body_html": body_html, "status": status, **secondary_values}
         return post_form_response(request, user, values, t(lang, "common.required"), status_code=400)
+    with get_db() as conn:
+        if not allowed_category(conn, actor(request), category_id):
+            return Response("Forbidden: category not assigned", status_code=403)
     image_path = await save_upload(image)
     with get_db() as conn:
         slug = unique_slug(conn, "posts", title)
         cursor = conn.execute(
             """
-            INSERT INTO posts (title, slug, excerpt, body, body_html, image_path, category_id, created_at, updated_at, status)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            INSERT INTO posts (title, slug, excerpt, body, body_html, image_path, category_id, created_at, updated_at, status, author_id)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """,
-            (title, slug, excerpt, html.unescape(re.sub("<[^>]+>", " ", body_html)), body_html, image_path, int(category_id) if category_id else None, now_iso(), now_iso(), status),
+            (title, slug, excerpt, html.unescape(re.sub("<[^>]+>", " ", body_html)), body_html, image_path, int(category_id) if category_id else None, now_iso(), now_iso(), status, actor(request)['id']),
         )
         save_secondary_post(conn, cursor.lastrowid, secondary_values)
         set_post_tags(conn, cursor.lastrowid, tags)
@@ -1722,6 +1741,8 @@ async def update_post(post_id: int, request: Request) -> Response:
         post = conn.execute("SELECT * FROM posts WHERE id = ?", (post_id,)).fetchone()
         if not post:
             return HTMLResponse(t(pick_lang(request), "common.not_found"), status_code=404)
+        if not can_write_post(conn, actor(request), post_id) or not allowed_category(conn, actor(request), category_id):
+            return Response("Forbidden", status_code=403)
         image_path = await save_upload(image)
         if not image_path:
             image_path = post["image_path"]
@@ -1796,6 +1817,12 @@ async def create_category(request: Request) -> Response:
                 """,
                 (name, unique_slug(conn, "categories", name), desc, str(form.get("menu_label_secondary", "")).strip(), name, str(form.get("description_secondary", "")).strip(), now_iso()),
             )
+            account = actor(request)
+            if account and account["role"] == "cc":
+                created = conn.execute("SELECT id FROM categories WHERE name=?", (name,)).fetchone()
+                if created:
+                    conn.execute("INSERT OR IGNORE INTO user_categories (user_id, category_id) VALUES (?, ?)",
+                                 (account["id"], created["id"]))
     return RedirectResponse("/admin/categories", status_code=303)
 
 
