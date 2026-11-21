@@ -12,7 +12,8 @@
     if (sections.length < 3) return;
     const nav = document.createElement('nav');
     nav.className = 'settings-section-nav';
-    nav.setAttribute('aria-label', form.querySelector('h1').textContent.trim());
+    const title = form.querySelector('h1, h2');
+    nav.setAttribute('aria-label', title?.textContent.trim() || 'Page sections');
     sections.forEach((section, index) => {
       const heading = section.querySelector('h2');
       if (!heading) return;
@@ -24,7 +25,8 @@
       link.addEventListener('click', () => heading.focus({ preventScroll: true }));
       nav.append(link);
     });
-    form.querySelector('.settings-page-header').after(nav);
+    const pageHeader = form.querySelector('.settings-page-header');
+    if (nav.childElementCount && pageHeader) pageHeader.after(nav);
   });
   const sidebar = document.getElementById('admin-sidebar');
   const sidebarToggle = document.querySelector('.admin-sidebar-toggle');
