@@ -1,0 +1,26 @@
+{% extends 'admin/base.html' %}
+{% block content %}
+<main id="admin-content" class="admin-settings-page admin-compact-page" tabindex="-1">
+  <div class="admin-settings-container">
+    <header class="settings-page-header">
+      <div>
+        <h1><span class="page-heading-icon">{{ icon('documentation') }}</span>{{ t(lang, 'admin.documentation') }}</h1>
+        <p>{{ t(lang, 'admin.documentation_help') }}</p>
+      </div>
+    </header>
+    <div class="documentation-layout">
+      <nav class="documentation-list" aria-label="{{ t(lang, 'admin.documentation') }}">
+        <h2>{{ t(lang, 'admin.documentation_contents') }}</h2>
+        {% for doc in documents %}
+          <a href="/admin/documentation?file={{ doc.name|urlencode }}" {% if doc.name == selected_document %}aria-current="page"{% endif %}>{{ doc.title }}</a>
+        {% else %}
+          <p>{{ t(lang, 'admin.documentation_empty') }}</p>
+        {% endfor %}
+      </nav>
+      <article class="documentation-article" aria-label="{{ document_title }}">
+        <div class="documentation-prose">{{ document_html|safe }}</div>
+      </article>
+    </div>
+  </div>
+</main>
+{% endblock %}
