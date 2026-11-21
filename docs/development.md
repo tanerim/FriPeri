@@ -42,7 +42,15 @@ Review the output before replacing a committed stylesheet: runtime CSS also cont
 
 ### Validation
 
-Run `node tests/rich_text_browser.cjs` for isolated Chromium checks of text formatting, headings, lists, table operations, paste filtering, appearance settings, cell colors and responsive toolbar layout (set `CHROMIUM` if needed). Run `python -m unittest discover -s tests` for rich-text server filtering and document round-trip tests. `scripts/check_admin_changes.py` provides a broader test discovery entry point; these focused tests do not replace checking complete application flows.
+Run the Python regression suite locally (GitHub Actions are not used):
+
+```bash
+python -m pip install -r requirements-dev.txt
+python -m pip check
+python -m pytest -q tests/
+```
+
+Browser smoke tests are optional and are skipped unless a running FriPeri test instance and the environment variables described in [docs/testing.md](testing.md) are configured. Run security and third-party license checks as described in [docs/dependency-security.md](dependency-security.md) and [THIRD_PARTY_NOTICES.md](../THIRD_PARTY_NOTICES.md).
 
 For documentation and implementation changes, use an isolated installation and check the relevant flows:
 
@@ -56,12 +64,14 @@ For documentation and implementation changes, use an isolated installation and c
 
 After setup, `GET /health` returns `status`, `database`, and `uploads`. It reports process-level information rather than a full database integrity or readiness check, and includes filesystem paths. Before setup, it redirects to the installer like other non-static routes.
 
-
----
-
-[Documentation index](index.md) · [Complete README](../README.md)
-
 ## Automated regression tests
 
 For an isolated test environment, dependency installation, ASGI endpoint tests, the optional Playwright browser suite and the manual mobile/browser checklist, see [Local regression and UI testing](testing.md). Tests are run locally, not through GitHub Actions.
-\n## License inventory\n\nBefore releases, consult [third-party notices](../THIRD_PARTY_NOTICES.md). The offline `python scripts/audit_third_party_licenses.py --strict` command audits package license metadata and included notice files for every pinned dependency; `--output third-party-installed.md` generates a reviewable report. This check is complementary to, not a replacement for, `pip-audit` or a review of icon and image provenance.\n
+
+## License inventory
+
+Before releases, consult [third-party notices](../THIRD_PARTY_NOTICES.md). The offline `python scripts/audit_third_party_licenses.py --strict` command audits package license metadata and included notice files for every pinned dependency; `--output third-party-installed.md` generates a reviewable report. This check is complementary to, not a replacement for, `pip-audit` or a review of icon and image provenance.
+
+---
+
+[Documentation index](index.md) · [Project README](../README.md)
