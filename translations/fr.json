@@ -486,5 +486,6 @@
   "dashboard.wizard_text": "Commencez par configurer la page d’accueil de votre site.",
   "dashboard.wizard_action": "Configurer l’accueil",
   "builder.section_add_placeholder": "Choisir un type de bloc…",
-  "builder.section_add_section": "Ajouter une section"
+  "builder.section_add_section": "Ajouter une section",
+  "admin.users": "Utilisateurs"
 }
