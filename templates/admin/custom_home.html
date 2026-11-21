@@ -27,15 +27,13 @@
       <div class="builder-workspace"><div id="builder-canvas" class="builder-canvas" style="--color-accent: {{ design_vars.color_accent_primary }}; --color-feature-bg: {{ design_vars.color_feature_bg }}; --color-feature-text: {{ design_vars.color_feature_text }};"></div></div>
     </div>
   <dialog id="builder-remove-dialog" aria-labelledby="builder-remove-title" aria-describedby="builder-remove-help">
-    <form method="dialog">
-      <h2 id="builder-remove-title">{{ t(lang, 'builder.remove_block_title') }}</h2>
-      <p id="builder-remove-name"></p>
-      <p id="builder-remove-help">{{ t(lang, 'builder.remove_block_help') }}</p>
-      <div class="builder-actions">
-        <button class="admin-secondary" value="cancel" autofocus>{{ t(lang, 'common.cancel') }}</button>
-        <button class="admin-danger" value="remove">{{ t(lang, 'common.delete') }}</button>
-      </div>
-    </form>
+    <h2 id="builder-remove-title">{{ t(lang, 'builder.remove_block_title') }}</h2>
+    <p id="builder-remove-name"></p>
+    <p id="builder-remove-help">{{ t(lang, 'builder.remove_block_help') }}</p>
+    <div class="builder-actions">
+      <button type="button" class="admin-secondary" id="builder-cancel-remove" autofocus>{{ t(lang, 'common.cancel') }}</button>
+      <button type="button" class="admin-danger" id="builder-confirm-remove">{{ t(lang, 'common.delete') }}</button>
+    </div>
   </dialog>
   <dialog id="builder-preview-dialog" aria-labelledby="builder-preview-title">
     <header><h2 id="builder-preview-title">{{ t(lang, 'common.preview') }}</h2><div class="builder-actions"><button type="button" class="admin-secondary" data-preview-width="desktop">{{ t(lang, 'builder.desktop') }}</button><button type="button" class="admin-secondary" data-preview-width="mobile">{{ t(lang, 'builder.mobile') }}</button><button type="button" class="admin-secondary" id="builder-close-preview">{{ t(lang, 'builder.close') }}</button></div></header>

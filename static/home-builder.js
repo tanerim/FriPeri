@@ -16,6 +16,8 @@
   const removeDialog = document.getElementById('builder-remove-dialog');
   const collapsedBlocks = new WeakSet();
   let pendingRemoval;
+  document.getElementById('builder-cancel-remove').addEventListener('click',()=>removeDialog.close('cancel'));
+  document.getElementById('builder-confirm-remove').addEventListener('click',()=>removeDialog.close('remove'));
   removeDialog.addEventListener('close',()=>{
     if (removeDialog.returnValue === 'remove') pendingRemoval?.();
     pendingRemoval=undefined;
