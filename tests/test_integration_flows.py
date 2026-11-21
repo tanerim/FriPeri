@@ -32,7 +32,7 @@ def site(tmp_path, monkeypatch):
 def sign_in(client):
     response = client.post("/login", data={"username": "admin", "password": "correct-horse-2026"})
     assert response.status_code == 303
-    assert "site_session" in client.cookies
+    assert main.SESSION_COOKIE in client.cookies
     return response
 
 
@@ -129,3 +129,27 @@ def test_first_run_creates_isolated_installation(tmp_path, monkeypatch):
         assert created.status_code == 303
         assert is_initialized(fresh_db)
         assert client.get("/first-run").status_code == 303
+
+
+def test_post_media_upload_uses_isolated_upload_directory(site):
+    import io
+    from PIL import Image
+    client, db = site
+    sign_in(client)
+    buffer = io.BytesIO()
+    Image.new("RGB", (8, 8), color=(60, 90, 120)).save(buffer, format="PNG")
+    response = client.post(
+        "/admin/posts/new",
+        data={
+            "title_en": "Post with an image",
+            "excerpt_en": "Media upload regression",
+            "body_html_en": "<p>Image body</p>",
+            "status": "published",
+        },
+        files={"image": ("upload.png", buffer.getvalue(), "image/png")},
+    )
+    assert response.status_code == 303
+    with sqlite3.connect(db) as conn:
+        value = conn.execute("SELECT image_path FROM posts WHERE title=?", ("Post with an image",)).fetchone()
+    assert value and value[0].startswith("/static/uploads/")
+    assert (main.UPLOAD_DIR / value[0].rsplit("/", 1)[1]).is_file()
