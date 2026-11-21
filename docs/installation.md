@@ -8,7 +8,7 @@
 - A modern browser for the admin interface.
 - Git if cloning the repository; alternatively, download and extract the source archive.
 
-Contact-form messages are stored in the admin **Messages** inbox. No email service or SMTP configuration is required. See [Contact Details and Messages](../README.md#contact-details-and-messages).
+Contact-form messages are stored in the admin **Messages** inbox. No email service or SMTP configuration is required. See [Contact Details and Messages](user-guide.md#contact-details-and-messages).
 
 ### 1. Get the source code
 
@@ -19,7 +19,7 @@ cd friperi
 
 If you downloaded an archive, extract it and open a terminal in the directory containing `main.py` and `requirements.txt`.
 
-For a specific website design you can colen repository with site name
+To use a custom local directory name when cloning the repository:
 ```bash
 git clone https://github.com/tanerim/friperi.git MyWebSite
 cd MyWebSite
@@ -78,7 +78,6 @@ python scripts/generate_db.py --help
 
 The initializer refuses to overwrite an initialized database. If you specify `--db-path`, configure the application with the same `SITE_DB_PATH` before starting it.
 
-
 ---
 
-[Documentation index](index.md) · [Complete README](../README.md)
+[Documentation index](index.md) · [Project README](../README.md)
