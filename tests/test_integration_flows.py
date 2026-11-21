@@ -66,6 +66,20 @@ def test_create_edit_and_delete_post(site):
     assert client.get("/posts/" + post[1]).status_code == 200
     assert client.get("/admin/posts/" + str(post[0]) + "/edit").status_code == 200
 
+    edited = client.post("/admin/posts/" + str(post[0]) + "/edit", data={
+        "title_en": "Revised integration test post",
+        "excerpt_en": "Updated excerpt",
+        "body_html_en": "<p>Updated body</p>",
+        "status": "published",
+    })
+    assert edited.status_code == 303
+    with sqlite3.connect(db) as conn:
+        assert conn.execute("SELECT title FROM posts WHERE id=?", (post[0],)).fetchone()[0] == "Revised integration test post"
+    deleted = client.post("/admin/posts/" + str(post[0]) + "/delete")
+    assert deleted.status_code == 303
+    with sqlite3.connect(db) as conn:
+        assert conn.execute("SELECT COUNT(*) FROM posts WHERE id=?", (post[0],)).fetchone()[0] == 0
+
 
 def test_contact_validation_and_persistence(site):
     client, db = site
@@ -92,3 +106,26 @@ def test_runtime_health_exposes_no_filesystem_paths(site):
     response = client.get("/health")
     assert response.status_code == 200
     assert response.json() == {"status": "ok"}
+
+
+def test_first_run_creates_isolated_installation(tmp_path, monkeypatch):
+    fresh_db = tmp_path / "fresh" / "new.sqlite3"
+    assert not fresh_db.exists()
+    monkeypatch.setattr(main, "DB_PATH", fresh_db)
+    monkeypatch.setattr(main.app.state, "database_identity", None, raising=False)
+    with TestClient(main.app, base_url="https://testserver", follow_redirects=False) as client:
+        page = client.get("/first-run")
+        assert page.status_code == 200
+        token = client.cookies.get("friperi_setup")
+        assert token
+        created = client.post("/first-run", data={
+            "site_name": "New Test Installation",
+            "site_description": "A fresh FriPeri installation",
+            "admin_username": "admin",
+            "admin_password": "a-strong-password-2026",
+            "password_confirmation": "a-strong-password-2026",
+            "setup_token": token,
+        })
+        assert created.status_code == 303
+        assert is_initialized(fresh_db)
+        assert client.get("/first-run").status_code == 303
