@@ -31,6 +31,7 @@ from fastapi.responses import HTMLResponse, RedirectResponse, Response, JSONResp
 from custom_home import (validate_document, read_document, render_blocks, clean_html,
                          validate_appearance, SECTION_SVG_FIELDS, SECTION_SVG_FILENAME)
 from navigation import menu_mapping, validate_parents, menu_tree
+from documentation import list_documents, render_document
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
@@ -1408,6 +1409,28 @@ async def logout(request: Request) -> Response:
 
 def require_user(request: Request) -> str | None:
     return current_user(request)
+
+
+@app.get("/admin/documentation", response_class=HTMLResponse)
+async def admin_documentation(request: Request) -> Response:
+    user = require_user(request)
+    if not user:
+        return RedirectResponse("/login", status_code=303)
+    root = BASE_DIR / "docs"
+    documents = list_documents(root)
+    allowed = {document["name"] for document in documents}
+    selected = request.query_params.get("file") or ("index.md" if "index.md" in allowed else next(iter(sorted(allowed)), ""))
+    if selected and selected not in allowed:
+        return Response(status_code=404)
+    rendered = render_document(root, selected, allowed) if selected else ""
+    title = next((item["title"] for item in documents if item["name"] == selected), "Documentation")
+    return render_template(request, "admin/documentation.html", title, {
+        "active_admin": "documentation",
+        "documents": documents,
+        "selected_document": selected,
+        "document_html": rendered,
+        "document_title": title,
+    }, user=user)
 
 
 @app.get("/admin", response_class=HTMLResponse)
