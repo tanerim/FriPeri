@@ -609,7 +609,7 @@
   "users.initial_password": "Initial password (minimum 8 characters)",
   "users.new_password": "New password (blank = unchanged)",
   "users.role": "Role",
-  "users.role_cc": "Content creator (cc)",
+  "users.role_cc": "Content Creator",
   "users.role_editor": "Editor",
   "users.role_admin": "Administrator",
   "users.categories": "Content creator category grants",
