@@ -7,7 +7,7 @@
     });
   });
   // Long settings forms can be scanned and navigated by their existing headings.
-  document.querySelectorAll('.settings-form-v3:not([data-language-form]):not(.homepage-settings-form)').forEach(form => {
+  document.querySelectorAll('.settings-form-v3:not([data-language-form]):not(.homepage-settings-form):not(.design-settings-form)').forEach(form => {
     const sections = [...form.querySelectorAll(':scope > .settings-card-v3')];
     if (sections.length < 3) return;
     const nav = document.createElement('nav');
