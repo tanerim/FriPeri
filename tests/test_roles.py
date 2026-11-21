@@ -182,3 +182,66 @@ def test_block_editor_enforces_creator_categories_and_ownership(site):
     assert client.post(f"/admin/posts/{pid}/edit", data={
         **form, "editor_token": main.custom_home_token("writer2"),
     }).status_code == 403
+
+
+
+def test_editor_sign_in_lands_in_content_workspace(site):
+    client, db = site
+    _make_user(db, "another_editor", role="editor")
+    client.cookies.clear()
+    response = client.post("/login", data={
+        "username": "another_editor", "password": "writer-password-2026",
+    })
+    assert response.status_code == 303
+    assert response.headers["location"] == "/admin/posts"
+    page = client.get("/admin/posts")
+    assert page.status_code == 200
+    assert "another_editor" in page.text
+    assert client.get("/admin/pages").status_code == 200
+    assert client.get("/admin/users").status_code == 403
+
+
+def test_creator_publishes_to_category_just_created(site):
+    client, db = site
+    _make_user(db, "category_writer")
+    _as(client, "category_writer")
+    response = client.post("/admin/categories", data={"name": "Author's own category"})
+    assert response.status_code == 303
+    with sqlite3.connect(db) as conn:
+        cat = conn.execute("SELECT id FROM categories WHERE name=?", ("Author's own category",)).fetchone()[0]
+        assert conn.execute(
+            "SELECT COUNT(*) FROM user_categories WHERE category_id=?",
+            (cat,)
+        ).fetchone()[0] == 1
+    editor = client.get("/admin/posts/new")
+    assert editor.status_code == 200
+    assert f'value="{cat}"' in editor.text
+    payload = {
+        "editor_token": main.custom_home_token("category_writer"),
+        "title_en": "Published from own category",
+        "excerpt_en": "Description",
+        "category_id": str(cat),
+        "status": "published",
+        "post_en": "[]",
+        "creation_key": "c" * 32,
+    }
+    save = client.post("/admin/posts/new", data=payload)
+    assert save.status_code == 200, save.text
+    with sqlite3.connect(db) as conn:
+        row = conn.execute(
+            "SELECT category_id, status, author_id FROM posts WHERE title=?",
+            ("Published from own category",)
+        ).fetchone()
+    assert row is not None
+    assert row[0] == cat
+    assert row[1] == "published"
+
+
+def test_admin_post_form_exposes_separate_publish_and_draft(site):
+    client, _ = site
+    sign_in(client)
+    page = client.get("/admin/posts/new")
+    assert page.status_code == 200
+    assert 'id="builder-save-draft"' in page.text
+    assert 'id="builder-save"' in page.text
+    assert 'value="published"' in page.text
