@@ -19,7 +19,7 @@ MAX_ARCHIVE_MEMBERS = 2000
 MAX_MEMBER_BYTES = 128 * 1024 * 1024
 _CHUNK = 1024 * 1024
 _IMAGE_SUFFIXES = {".png", ".jpg", ".jpeg", ".webp", ".gif", ".svg", ".ico"}
-_BACKUP_NAME = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_.-]{0,119}\\.zip$")
+_BACKUP_NAME = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_.-]{0,119}[.]zip$")
 
 
 class BackupError(ValueError):
