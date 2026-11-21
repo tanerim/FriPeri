@@ -626,5 +626,8 @@
   "categories.edit_description": "Description",
   "categories.edit_secondary_label": "Secondary language label",
   "categories.edit_secondary_description": "Secondary language description",
-  "categories.edit_save": "Save category"
+  "categories.edit_save": "Save category",
+  "users.select_category": "Choose an assigned category",
+  "users.create_help": "Create accounts and grant content permissions.",
+  "users.manage_help": "Select an account to edit permissions or reset its password."
 }
