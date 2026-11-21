@@ -12,7 +12,6 @@ import secrets
 import shutil
 import zipfile
 import sqlite3
-import tempfile
 import xml.etree.ElementTree as ET
 from datetime import datetime, timezone
 from pathlib import Path
@@ -70,7 +69,16 @@ app = FastAPI(
 app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 
 @app.api_route("/sitemap.xml", methods=["GET", "HEAD"], include_in_schema=False)
-async def sitemap() -> Response:
+async def sitemap(request: Request) -> Response:
+    with get_db() as conn:
+        row = conn.execute("SELECT value FROM site_settings WHERE key = 'sitemap_xml'").fetchone()
+    if row is not None:
+        xml = row["value"].encode("utf-8")
+        return Response(
+            xml if request.method == "GET" else b"",
+            media_type="application/xml",
+            headers={"Content-Length": str(len(xml))},
+        )
     if not SITEMAP_PATH.is_file():
         return Response(status_code=404)
     return FileResponse(SITEMAP_PATH, media_type="application/xml")
@@ -120,7 +128,7 @@ def t(lang: str, key: str) -> str:
 def get_site_settings(conn: sqlite3.Connection) -> dict[str, str]:
     settings = dict(DEFAULT_SITE_SETTINGS)
     try:
-        rows = conn.execute("SELECT key, value FROM site_settings").fetchall()
+        rows = conn.execute("SELECT key, value FROM site_settings WHERE key != 'sitemap_xml'").fetchall()
     except sqlite3.OperationalError:
         return settings
     settings.update({row["key"]: row["value"] for row in rows})
@@ -1972,6 +1980,8 @@ def settings_form_token(request: Request, user: str) -> str:
 def settings_response(request, user, settings, *, error="", status_code=200,
                       sitemap_origin=None, sitemap_error=""):
     lang = pick_lang(request)
+    with get_db() as conn:
+        sitemap_saved = conn.execute("SELECT 1 FROM site_settings WHERE key = 'sitemap_xml'").fetchone() is not None
     return render_template(
         request,
         "admin/settings.html",
@@ -1985,7 +1995,7 @@ def settings_response(request, user, settings, *, error="", status_code=200,
             "category_cards": category_card_settings(settings),
             "settings_token": settings_form_token(request, user),
             "sitemap_origin": str(request.base_url).rstrip("/") if sitemap_origin is None else sitemap_origin,
-            "sitemap_exists": SITEMAP_PATH.is_file(),
+            "sitemap_exists": sitemap_saved or SITEMAP_PATH.is_file(),
             "sitemap_generated": request.query_params.get("sitemap") == "generated",
             "sitemap_error": sitemap_error,
         },
@@ -2083,23 +2093,13 @@ async def generate_sitemap(request: Request) -> Response:
         return settings_response(request, user, settings, sitemap_origin=origin,
                                  sitemap_error=t(pick_lang(request), "sitemap.too_large"), status_code=400)
 
-    temporary_path = None
     try:
-        with tempfile.NamedTemporaryFile(dir=STATIC_DIR, prefix=".sitemap-", delete=False) as output:
-            temporary_path = Path(output.name)
-            output.write(xml)
-        temporary_path.chmod(0o644)
-        temporary_path.replace(SITEMAP_PATH)
-    except OSError:
-        logging.getLogger(__name__).exception("Could not write sitemap to %s", SITEMAP_PATH)
+        with get_db() as conn:
+            set_site_settings(conn, {"sitemap_xml": xml.decode("utf-8")})
+    except sqlite3.Error:
+        logging.getLogger(__name__).exception("Could not save sitemap to the site database")
         return settings_response(request, user, settings, sitemap_origin=origin,
                                  sitemap_error=t(pick_lang(request), "sitemap.write_error"), status_code=500)
-    finally:
-        if temporary_path:
-            try:
-                temporary_path.unlink(missing_ok=True)
-            except OSError:
-                logging.getLogger(__name__).exception("Could not remove temporary sitemap %s", temporary_path)
     return RedirectResponse("/admin/settings?sitemap=generated#sitemap", status_code=303)
 
 

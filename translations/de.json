@@ -1,5 +1,5 @@
 {
-  "sitemap.write_error": "Die Sitemap konnte nicht gespeichert werden. Prüfen Sie die Serverprotokolle und die Schreibrechte des Anwendungskontos für das static-Verzeichnis.",
+  "sitemap.write_error": "Die Sitemap konnte nicht in der Datenbank gespeichert werden. Versuchen Sie es erneut und prüfen Sie bei anhaltenden Problemen die Serverprotokolle.",
   "admin.head_snippet": "Code für den Seitenkopf (<head>)",
   "admin.head_snippet_help": "Fügen Sie vertrauenswürdigen HTML-Code ein, etwa ein Bestätigungs-Tag für die Google Search Console oder ein Skript für Werbung oder Analysen. Speichern Sie das Feld leer, um den Code zu entfernen.",
   "sitemap.title": "Sitemap",

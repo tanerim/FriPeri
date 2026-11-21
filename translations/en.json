@@ -1,5 +1,5 @@
 {
-  "sitemap.write_error": "The sitemap could not be saved. Check the server logs and the application user’s write permissions on the static directory.",
+  "sitemap.write_error": "The sitemap could not be saved to the database. Try again and check the server logs if the problem persists.",
   "admin.head_snippet": "Page head snippet",
   "admin.head_snippet_help": "Paste trusted HTML such as a Google Search Console verification tag or an advertising or analytics script. Save the field empty to remove the snippet.",
   "sitemap.title": "Sitemap",
