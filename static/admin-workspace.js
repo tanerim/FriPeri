@@ -26,6 +26,25 @@
     });
     form.querySelector('.settings-page-header').after(nav);
   });
+  const sidebar = document.getElementById('admin-sidebar');
+  const sidebarToggle = document.querySelector('.admin-sidebar-toggle');
+  const collapsedKey = 'friperi.adminSidebarCollapsed';
+  if (sidebar && sidebarToggle) {
+    let collapsed = false;
+    try { collapsed = localStorage.getItem(collapsedKey) === 'true'; } catch (_) {}
+    const applySidebar = () => {
+      document.body.classList.toggle('admin-sidebar-collapsed', collapsed);
+      sidebarToggle.setAttribute('aria-expanded', String(!collapsed));
+      sidebarToggle.setAttribute('aria-label', collapsed ? 'Expand sidebar' : 'Collapse sidebar');
+      sidebarToggle.title = collapsed ? 'Expand sidebar' : 'Collapse sidebar';
+    };
+    applySidebar();
+    sidebarToggle.addEventListener('click', () => {
+      collapsed = !collapsed;
+      applySidebar();
+      try { localStorage.setItem(collapsedKey, String(collapsed)); } catch (_) {}
+    });
+  }
   const navigation = document.querySelector('.admin-navigation');
   if (navigation) {
     const desktop = window.matchMedia('(min-width: 1024px)');
