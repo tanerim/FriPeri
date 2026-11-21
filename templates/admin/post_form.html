@@ -5,6 +5,9 @@
   <form id="page-details" class="settings-form-v3 content-editor-form" method="post" action="{{ action }}" enctype="multipart/form-data">
    <input type="hidden" name="creation_key" value="{{ creation_key }}">
    {% if error %}<p class="error">{{ error }}</p>{% endif %}
+   {% if account_role == 'cc' and not categories %}
+   <p class="error">You need an assigned category to publish. Ask an administrator to grant access or <a href="/admin/categories">create a new category</a>.</p>
+   {% endif %}
    {% set status_value = values.get('status', 'draft') %}
    <header class="settings-page-header"><div><h1>{{ heading }}</h1><p>{{ t(lang, 'admin.admin_copy') }}</p></div><a class="admin-secondary" href="/admin/posts">← {{ t(lang, 'admin.new_content') }}</a></header>
      <section class="content-title-fields">
@@ -22,8 +25,8 @@
           <div class="content-publishing-grid">
             <label class="content-publishing-field">
               <span class="field-label">{{ t(lang, "content.category") }}</span>
-              <select class="modern-select" name="category_id">
-                <option value="" {{ 'selected' if not values.get('category_id') else '' }}>{{ t(lang, 'common.uncategorized') }}</option>
+              <select class="modern-select" name="category_id" {% if account_role == 'cc' %}required{% endif %}>
+                {% if account_role != 'cc' %}<option value="" {{ 'selected' if not values.get('category_id') else '' }}>{{ t(lang, 'common.uncategorized') }}</option>{% endif %}
                 {% for cat in categories %}
                   <option value="{{ cat['id'] }}" {{ "selected" if values.get("category_id", "")|string == cat["id"]|string else "" }}>{{ cat["name"] }}</option>
                 {% endfor %}
