@@ -8,14 +8,17 @@
 
 FriPeri is a self-hosted publishing application for personal websites, blogs, notes, and other category-based content. It combines a public website with a browser-based administration panel, stores content and configuration in SQLite, and lets you choose between an automatically updated content feed and a custom homepage built from visual blocks.
 
-**Documentation:**
-[Browse the complete documentation](docs/index.md)
-[Security policy](SECURITY.md)
-[Dependency security review](docs/dependency-security.md)
-[Third-party notices](THIRD_PARTY_NOTICES.md).
+## Project resources
+
+| Guides | Project information |
+| --- | --- |
+| [Documentation index](docs/index.md) | [Security policy](SECURITY.md) |
+| [Installation guide](docs/installation.md) | [Dependency security review](docs/dependency-security.md) |
+| [Administrator guide](docs/user-guide.md) | [Third-party notices](THIRD_PARTY_NOTICES.md) |
 
 ## Contents
 
+- [Project resources](#project-resources)
 - [What Is FriPeri?](#what-is-friperi)
 - [Features](#features)
 - [Installation](#installation)
@@ -83,7 +86,7 @@ cd friperi
 
 If you downloaded an archive, extract it and open a terminal in the directory containing `main.py` and `requirements.txt`.
 
-For a specific website design you can colen repository with site name
+To use a custom local directory name when cloning the repository:
 ```bash
 git clone https://github.com/tanerim/friperi.git MyWebSite
 cd MyWebSite
@@ -582,7 +585,15 @@ Review the output before replacing a committed stylesheet: runtime CSS also cont
 
 ### Validation
 
-Run `node tests/rich_text_browser.cjs` for isolated Chromium checks of text formatting, headings, lists, table operations, paste filtering, appearance settings, cell colors and responsive toolbar layout (set `CHROMIUM` if needed). Run `python -m unittest discover -s tests` for rich-text server filtering and document round-trip tests. `scripts/check_admin_changes.py` provides a broader test discovery entry point; these focused tests do not replace checking complete application flows.
+Run the Python regression suite locally (GitHub Actions are not used):
+
+```bash
+python -m pip install -r requirements-dev.txt
+python -m pip check
+python -m pytest -q tests/
+```
+
+Browser smoke tests are optional and are skipped unless a running FriPeri test instance and the environment variables described in [docs/testing.md](docs/testing.md) are configured. Run security and third-party license checks as described in [docs/dependency-security.md](docs/dependency-security.md) and [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
 
 For documentation and implementation changes, use an isolated installation and check the relevant flows:
 
@@ -602,7 +613,7 @@ Use the repository's Issues area for reproducible bugs and feature requests, and
 
 When contributing, use generic names, `example.com` addresses, and sample content. Update this README for user-facing changes, keep built-in translation dictionaries aligned when adding interface labels, and describe the checks performed in the pull request. Do not commit runtime databases, uploads, backups, credentials, or your virtual environment.
 
-For security-sensitive reports, avoid publishing exploit details or private data in a public issue. This checkout does not include a dedicated security policy or reporting address.
+For security-sensitive reports, do not publish exploit details or private data in a public issue. Follow the private disclosure instructions in [SECURITY.md](SECURITY.md).
 
 ## Troubleshooting
 
