@@ -64,3 +64,4 @@ After setup, `GET /health` returns `status`, `database`, and `uploads`. It repor
 ## Automated regression tests
 
 For an isolated test environment, dependency installation, ASGI endpoint tests, the optional Playwright browser suite and the manual mobile/browser checklist, see [Local regression and UI testing](testing.md). Tests are run locally, not through GitHub Actions.
+\n## License inventory\n\nBefore releases, consult [third-party notices](../THIRD_PARTY_NOTICES.md). The offline `python scripts/audit_third_party_licenses.py --strict` command audits package license metadata and included notice files for every pinned dependency; `--output third-party-installed.md` generates a reviewable report. This check is complementary to, not a replacement for, `pip-audit` or a review of icon and image provenance.\n
