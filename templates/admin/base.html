@@ -19,8 +19,8 @@
   <body class="admin-site hyperui-admin {{ 'admin-auth' if not user else '' }}">
     <a class="admin-skip" href="#admin-content">{{ t(lang, 'content.content') }} ↓</a>
     {% if user %}
-    <aside class="admin-sidebar">
-      <a class="admin-brand" href="/admin"><img class="admin-brand-logo" src="{{ static_url('images/FriPeri_Logo.png') }}" alt="FriPeri"></a>
+    <aside class="admin-sidebar" id="admin-sidebar">
+      <div class="admin-sidebar-header"><a class="admin-brand" href="/admin"><img class="admin-brand-logo" src="{{ static_url('images/FriPeri_Logo.png') }}" alt="FriPeri"></a><button type="button" class="admin-sidebar-toggle" aria-label="Collapse sidebar" aria-controls="admin-sidebar" aria-expanded="true" title="Collapse sidebar">{{ icon('chevron-left') }}</button></div>
       {% include 'admin/partials/admin_nav.html' %}
       <div class="admin-sidebar-footer"><span>{{ t(lang, 'admin.admin') }}</span><a href="/logout">{{ t(lang, 'nav.logout') }} ↗</a></div>
     </aside>
