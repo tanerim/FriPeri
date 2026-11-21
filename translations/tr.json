@@ -520,5 +520,10 @@
   "admin.documentation": "Belgelendirme",
   "admin.documentation_help": "docs dizinindeki proje belgelerini okuyun.",
   "admin.documentation_contents": "İçindekiler",
-  "admin.documentation_empty": "Belgelendirme dosyası bulunamadı."
+  "admin.documentation_empty": "Belgelendirme dosyası bulunamadı.",
+  "dashboard.wizard_intro": "Sitenizi yapılandırmaya başlayın",
+  "dashboard.wizard_text": "İlk içeriğinizi oluşturmadan önce ana sayfanızı yapılandırabilirsiniz.",
+  "dashboard.wizard_action": "Ana sayfayı yapılandır",
+  "builder.section_add_placeholder": "Blok türü seçin…",
+  "builder.section_add_section": "Bölüm ekle"
 }
