@@ -591,5 +591,9 @@
   "builder.reset_appearance": "Reset appearance",
   "builder.reset_cell": "Reset cell colors",
   "builder.cell_select_help": "Select a cell to change its colors.",
-  "builder.selected_cell": "Selected cell (row / column)"
+  "builder.selected_cell": "Selected cell (row / column)",
+  "admin.documentation": "Documentation",
+  "admin.documentation_help": "Read the local project documentation from the docs directory.",
+  "admin.documentation_contents": "Contents",
+  "admin.documentation_empty": "No documentation files were found."
 }
