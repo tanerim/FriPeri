@@ -515,5 +515,9 @@
   "categories.edit_save": "Kategorie speichern",
   "users.select_category": "Zugewiesene Kategorie wählen",
   "users.create_help": "Konten erstellen und Inhaltsrechte zuweisen.",
-  "users.manage_help": "Konto wählen, um Berechtigungen oder Passwort zu ändern."
+  "users.manage_help": "Konto wählen, um Berechtigungen oder Passwort zu ändern.",
+  "users.category_access_title": "Kategoriezugriff",
+  "users.category_access_help": "Weisen Sie Inhaltserstellern Kategorien zu. Rollen und Passwörter bleiben Administratoren vorbehalten.",
+  "users.grants_only_help": "Hier können nur Kategorieberechtigungen geändert werden.",
+  "users.no_creators": "Noch keine Inhaltsersteller vorhanden."
 }
