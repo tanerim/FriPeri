@@ -515,5 +515,9 @@
   "categories.edit_save": "Enregistrer la catégorie",
   "users.select_category": "Choisir une catégorie autorisée",
   "users.create_help": "Créez des comptes et attribuez les autorisations de contenu.",
-  "users.manage_help": "Sélectionnez un compte pour modifier les droits ou le mot de passe."
+  "users.manage_help": "Sélectionnez un compte pour modifier les droits ou le mot de passe.",
+  "users.category_access_title": "Accès aux catégories",
+  "users.category_access_help": "Attribuez des catégories aux créateurs de contenu. Les rôles et mots de passe restent réservés aux administrateurs.",
+  "users.grants_only_help": "Seules les autorisations de catégorie peuvent être modifiées ici.",
+  "users.no_creators": "Aucun créateur de contenu pour le moment."
 }
