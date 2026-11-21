@@ -13,9 +13,9 @@
     <div class="admin-nav-group nav-group-{{ loop.index }}">
       <p class="admin-nav-heading">{{ t(lang, heading) }}</p>
       {% for key, href, label, glyph in links %}
-      {% if (key != 'about' or site_settings.get('show_about_link', '1') == '1') and (account_role == 'admin' or key in (['admin', 'posts', 'categories', 'documentation'] if account_role == 'cc' else ['admin', 'posts', 'categories', 'pages', 'about', 'homepage', 'documentation'])) %}
+      {% if (key != 'about' or site_settings.get('show_about_link', '1') == '1') and (account_role == 'admin' or key in (['admin', 'posts', 'categories', 'documentation'] if account_role == 'cc' else ['admin', 'posts', 'categories', 'pages', 'about', 'homepage', 'documentation', 'users'])) %}
       <a class="admin-nav-link nav-{{ glyph }} {{ 'is-active' if active == key else '' }}" href="{{ href }}" {% if active == key %}aria-current="page"{% endif %}>
-        {{ icon(glyph) }}<span>{{ t(lang, label) }}</span>
+        {{ icon(glyph) }}<span>{{ t(lang, 'users.category_access_title') if key == 'users' and account_role == 'editor' else t(lang, label) }}</span>
       </a>
       {% endif %}
       {% endfor %}
