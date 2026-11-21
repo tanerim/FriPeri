@@ -12,6 +12,7 @@ def test_frontend_license_texts_and_documentation_present():
     for name, holder in [
         ("HyperUI-MIT.txt", "Mark Mead"),
         ("TailwindCSS-MIT.txt", "Tailwind Labs, Inc."),
+        ("packageurl-python-MIT.txt", "the purl authors"),
     ]:
         text = (ROOT / "licenses" / name).read_text(encoding="utf-8")
         assert text.startswith("MIT License")
