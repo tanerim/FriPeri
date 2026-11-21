@@ -11,6 +11,7 @@ FriPeri uses **three account roles**. The initial account created during first-r
 | Edit existing posts | Own posts only | Any post | Any post |
 | Delete posts | No | Yes | Yes |
 | Create categories | Yes (automatically assigned) | Yes | Yes |
+| Edit category names and descriptions | No | Yes | Yes |
 | Delete categories | No | Yes | Yes |
 | Create, edit and delete custom pages | No | Yes | Yes |
 | Edit About page and custom-home content | No | Yes | Yes |
@@ -31,7 +32,7 @@ Sign in as administrator and open **Configuration → Users** (`/admin/users`).
 4. Save. A user can sign in at `/login` with the new credentials.
 5. Use the existing account form to change a role, update category permissions or set a new password. Leave password blank to keep it unchanged.
 
-An administrator cannot delete their own account or demote themselves. The last administrator account cannot be removed or demoted. Deleting an account does **not** delete existing posts: their `author_id` is set to NULL and the content remains available for editors/administrators. Deletion invalidates the deleted user's v3 sessions.
+An administrator cannot delete their own account or demote themselves. The last administrator account cannot be removed or demoted. Deleting an account does **not** delete existing posts: their `author_id` is set to NULL and the content remains available for editors/administrators. Deleting an account invalidates that user's sessions. Changing a user's role, password, or category grants invalidates their existing sessions as well; they must sign in again.
 
 ## Creator ownership and categories
 
@@ -46,6 +47,7 @@ Previously existing posts do not have a creator assigned automatically. Editors/
 Schema migration runs automatically at startup and adds:
 
 - `users.role` — `admin` for all existing accounts.
+- `users.session_epoch` — invalidates previously issued sessions when access permissions or passwords are updated.
 - `posts.author_id` — tracks the account that created new posts.
 - `user_categories` — many-to-many category grants for content creators.
 
@@ -63,4 +65,4 @@ python -m pip check
 python -m pytest -q tests/
 ```
 
-The new `tests/test_roles.py` checks role migration, post ownership, creator category grants, account management and editor restrictions. No GitHub Actions are used.
+The new `tests/test_roles.py` checks role migration, post ownership, creator category grants, visual-builder saves, account management, session revocation and editor restrictions. No GitHub Actions are used.
