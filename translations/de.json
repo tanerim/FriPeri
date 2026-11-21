@@ -23,7 +23,7 @@
   "builder.section_background": "Hintergrundbild",
   "builder.section_anchor": "Abschnitt-ID (für #Links)",
   "builder.section_image": "HTTPS- oder hochgeladene Hintergrundbild-URL",
-  "builder.section_add": "Block zum Abschnitt hinzufügen",
+  "builder.section_add": "Block zu diesem Abschnitt hinzufügen",
   "builder.section_split_preset": "Zweispaltiger Hero-Abschnitt",
   "builder.heading_accent": "Hervorgehobener Text",
   "builder.layout": "Layout",
@@ -481,5 +481,10 @@
   "admin.documentation": "Dokumentation",
   "admin.documentation_help": "Projektdokumentation aus dem docs-Verzeichnis lesen.",
   "admin.documentation_contents": "Inhalt",
-  "admin.documentation_empty": "Keine Dokumentationsdateien gefunden."
+  "admin.documentation_empty": "Keine Dokumentationsdateien gefunden.",
+  "dashboard.wizard_intro": "Richten Sie Ihre Website ein",
+  "dashboard.wizard_text": "Konfigurieren Sie zunächst die Startseite Ihrer Website.",
+  "dashboard.wizard_action": "Startseite konfigurieren",
+  "builder.section_add_placeholder": "Blocktyp auswählen…",
+  "builder.section_add_section": "Abschnitt hinzufügen"
 }
