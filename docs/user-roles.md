@@ -29,8 +29,8 @@ Sign in as administrator and open **Configuration → Users** (`/admin/users`).
 1. Create a username (3–64 characters using letters, digits, underscore, period or hyphen) and an initial password of at least eight characters.
 2. Choose `cc`, `editor` or `admin`.
 3. For `cc`, select one or more categories in the permission list. Editors and administrators have access to all categories.
-4. Save. A user can sign in at `/login` with the new credentials.
-5. Use the existing account form to change a role, update category permissions or set a new password. Leave password blank to keep it unchanged.
+4. Save. A user can sign in at `/login` with the new credentials. Content creators and editors are sent directly to their **Posts** workspace; administrators open the dashboard.
+5. In the compact account list, expand the relevant user to change their role, update category permissions or set a new password. Leave password blank to keep it unchanged.
 
 An administrator cannot delete their own account or demote themselves. The last administrator account cannot be removed or demoted. Deleting an account does **not** delete existing posts: their `author_id` is set to NULL and the content remains available for editors/administrators. Deleting an account invalidates that user's sessions. Changing a user's role, password, or category grants invalidates their existing sessions as well; they must sign in again.
 
@@ -38,7 +38,7 @@ An administrator cannot delete their own account or demote themselves. The last 
 
 A content creator is allowed to select only categories explicitly assigned by an administrator or categories they successfully create. A newly created category is automatically added to its creator's allowed set. Trying to create a category with an existing name does not grant access to that existing category.
 
-Creators must choose an assigned category when saving a post; **Uncategorized** is not available to them. The server rejects attempts to save to an unassigned category or to edit another author's post, even if someone manually constructs a URL or sends an HTTP request. Creators cannot delete posts or categories.
+Creators must explicitly choose an assigned category when saving a post; **Uncategorized** is not available to them. The post editor displays separate **Save as draft** and **Publish** actions. The server rejects attempts to save to an unassigned category or to edit another author's post, even if someone manually constructs a URL or sends an HTTP request. Creators cannot delete posts or categories.
 
 Previously existing posts do not have a creator assigned automatically. Editors/administrators can still manage these posts; creators cannot claim them merely by editing.
 
