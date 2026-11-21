@@ -384,8 +384,8 @@ def verify_session_v3(raw: str) -> str | None:
 
     # --- Check that the user still exists (catches deletion) ---
     with get_db() as conn:
-        exists = conn.execute("SELECT 1 FROM users WHERE id = ?", (user_id,)).fetchone()
-        if not exists:
+        exists = conn.execute("SELECT username FROM users WHERE id = ?", (user_id,)).fetchone()
+        if not exists or exists["username"] != username:
             return None
 
         # --- Check token revocation ---
@@ -434,6 +434,8 @@ def verify_session(raw: str) -> str | None:
         with get_db() as conn:
             if _is_token_revoked(conn, token):
                 return None
+            if conn.execute("SELECT 1 FROM users WHERE username=?", (username,)).fetchone() is None:
+                return None
         return username
 
     # --- v1 format: username:timestamp:signature (legacy, no token) ---
@@ -453,6 +455,9 @@ def verify_session(raw: str) -> str | None:
     expected_signature = hmac.new(SECRET_KEY.encode(), f"{username}:{ts_str}".encode(), hashlib.sha256).hexdigest()
     if not hmac.compare_digest(signature, expected_signature):
         return None
+    with get_db() as conn:
+        if conn.execute("SELECT 1 FROM users WHERE username=?", (username,)).fetchone() is None:
+            return None
     return username
 
 
