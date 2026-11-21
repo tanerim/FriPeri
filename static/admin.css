@@ -650,3 +650,38 @@
     padding-bottom: calc(28px + env(safe-area-inset-bottom, 0px));
   }
 }
+
+
+/* Responsive admin polish: preserve navigation, forms and readable docs. */
+@media (max-width: 1023px) {
+  .hyperui-admin .admin-sidebar { max-width: 100%; }
+  .hyperui-admin .admin-navigation { min-width: 0; }
+  .hyperui-admin .admin-shell { min-width: 0; width: 100%; }
+  .hyperui-admin .admin-topbar { flex-wrap: wrap; }
+  .hyperui-admin .admin-topbar-actions { min-width: 0; max-width: 100%; flex-wrap: wrap; }
+}
+@media (max-width: 640px) {
+  .hyperui-admin .admin-navigation .hyperui-nav {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 5px;
+  }
+  .hyperui-admin .admin-nav-link { min-width: 0; overflow-wrap: anywhere; }
+  .hyperui-admin .admin-settings-container,
+  .hyperui-admin .documentation-layout,
+  .hyperui-admin .documentation-article { min-width: 0; max-width: 100%; }
+  .hyperui-admin .settings-page-header { flex-wrap: wrap; gap: 12px; }
+  .hyperui-admin .settings-page-header .settings-primary { max-width: 100%; }
+  .hyperui-admin .documentation-list { max-height: 205px; }
+  .hyperui-admin .documentation-article { padding: 16px 14px; }
+  .hyperui-admin .documentation-prose pre { max-width: 100%; }
+  .hyperui-admin .documentation-prose :is(h1,h2,h3,h4) { overflow-wrap: anywhere; }
+}
+@media (max-width: 380px) {
+  .hyperui-admin .admin-navigation .hyperui-nav { grid-template-columns: minmax(0,1fr); }
+}
+/* Motion preferences apply to sidebar and scroll effects, not only the editor. */
+@media (prefers-reduced-motion: reduce) {
+  .hyperui-admin .admin-sidebar,
+  .hyperui-admin .admin-shell,
+  .hyperui-admin .admin-sidebar-toggle .admin-icon { transition: none !important; }
+}
