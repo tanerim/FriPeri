@@ -52,7 +52,6 @@ The database contains posts, custom pages, categories, tags, administrator passw
 
 Uploaded URLs use `/static/uploads/<filename>`. If you override storage locations, ensure these URLs still resolve to the actual upload directory through the static directory layout or your web-server configuration. Setting `SITE_UPLOAD_DIR` alone does not create a new public URL mapping.
 
-
 ---
 
-[Documentation index](index.md) · [Complete README](../README.md)
+[Documentation index](index.md) · [Project README](../README.md)
