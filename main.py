@@ -1452,7 +1452,7 @@ async def admin(request: Request) -> Response:
                 "SELECT COUNT(*) FROM posts WHERE author_id=? AND category_id IS NULL",
                 (account["id"],)).fetchone()[0]
         else:
-                counts = dict(conn.execute("""
+            counts = dict(conn.execute("""
                 SELECT COUNT(*) AS total,
                        COUNT(CASE WHEN status = 'published' THEN 1 END) AS published,
                        COUNT(CASE WHEN status = 'draft' THEN 1 END) AS drafts
