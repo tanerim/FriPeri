@@ -118,7 +118,7 @@
       },
       children:[
         {...newBlock('section'), children:[
-          {...newBlock('heading'), level:'h1', text:t('starter_title'),
+          {...newBlock('heading'), level:blocks().length ? 'h2' : 'h1', text:t('starter_title'),
             appearance:{font_size:96,font_weight:'heavy'}},
           {...newBlock('text'), html:el('p','',t('starter_text')).outerHTML},
           {...newBlock('section'), appearance:{layout:'actions',gap:14}, children:[
@@ -138,6 +138,7 @@
       blocks().splice(selected,0,section);
     });
     canvas.children[selected]?.scrollIntoView({block:'nearest',behavior:'smooth'});
+    canvas.children[selected]?.querySelector('.builder-hero-editor input')?.focus({preventScroll:true});
   }
   const symbols = {section:'▥',heading:'H',text:'¶',list:'☷',table:'▦',image:'▧',video:'▷',button:'↗',quote:'❝',callout:'!',stats:'№',faq:'?',divider:'―',category:'▤',legacy_html:'<>'};
   Object.keys(symbols).forEach(type => {
@@ -147,10 +148,16 @@
     document.getElementById('builder-add-blocks').append(node);
   });
   const presets = document.getElementById('builder-section-presets');
-  presets.append(
-    button(t('section_split_preset'),()=>addSectionPreset(true),'admin-secondary'),
-    button(t('section_light_preset'),()=>addSectionPreset(false),'admin-secondary')
-  );
+  for (const [theme,key] of [['dark','section_split_preset'],['light','section_light_preset']]) {
+    const preset=button('',()=>addSectionPreset(theme === 'dark'),'builder-preset');
+    preset.dataset.theme=theme;
+    const thumbnail=el('span','builder-preset-thumbnail');
+    thumbnail.setAttribute('aria-hidden','true');
+    thumbnail.append(el('span','builder-preset-copy'),el('span','builder-preset-visual'));
+    preset.append(thumbnail,el('span','builder-preset-label',t(key)),el('span','builder-preset-add','+'));
+    preset.lastChild.setAttribute('aria-hidden','true');
+    presets.append(preset);
+  }
 
   function safeURL(value, media = false) {
     if (/[\s\x00-\x1f\x7f\\]/.test(value)) return '';
@@ -496,13 +503,13 @@
     ['section_background', [
       ['background_fit',['cover','contain']],['background_position',['center','left','right','top','bottom']],
       ['overlay_color','color','#131c32'],['overlay_opacity',0,100,0],
-      ['svg_pattern',['none','ribbons','waves','grid']],['svg_primary','color','#7466ef'],
-      ['svg_secondary','color','#5ed8ce'],['svg_opacity',0,100,100],['edge',['flat','wave']],
+      ['edge',['flat','wave']],
       ['edge_color','color','#f7f8f5']
     ]]
   ];
   const appearanceFields = {
-    section: sectionControls.flatMap(([, fields]) => fields),
+    section: [...sectionControls.flatMap(([, fields]) => fields),
+      ['svg_pattern'],['svg_primary'],['svg_secondary'],['svg_opacity']],
     heading: [['font_size',18,160,48],['font_weight',['normal','bold','heavy']],['accent_color','color','#2563eb'],['accent_style',['color_only','underline']]],
     list: [['font_size',10,72,18],['item_gap',0,48,8]],
     table: [['cell_background','color','#ffffff'],['cell_color','color','#17243b'],['header_background','color','#eef2ff'],['header_color','color','#17243b']],
@@ -625,7 +632,125 @@
     return panel;
   }
 
-  function sectionEditor(block, body, card, depth) {
+  function sectionSvgGenerator(block, body) {
+    const panel = el('details','builder-section-panel builder-svg-generator');
+    panel.open = true;
+    panel.append(el('summary','',t('section_svg_title')));
+    const preview = el('div','builder-svg-preview');
+    const settings = el('div','builder-svg-controls');
+    const note = el('p','builder-help');
+    note.setAttribute('role','status');
+    const actions = el('div','builder-actions');
+    const draft = {
+      svg_pattern: block.appearance?.svg_pattern === 'none' ? 'ribbons' : block.appearance?.svg_pattern || 'ribbons',
+      svg_primary: block.appearance?.svg_primary || '#7466ef',
+      svg_secondary: block.appearance?.svg_secondary || '#5ed8ce',
+      svg_opacity: block.appearance?.svg_opacity ?? 100
+    };
+    const redraw = () => {
+      const template = document.getElementById('builder-art-'+draft.svg_pattern);
+      preview.replaceChildren(template.content.firstElementChild.cloneNode(true));
+      preview.style.setProperty('--block-svg-primary',draft.svg_primary);
+      preview.style.setProperty('--block-svg-secondary',draft.svg_secondary);
+      preview.style.setProperty('--block-svg-opacity',draft.svg_opacity + '%');
+      preview.style.backgroundColor = getComputedStyle(body).backgroundColor;
+      note.textContent = block.svg_url && Object.keys(draft).every(key=>block.appearance?.[key] === draft[key])
+        ? t('section_svg_saved') : t('section_svg_preview_help');
+    };
+    const patternField = el('label','builder-select');
+    patternField.append(el('span','',t('svg_pattern')));
+    const pattern = el('select');
+    for (const name of ['ribbons','waves','grid']) pattern.add(new Option(t('option_'+name),name));
+    pattern.value = draft.svg_pattern;
+    pattern.addEventListener('change',()=>{ draft.svg_pattern=pattern.value; redraw(); });
+    patternField.append(pattern); settings.append(patternField);
+    for (const key of ['svg_primary','svg_secondary']) {
+      settings.append(field(t(key),draft[key],value=>{ draft[key]=value; redraw(); },'color'));
+    }
+    const opacityField = el('label','builder-select');
+    opacityField.append(el('span','',t('svg_opacity')));
+    const opacity = el('input');
+    opacity.type='range'; opacity.min='0'; opacity.max='100'; opacity.value=String(draft.svg_opacity);
+    opacity.addEventListener('input',()=>{ draft.svg_opacity=Number(opacity.value); redraw(); });
+    opacityField.append(opacity); settings.append(opacityField);
+
+    const save = button(t('section_svg_save'),async()=>{
+      const payload = new FormData();
+      payload.set('editor_token',config.token);
+      for (const [key,value] of Object.entries(draft)) payload.set(key,String(value));
+      busy++; updateStatus(); note.textContent=t('section_svg_saving');
+      try {
+        const response = await fetch('/admin/section-svg',{method:'POST',body:payload});
+        const result = await responseJSON(response);
+        if (!response.ok || !result.url) throw new Error(result.error || t('section_svg_error'));
+        checkpoint();
+        block.svg_url=result.url;
+        block.appearance={...block.appearance,...draft};
+        applyAppearance(block,body);
+        checkpoint();
+        remove.disabled=false;
+        redraw();
+      } catch (error) {
+        note.textContent=error.message || t('section_svg_error');
+      } finally {
+        busy--; updateStatus();
+      }
+    },'settings-primary');
+    const remove = button(t('section_svg_remove'),()=>{
+      checkpoint();
+      delete block.svg_url;
+      block.appearance={...block.appearance,svg_pattern:'none'};
+      applyAppearance(block,body);
+      checkpoint();
+      remove.disabled=true;
+      redraw();
+    },'settings-secondary');
+    remove.disabled = !block.appearance?.svg_pattern || block.appearance.svg_pattern === 'none';
+    actions.append(save,remove);
+    panel.append(preview,settings,actions,note);
+    requestAnimationFrame(redraw);
+    return panel;
+  }
+
+  const advancedHeroes = new WeakSet();
+
+  function heroContent(block) {
+    if (block.type !== 'section' || block.children.length !== 2) return null;
+    const [copy,image] = block.children;
+    if (copy.type !== 'section' || image.type !== 'image' || copy.children.length !== 3) return null;
+    const [heading,text,actions] = copy.children;
+    if (heading.type !== 'heading' || text.type !== 'text' || actions.type !== 'section' ||
+        actions.children.length !== 2 || actions.children.some(action=>action.type !== 'button')) return null;
+    return {heading,text,image,actions:actions.children};
+  }
+
+  function editHero(hero) {
+    const editor=el('div','builder-hero-editor');
+    const group = label => {
+      const panel=el('fieldset','builder-hero-group');
+      panel.append(el('legend','',t(label))); editor.append(panel);
+      return panel;
+    };
+    const copy=group('hero_copy_fields');
+    const textLabel=el('span','builder-hero-label',t('text'));
+    const description=editable('div',hero.text.html,t('text'),value=>{hero.text.html=value;},true);
+    description.classList.add('builder-hero-description');
+    copy.append(
+      field(t('heading'),hero.heading.text,value=>{hero.heading.text=value;}),
+      field(t('heading_accent'),hero.heading.accent,value=>{hero.heading.accent=value;}),
+      textLabel,description
+    );
+    hero.actions.forEach((action,index)=>{
+      const controls=group(index ? 'hero_secondary_button' : 'hero_primary_button');
+      controls.append(field(t('hero_button_label'),action.text,value=>{action.text=value;}),
+                      field(t('url'),action.url,value=>{action.url=value.trim();}));
+    });
+    const image=group('hero_visual');
+    media(hero.image,image);
+    return editor;
+  }
+
+  function sectionEditor(block, body, card, depth, hero) {
     if (safeURL(block.image, true)) {
       const image = el('img','section-image'); image.src = block.image; image.alt = '';
       body.append(image);
@@ -657,26 +782,14 @@
     }));
     uploadField.append(el('span','',t('upload')),file);
     mediaFields.append(urlField,uploadField);
-    background.append(mediaFields,button(t('section_svg_download'),()=>{
-      const art = body.querySelector(':scope > .section-art');
-      if (!art) return message(t('section_svg_choose'),true);
-      const svg=art.cloneNode(true);
-      svg.setAttribute('width','1440'); svg.setAttribute('height','760');
-      svg.setAttribute('opacity',String((block.appearance?.svg_opacity ?? 100)/100));
-      for (const path of svg.querySelectorAll('path')) {
-        const secondary=path.classList.contains('section-art-secondary');
-        const paint=secondary ? block.appearance?.svg_secondary || '#5ed8ce' : block.appearance?.svg_primary || '#7466ef';
-        path.setAttribute(path.classList.contains('section-art-primary-stroke') ? 'stroke' : 'fill',paint);
-      }
-      const url=URL.createObjectURL(new Blob([new XMLSerializer().serializeToString(svg)],{type:'image/svg+xml'}));
-      const download=el('a'); download.href=url; download.download='section-'+art.dataset.pattern+'.svg';
-      download.click(); setTimeout(()=>URL.revokeObjectURL(url),1000);
-    }));
-    tools.append(layout,background);
+    background.append(mediaFields);
+    const generator = sectionSvgGenerator(block,body);
+    generator.open = depth === 0 && !hero;
+    tools.append(layout,background,generator);
+    if (hero) card.append(editHero(hero));
     card.append(tools);
     const content = el('div','section-content builder-section-content');
-    renderBlocks(block.children, content, depth+1);
-    body.append(content);
+
     const add = el('select');
     add.setAttribute('aria-label',t('section_add'));
     add.add(new Option(t('section_add'),''));
@@ -689,7 +802,31 @@
       if (blockCount(blocks()) >= 80) return message(t('limit'),true);
       mutate(()=>block.children.push(newBlock(kind)));
     });
-    body.append(add);
+    if (hero) {
+      const advanced=el('details','builder-section-panel builder-hero-advanced');
+      advanced.append(el('summary','',t('hero_advanced')),content,add);
+      advanced.open=advancedHeroes.has(block);
+      const syncMode=()=>{
+        const editor=card.querySelector(':scope > .builder-hero-editor');
+        editor.hidden=advanced.open;
+        content.replaceChildren();
+        if (advanced.open) {
+          advancedHeroes.add(block);
+          renderBlocks(block.children,content,depth+1);
+        } else {
+          advancedHeroes.delete(block);
+          const updated=heroContent(block);
+          if (updated) editor.replaceWith(editHero(updated));
+        }
+      };
+      card.querySelector(':scope > .builder-hero-editor').hidden=advanced.open;
+      if (advanced.open) renderBlocks(block.children,content,depth+1);
+      advanced.addEventListener('toggle',syncMode);
+      body.append(advanced);
+    } else {
+      renderBlocks(block.children,content,depth+1);
+      body.append(content,add);
+    }
   }
 
   function render() {
@@ -706,7 +843,8 @@
         selected=index;
         Array.from(canvas.children).forEach((node,i)=>node.classList.toggle('is-selected',i===index));
       });
-      const header=el('header','builder-block-header');header.append(el('strong','',String(index+1).padStart(2,'0')+' / '+t(block.type)));
+      const hero=heroContent(block);
+      const header=el('header','builder-block-header');header.append(el('strong','',String(index+1).padStart(2,'0')+' / '+t(hero ? 'hero_section' : block.type)));
       const actions=el('div','builder-block-actions');
       const move = direction => mutate(()=>{
         [items[index+direction],items[index]]=[items[index],items[index+direction]];
@@ -724,6 +862,7 @@
           if (!depth) selected=index+1;
         });
       });
+      if (hero) actions.append(button(t('preview'),()=>previewButton.click()));
       actions.append(up,down,copy,button(t('remove'),()=>mutate(()=>{items.splice(index,1);if (!depth) selected=Math.min(index,items.length-1);})));header.append(actions);card.append(header);
       const styles=el('div','builder-style-controls');
       for (const [key,values] of [['tone',['plain','soft','accent','dark','white','custom']],['align',['left','center','right']],['width',['normal','wide']]])styles.append(select(t(key),block[key],values.map(v=>[v,t(v)]),v=>{block[key]=v;}));
@@ -741,7 +880,7 @@
       const body=el('div',`custom-block custom-${block.type} tone-${block.tone} align-${block.align} width-${block.width}`);
       if(block.tone==='custom') body.style.backgroundColor=block.background || '#ffffff';
       if(block.foreground) body.style.setProperty('--text-color',block.foreground);
-      if (block.type === 'section') sectionEditor(block,body,card,depth);
+      if (block.type === 'section') sectionEditor(block,body,card,depth,hero);
       else {
         const appearance=appearanceControls(block,body);if(appearance)card.append(appearance);
       }

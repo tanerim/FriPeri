@@ -337,3 +337,4 @@
   text-decoration: underline;
   text-underline-offset: .25em;
 }
+.custom-section > .section-art-saved { opacity: 1; object-fit: cover; }

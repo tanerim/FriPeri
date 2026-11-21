@@ -12,6 +12,7 @@ import secrets
 import shutil
 import zipfile
 import sqlite3
+import tempfile
 import xml.etree.ElementTree as ET
 from datetime import datetime, timezone
 from pathlib import Path
@@ -27,7 +28,8 @@ from language_migration import (backup_before_language_migration, migrate_langua
 from dotenv import load_dotenv
 from fastapi import FastAPI, Request, UploadFile, Form
 from fastapi.responses import HTMLResponse, RedirectResponse, Response, JSONResponse, FileResponse
-from custom_home import validate_document, read_document, render_blocks, clean_html
+from custom_home import (validate_document, read_document, render_blocks, clean_html,
+                         validate_appearance, SECTION_SVG_FIELDS, SECTION_SVG_FILENAME)
 from navigation import menu_mapping, validate_parents, menu_tree
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
@@ -66,6 +68,26 @@ app = FastAPI(
     description=os.getenv("SITE_DESCRIPTION", "Personal publishing system"),
     version="2.0.0",
 )
+@app.api_route("/static/images/friperi-section-{digest}.svg", methods=["GET", "HEAD"], include_in_schema=False)
+async def section_svg(digest: str, request: Request) -> Response:
+    filename = f"friperi-section-{digest}.svg"
+    if not re.fullmatch(SECTION_SVG_FILENAME, filename):
+        return Response(status_code=404)
+    asset = STATIC_DIR / "images" / filename
+    headers = {"Cache-Control": "public, max-age=31536000, immutable", "X-Content-Type-Options": "nosniff"}
+    if asset.is_file():
+        return FileResponse(asset, media_type="image/svg+xml", headers=headers)
+    if not request.app.state.initialized:
+        return Response(status_code=404)
+    with get_db() as conn:
+        row = conn.execute("SELECT value FROM site_settings WHERE key = ?", (f"section_svg:{filename}",)).fetchone()
+    if row is None:
+        return Response(status_code=404)
+    svg = row["value"].encode("utf-8")
+    headers["Content-Length"] = str(len(svg))
+    return Response(svg if request.method == "GET" else b"", media_type="image/svg+xml", headers=headers)
+
+
 app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 
 @app.api_route("/sitemap.xml", methods=["GET", "HEAD"], include_in_schema=False)
@@ -128,7 +150,7 @@ def t(lang: str, key: str) -> str:
 def get_site_settings(conn: sqlite3.Connection) -> dict[str, str]:
     settings = dict(DEFAULT_SITE_SETTINGS)
     try:
-        rows = conn.execute("SELECT key, value FROM site_settings WHERE key != 'sitemap_xml'").fetchall()
+        rows = conn.execute("SELECT key, value FROM site_settings WHERE key != 'sitemap_xml' AND key NOT GLOB 'section_svg:*'").fetchall()
     except sqlite3.OperationalError:
         return settings
     settings.update({row["key"]: row["value"] for row in rows})
@@ -2545,6 +2567,50 @@ async def preview_custom_home(request: Request) -> Response:
         }, require_user(request))
     title = t(pick_lang(request), 'admin.pages' if builder_page(request) == 'page' else ('nav.about' if builder_page(request) == 'about' else 'nav.home'))
     return render_template(request, 'custom_home.html', title, {'custom_blocks': prepare_custom_blocks(blocks, pick_lang(request))}, require_user(request))
+
+
+@app.post('/admin/section-svg')
+async def save_section_svg(request: Request) -> Response:
+    form = await request.form()
+    if not custom_home_authorized(request, form):
+        return JSONResponse({'error': t(pick_lang(request), 'builder.session_error')}, status_code=403)
+    try:
+        options = validate_appearance({
+            'svg_pattern': form.get('svg_pattern', 'ribbons'),
+            'svg_primary': form.get('svg_primary', '#7466ef'),
+            'svg_secondary': form.get('svg_secondary', '#5ed8ce'),
+            'svg_opacity': int(str(form.get('svg_opacity', '100'))),
+        }, SECTION_SVG_FIELDS)
+    except ValueError:
+        return JSONResponse({'error': t(pick_lang(request), 'builder.invalid')}, status_code=400)
+    art = templates.env.get_template('partials/section_art.html').module.section_art
+    svg = art(options['svg_pattern'], options).strip().encode('utf-8')
+    digest = hashlib.sha256(svg).hexdigest()[:32]
+    filename = f'friperi-section-{digest}.svg'
+    asset = STATIC_DIR / 'images' / filename
+    temporary = None
+    try:
+        if not asset.is_file():
+            asset.parent.mkdir(parents=True, exist_ok=True)
+            with tempfile.NamedTemporaryFile(dir=asset.parent, prefix='.section-svg-', delete=False) as output:
+                temporary = Path(output.name)
+                output.write(svg)
+            temporary.chmod(0o644)
+            temporary.replace(asset)
+    except OSError:
+        try:
+            with get_db() as conn:
+                set_site_settings(conn, {f'section_svg:{filename}': svg.decode('utf-8')})
+        except sqlite3.Error:
+            logging.getLogger(__name__).exception("Could not store generated section SVG")
+            return JSONResponse({'error': t(pick_lang(request), 'builder.section_svg_error')}, status_code=500)
+    finally:
+        if temporary:
+            try:
+                temporary.unlink(missing_ok=True)
+            except OSError:
+                logging.getLogger(__name__).exception("Could not remove temporary section SVG %s", temporary)
+    return JSONResponse({'url': f'/static/images/{filename}'})
 
 
 @app.post('/admin/posts/new/upload')

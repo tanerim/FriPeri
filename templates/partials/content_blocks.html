@@ -19,7 +19,10 @@
     {% if block.type == 'section' %}
       {% if block.image %}<img class="section-image" src="{{ block.image }}" alt="" decoding="async" />{% endif %}
       {% set pattern = appearance.get('svg_pattern', 'none') %}
-      {% if pattern != 'none' %}{{ section_art(pattern) }}{% endif %}
+      {% if pattern != 'none' %}
+        {% if block.svg_url %}<img class="section-art section-art-saved" src="{{ block.svg_url }}" alt="" decoding="async" />
+        {% else %}{{ section_art(pattern) }}{% endif %}
+      {% endif %}
       <div class="section-overlay" aria-hidden="true"></div>
       <div class="section-content">{{ render_content_blocks(block.children) }}</div>
       {% if appearance.get('edge') == 'wave' %}

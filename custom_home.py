@@ -6,6 +6,9 @@ from html.parser import HTMLParser
 from urllib.parse import urlsplit, parse_qs
 
 MAX_DOCUMENT_BYTES = 500_000
+SECTION_SVG_FILENAME = r'friperi-section-[0-9a-f]{32}\.svg'
+SECTION_SVG_FIELDS = {'svg_pattern': ('ribbons', 'waves', 'grid'), 'svg_primary': 'color',
+                      'svg_secondary': 'color', 'svg_opacity': (0, 100)}
 BLOCK_TYPES = {'section', 'heading', 'text', 'list', 'table', 'image', 'video', 'button', 'divider', 'category', 'quote', 'callout', 'stats', 'faq', 'legacy_html'}
 
 # Optional presentation settings keep existing documents on their theme defaults.
@@ -303,6 +306,11 @@ def _validate_blocks(data, depth, remaining, anchors):
             block['image'] = safe_url(url, media=True)
             if url and not block['image']:
                 raise ValueError('Invalid section image URL')
+            svg_url = text(item.get('svg_url', ''), 100)
+            if svg_url:
+                if not re.fullmatch(r'/static/images/' + SECTION_SVG_FILENAME, svg_url):
+                    raise ValueError('Invalid generated section SVG URL')
+                block['svg_url'] = svg_url
             anchor = text(item.get('anchor', ''), 80)
             if anchor:
                 if anchor in anchors or not re.fullmatch(r'[A-Za-z][A-Za-z0-9_-]*', anchor):

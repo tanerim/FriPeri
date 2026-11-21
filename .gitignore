@@ -6,6 +6,8 @@ __pycache__/
 static/uploads/*
 !static/uploads/.gitkeep
 /static/sitemap.xml
+/static/images/friperi-section-*.svg
+/static/images/.section-svg-*
 backups/
 
 .env.bak
