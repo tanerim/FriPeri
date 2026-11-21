@@ -495,7 +495,7 @@
   "users.initial_password": "Mot de passe initial (8 caractères minimum)",
   "users.new_password": "Nouveau mot de passe (laisser vide pour conserver l’actuel)",
   "users.role": "Rôle",
-  "users.role_cc": "Créateur de contenu (cc)",
+  "users.role_cc": "Créateur de contenu",
   "users.role_editor": "Éditeur",
   "users.role_admin": "Administrateur",
   "users.categories": "Catégories autorisées pour le créateur",
