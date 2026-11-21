@@ -31,6 +31,9 @@ from fastapi.responses import HTMLResponse, RedirectResponse, Response, JSONResp
 from custom_home import (validate_document, read_document, render_blocks, clean_html,
                          validate_appearance, SECTION_SVG_FIELDS, SECTION_SVG_FILENAME)
 from navigation import menu_mapping, validate_parents, menu_tree
+from backup_security import (BackupError, MAX_UPLOAD_BYTES, create_backup as write_secure_backup,
+                             restore_backup as restore_secure_backup, validate_backup, safe_backup_path)
+from login_security import blocked as login_blocked, failed as login_failed, succeeded as login_succeeded
 from documentation import list_documents, render_document
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
@@ -108,10 +111,8 @@ async def sitemap(request: Request) -> Response:
 
 @app.get("/app-ads.txt", include_in_schema=False)
 async def app_ads_txt():
-    return FileResponse(
-        STATIC_DIR / "app-ads.txt",
-        media_type="text/plain",
-    )
+    ads_path = STATIC_DIR / "app-ads.txt"
+    return FileResponse(ads_path, media_type="text/plain") if ads_path.is_file() else Response(status_code=404)
 
 templates = Jinja2Templates(directory=TEMPLATES_DIR)
 
@@ -1088,31 +1089,43 @@ async def admin_messages(request: Request) -> Response:
 # Backup & Restore
 # ===========================
 
-BACKUP_DIR = Path(__file__).resolve().parent / "backups"
+BACKUP_DIR = BASE_DIR / "backups"
 BACKUP_DIR.mkdir(exist_ok=True)
-PROJECT_ROOT = Path(__file__).resolve().parent
+PROJECT_ROOT = BASE_DIR
 
 
 def _get_backups() -> list[dict]:
-    """List available backups sorted newest first."""
+    """List regular archives (never follow symlinks)."""
     items = []
-    for f in BACKUP_DIR.iterdir():
-        if f.is_file() and f.suffix == ".zip":
-            try:
-                stat = f.stat()
-                items.append({
-                    "name": f.name,
-                    "size": stat.st_size,
-                    "mtime": datetime.fromtimestamp(stat.st_mtime, tz=timezone.utc).strftime("%Y-%m-%d %H:%M"),
-                    "_ts": stat.st_mtime,
-                })
-            except OSError:
-                pass
-    items.sort(key=lambda x: x["_ts"], reverse=True)
-    # Remove internal sort key
+    for file in BACKUP_DIR.iterdir():
+        if not file.is_file() or file.is_symlink() or file.suffix.lower() != ".zip":
+            continue
+        try:
+            safe_backup_path(BACKUP_DIR, file.name)
+            stat = file.stat()
+            items.append({
+                "name": file.name, "size": stat.st_size,
+                "mtime": datetime.fromtimestamp(stat.st_mtime, tz=timezone.utc).strftime("%Y-%m-%d %H:%M"),
+                "_ts": stat.st_mtime,
+            })
+        except (OSError, BackupError):
+            continue
+    items.sort(key=lambda item: item["_ts"], reverse=True)
     for item in items:
         item.pop("_ts", None)
     return items
+
+
+def _backup_csrf_valid(request: Request, user: str, form: Any) -> bool:
+    expected = settings_form_token(request, user)
+    return hmac.compare_digest(str(form.get("backup_csrf", "")).encode(), expected.encode())
+
+
+def _backup_redirect(message: str, successful: bool = False) -> Response:
+    response = RedirectResponse("/admin/backup", status_code=303)
+    response.set_cookie("flash", ("success:" if successful else "error:") + message,
+                        max_age=5, httponly=True, samesite="lax", secure=SESSION_COOKIE_SECURE)
+    return response
 
 
 @app.get("/admin/backup", response_class=HTMLResponse)
@@ -1120,11 +1133,9 @@ async def admin_backup(request: Request) -> Response:
     user = require_user(request)
     if not user:
         return RedirectResponse("/login", status_code=303)
-    lang = pick_lang(request)
-    backups = _get_backups()
-    return render_template(request, 'admin/backup.html', t(lang, 'admin.backup'), {
-        'active_admin': 'backup',
-        'backups': backups,
+    return render_template(request, "admin/backup.html", t(pick_lang(request), "admin.backup"), {
+        "active_admin": "backup", "backups": _get_backups(),
+        "backup_csrf": settings_form_token(request, user),
     }, user)
 
 
@@ -1133,104 +1144,53 @@ async def backup_create(request: Request) -> Response:
     user = require_user(request)
     if not user:
         return RedirectResponse("/login", status_code=303)
-    
+    form = await request.form()
+    if not _backup_csrf_valid(request, user, form):
+        return Response(status_code=403)
     lang = pick_lang(request)
-    ts = datetime.now(tz=timezone.utc).strftime("%Y-%m-%d_%H-%M")
-    zip_filename = f"backup-{ts}.zip"
-    zip_path = BACKUP_DIR / zip_filename
-    
+    filename = "backup-" + datetime.now(timezone.utc).strftime("%Y-%m-%d_%H-%M-%S") + "-" + secrets.token_hex(4) + ".zip"
+    path = safe_backup_path(BACKUP_DIR, filename)
     try:
-        project_db = PROJECT_ROOT / "site.db"
-        db_dir = PROJECT_ROOT / "db"
-        db_file = db_dir / "site.db"
-        static_dir = PROJECT_ROOT / "static"
-        uploads_dir = static_dir / "uploads"
-        images_dir = static_dir / "images"
-        env_file = PROJECT_ROOT / ".env"
-        
-        backup = zipfile.ZipFile(zip_path, 'w', zipfile.ZIP_DEFLATED)
-        
-        # 1. SQLite DB
-        if db_file.is_file():
-            backup.write(db_file, 'db/site.db')
-        
-        # 2. Static files (images, uploads)
-        for d in [images_dir, uploads_dir]:
-            if d.is_dir():
-                for file in d.rglob('*'):
-                    if file.is_file():
-                        arcname = f"static/{file.relative_to(static_dir).as_posix()}"
-                        backup.write(file, arcname)
-        
-        # 3. .env
-        if env_file.is_file():
-            backup.write(env_file, 'env/.env')
-        
-        backup.close()
-        
-    except Exception as e:
-        if zip_path.exists():
-            zip_path.unlink()
-        response = RedirectResponse("/admin/backup", status_code=303)
-        response.set_cookie("flash", f"error:{t(lang, 'admin.backup_error')}", max_age=5)
-        return response
-    
-    response = RedirectResponse("/admin/backup", status_code=303)
-    response.set_cookie("flash", f"success:{t(lang, 'admin.backup_created')}", max_age=5)
-    return response
+        write_secure_backup(path, DB_PATH, STATIC_DIR, UPLOAD_DIR, BASE_DIR / ".env")
+        validate_backup(path)
+    except (BackupError, OSError, sqlite3.Error, zipfile.BadZipFile):
+        path.unlink(missing_ok=True)
+        logging.getLogger(__name__).exception("Backup creation failed")
+        return _backup_redirect(t(lang, "admin.backup_error"))
+    return _backup_redirect(t(lang, "admin.backup_created"), True)
 
 
 @app.post("/admin/backup/upload")
 async def backup_upload(request: Request, file: UploadFile = Form(...)) -> Response:
-    """Upload an existing backup .zip file to the backups directory."""
     user = require_user(request)
     if not user:
         return RedirectResponse("/login", status_code=303)
-    
+    form = await request.form()
+    if not _backup_csrf_valid(request, user, form):
+        return Response(status_code=403)
     lang = pick_lang(request)
-    upload_dir = BACKUP_DIR
-    
-    if file.content_type and file.content_type not in {"application/zip", "application/x-zip-compressed", None}:
-        response = RedirectResponse("/admin/backup", status_code=303)
-        response.set_cookie("flash", f"error:{t(lang, 'admin.backup_upload_error')}", max_age=5)
-        return response
-    
-    filename = file.filename or "backup-upload.zip"
-    if not filename.endswith(".zip"):
-        filename = filename.rsplit(".", 1)[0] + ".zip"
-    
-    safe_filename = re.sub(r"[^a-zA-Z0-9_\-.]", "_", filename)
-    dest_path = upload_dir / safe_filename
-    
+    if not (file.filename or "").lower().endswith(".zip"):
+        return _backup_redirect(t(lang, "admin.backup_upload_error"))
+    if file.content_type and file.content_type not in ("application/zip", "application/x-zip-compressed", "application/octet-stream"):
+        return _backup_redirect(t(lang, "admin.backup_upload_error"))
+    name = "upload-" + datetime.now(timezone.utc).strftime("%Y-%m-%d_%H-%M-%S") + "-" + secrets.token_hex(4) + ".zip"
+    dest = safe_backup_path(BACKUP_DIR, name)
     try:
-        with open(dest_path, "wb") as f:
-            while True:
-                chunk = await file.read(8192)
-                if not chunk:
-                    break
-                f.write(chunk)
-        
-        # Validate it's a valid zip before accepting
-        with zipfile.ZipFile(dest_path, "r") as zf:
-            zf.infolist()
-        
-        response = RedirectResponse("/admin/backup", status_code=303)
-        response.set_cookie("flash", f"success:{t(lang, 'admin.backup_upload_success')}", max_age=5)
-        return response
-    
-    except zipfile.BadZipFile:
-        if dest_path.exists():
-            dest_path.unlink()
-        response = RedirectResponse("/admin/backup", status_code=303)
-        response.set_cookie("flash", f"error:{t(lang, 'admin.backup_upload_not_zip')}", max_age=5)
-        return response
-    
-    except Exception as e:
-        if dest_path.exists():
-            dest_path.unlink()
-        response = RedirectResponse("/admin/backup", status_code=303)
-        response.set_cookie("flash", f"error:{t(lang, 'admin.backup_upload_error')}", max_age=5)
-        return response
+        size = 0
+        with dest.open("xb") as output:
+            while chunk := await file.read(1024 * 1024):
+                size += len(chunk)
+                if size > MAX_UPLOAD_BYTES:
+                    raise BackupError("Uploaded archive exceeds limit")
+                output.write(chunk)
+        validate_backup(dest)
+    except (BackupError, OSError, zipfile.BadZipFile):
+        dest.unlink(missing_ok=True)
+        logging.getLogger(__name__).warning("Rejected backup upload", exc_info=True)
+        return _backup_redirect(t(lang, "admin.backup_upload_error"))
+    finally:
+        await file.close()
+    return _backup_redirect(t(lang, "admin.backup_upload_success"), True)
 
 
 @app.post("/admin/backup/restore/{backup_name}")
@@ -1238,64 +1198,20 @@ async def backup_restore(request: Request, backup_name: str) -> Response:
     user = require_user(request)
     if not user:
         return RedirectResponse("/login", status_code=303)
-    
+    form = await request.form()
+    if not _backup_csrf_valid(request, user, form):
+        return Response(status_code=403)
     lang = pick_lang(request)
-    zip_path = BACKUP_DIR / backup_name
-    
-    if not zip_path.exists() or not zip_path.is_file():
-        return render_template(request, 'admin/backup.html', t(lang, 'admin.backup'), {
-            'active_admin': 'backup',
-            'backups': _get_backups(),
-            'error': t(lang, 'admin.backup_not_found'),
-        }, user, status_code=404)
-    
     try:
-        project_db = PROJECT_ROOT / "site.db"
-        db_dir = PROJECT_ROOT / "db"
-        static_dir = PROJECT_ROOT / "static"
-        uploads_dir = static_dir / "uploads"
-        images_dir = static_dir / "images"
-        env_file = PROJECT_ROOT / ".env"
-        
-        with zipfile.ZipFile(zip_path, 'r') as zf:
-            # Validate: no path traversal
-            for name in zf.namelist():
-                if name.startswith('..') or '/' in name.split('/')[0] or name.count('../') > 0:
-                    raise ValueError(f"Invalid path in backup: {name}")
-            
-            # 1. Restore DB
-            if 'db/site.db' in zf.namelist():
-                with zf.open('db/site.db') as src:
-                    db_dir.mkdir(exist_ok=True)
-                    db_file = db_dir / "site.db"
-                    with open(db_file, 'wb') as dst:
-                        dst.write(src.read())
-            
-            # 2. Restore static files
-            for arc in zf.namelist():
-                if arc.startswith('static/'):
-                    target = static_dir / arc[7:]  # remove 'static/'
-                    target_parent = target.parent
-                    if not target_parent.exists():
-                        target_parent.mkdir(parents=True, exist_ok=True)
-                    with zf.open(arc) as src_file:
-                        with open(target, 'wb') as dst_file:
-                            dst_file.write(src_file.read())
-            
-            # 3. Restore .env
-            if 'env/.env' in zf.namelist():
-                with zf.open('env/.env') as src:
-                    with open(env_file, 'wb') as dst:
-                        dst.write(src.read())
-        
-        response = RedirectResponse("/admin/backup", status_code=303)
-        response.set_cookie("flash", f"success:{t(lang, 'admin.backup_restored')}", max_age=5)
-        return response
-    
-    except Exception as e:
-        response = RedirectResponse("/admin/backup", status_code=303)
-        response.set_cookie("flash", f"error:{t(lang, 'admin.backup_restore_error')}", max_age=5)
-        return response
+        path = safe_backup_path(BACKUP_DIR, backup_name)
+        if not path.is_file():
+            return _backup_redirect(t(lang, "admin.backup_not_found"))
+        restore_secure_backup(path, DB_PATH, STATIC_DIR, UPLOAD_DIR, BASE_DIR / ".env")
+        refresh_secret()
+    except (BackupError, OSError, sqlite3.Error, zipfile.BadZipFile):
+        logging.getLogger(__name__).exception("Backup restore failed")
+        return _backup_redirect(t(lang, "admin.backup_restore_error"))
+    return _backup_redirect(t(lang, "admin.backup_restored"), True)
 
 
 @app.get("/admin/backup/download/{backup_name}")
@@ -1303,17 +1219,14 @@ async def backup_download(request: Request, backup_name: str) -> Response:
     user = require_user(request)
     if not user:
         return RedirectResponse("/login", status_code=303)
-    
-    zip_path = BACKUP_DIR / backup_name
-    if not zip_path.exists() or not zip_path.is_file():
+    try:
+        path = safe_backup_path(BACKUP_DIR, backup_name)
+    except BackupError:
         return Response(status_code=404)
-    
-    return FileResponse(
-        path=str(zip_path),
-        media_type="application/zip",
-        filename=backup_name,
-        headers={"Cache-Control": "no-store"},
-    )
+    if not path.is_file():
+        return Response(status_code=404)
+    return FileResponse(path, media_type="application/zip", filename=backup_name,
+                        headers={"Cache-Control": "no-store"})
 
 
 @app.get("/set-language/{lang}")
@@ -1338,9 +1251,14 @@ async def login(request: Request) -> Response:
     form = await request.form()
     username = str(form.get("username", "")).strip()
     password = str(form.get("password", ""))
+    client_address = request.client.host if request.client else "unknown"
+    if login_blocked(client_address, username):
+        return Response("Too many sign-in attempts. Try again later.", status_code=429,
+                        headers={"Retry-After": "900", "Cache-Control": "no-store"})
     with get_db() as conn:
         user = conn.execute("SELECT * FROM users WHERE username = ?", (username,)).fetchone()
     if not user or not verify_password(password, user["password_salt"], user["password_hash"]):
+        login_failed(client_address, username)
         return render_template(
             request,
             "login.html",
@@ -1348,6 +1266,7 @@ async def login(request: Request) -> Response:
             {"error": t(lang, "auth.bad_login")},
             status_code=401,
         )
+    login_succeeded(client_address, username)
     response = RedirectResponse("/admin", status_code=303)
     # Use v3 format: ties session to immutable user_id so deletion invalidates the session
     response.set_cookie(
@@ -2774,7 +2693,7 @@ async def save_social_links(request: Request) -> Response:
 
 @app.get("/health")
 async def health() -> dict[str, str]:
-    return {"status": "ok", "database": str(DB_PATH), "uploads": str(UPLOAD_DIR)}
+    return {"status": "ok"}
 
 
 @app.get("/favicon.ico", include_in_schema=False)
