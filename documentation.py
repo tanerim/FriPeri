@@ -3,10 +3,19 @@ from __future__ import annotations
 
 import html
 import re
+from functools import lru_cache
 from pathlib import Path
 from urllib.parse import quote, unquote, urlsplit
 
 import markdown
+
+
+@lru_cache(maxsize=512)
+def _document_title(path: str, mtime_ns: int, size: int) -> str:
+    file = Path(path)
+    text = file.read_text(encoding="utf-8")
+    match = re.search(r"^#\s+(.+?)\s*$", text, flags=re.MULTILINE)
+    return match.group(1) if match else file.stem.replace("-", " ").title()
 
 
 def list_documents(root: Path) -> list[dict[str, str]]:
@@ -15,14 +24,13 @@ def list_documents(root: Path) -> list[dict[str, str]]:
         return []
     results = []
     for file in sorted(root.rglob("*.md")):
-        if not file.is_file() or file.is_symlink():
+        if not file.is_file() or file.is_symlink() or not file.resolve().is_relative_to(root.resolve()):
             continue
         relative = file.relative_to(root).as_posix()
         if any(part.startswith(".") for part in file.relative_to(root).parts):
             continue
-        text = file.read_text(encoding="utf-8")
-        match = re.search(r"^#\s+(.+?)\s*$", text, flags=re.MULTILINE)
-        results.append({"name": relative, "title": match.group(1) if match else file.stem.replace("-", " ").title()})
+        stat = file.stat()
+        results.append({"name": relative, "title": _document_title(str(file.resolve()), stat.st_mtime_ns, stat.st_size)})
     return sorted(results, key=lambda item: (item["name"] != "index.md", item["title"].casefold()))
 
 
@@ -31,8 +39,16 @@ def render_document(root: Path, name: str, allowed: set[str]) -> str:
     if name not in allowed:
         raise FileNotFoundError(name)
     source = root / name
-    if not source.is_file() or source.is_symlink():
+    if not source.is_file() or source.is_symlink() or not source.resolve().is_relative_to(root.resolve()):
         raise FileNotFoundError(name)
+    stat = source.stat()
+    return _render_document_cached(str(source.resolve()), name, stat.st_mtime_ns, stat.st_size, tuple(sorted(allowed)))
+
+
+@lru_cache(maxsize=128)
+def _render_document_cached(path: str, name: str, mtime_ns: int, size: int, allowed_names: tuple[str, ...]) -> str:
+    allowed = set(allowed_names)
+    source = Path(path)
     # Disable raw HTML embedded in a Markdown file before handing it to the renderer.
     content = source.read_text(encoding="utf-8").replace("<", "&lt;")
     output = markdown.markdown(content, extensions=["tables", "fenced_code", "toc", "sane_lists"], output_format="html5")
