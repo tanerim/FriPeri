@@ -1,4 +1,7 @@
 # FriPeri
+
+**Documentation:** [Browse the complete documentation](docs/index.md) · [Security policy](SECURITY.md) · [Dependency security review](docs/dependency-security.md).
+
 <p align="center">
 <img height="250" src="static/images/FriPeri_Logo.png" alt="FriPeri logo" />
 </p>
