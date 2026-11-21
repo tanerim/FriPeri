@@ -24,7 +24,7 @@ FriPeri is a FastAPI and SQLite-based content management and publishing system.
 - [Language migration](../translations/LANGUAGE_MIGRATION.md)
 - [Pinned Python requirements](../requirements.txt)
 - [Local regression and browser testing](testing.md)
-- [License](../LICENSE)
+- [License](../LICENSE)\n- [Third-party component and asset notices](../THIRD_PARTY_NOTICES.md)
 
 The complete historical user manual remains available in the [root README](../README.md). This directory contains topic-specific guides that can be read independently.
 
