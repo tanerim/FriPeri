@@ -42,3 +42,31 @@ def test_path_traversal_and_unlisted_files_are_rejected(tmp_path: Path):
         render_document(root, "../private.md", allowed)
     with pytest.raises(FileNotFoundError):
         render_document(root, "/etc/passwd", allowed)
+
+
+def test_markdown_cache_invalidates_after_file_change(tmp_path: Path):
+    root = tmp_path / "docs"
+    root.mkdir()
+    page = root / "index.md"
+    page.write_text("# Original title\n\nOriginal text.", encoding="utf-8")
+    allowed = {item["name"] for item in list_documents(root)}
+    first = render_document(root, "index.md", allowed)
+    assert "Original title" in first
+    # Same file but different content/size: cached content must not remain stale.
+    page.write_text("# Revised documentation title\n\nAn updated paragraph.", encoding="utf-8")
+    refreshed = render_document(root, "index.md", allowed)
+    assert "Revised documentation title" in refreshed
+    assert "Original title" not in refreshed
+    assert list_documents(root)[0]["title"] == "Revised documentation title"
+
+
+def test_symlink_directory_cannot_expose_document_outside_root(tmp_path: Path):
+    root = tmp_path / "docs"
+    root.mkdir()
+    elsewhere = tmp_path / "secrets"
+    elsewhere.mkdir()
+    (elsewhere / "private.md").write_text("# Secret", encoding="utf-8")
+    (root / "link").symlink_to(elsewhere, target_is_directory=True)
+    assert list_documents(root) == []
+    with pytest.raises(FileNotFoundError):
+        render_document(root, "link/private.md", {"link/private.md"})
