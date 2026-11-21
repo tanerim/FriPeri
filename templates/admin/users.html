@@ -1,0 +1,55 @@
+{% extends "admin/base.html" %}
+{% block content %}
+<main id="admin-content" class="admin-settings-page" tabindex="-1">
+ <div class="admin-settings-container">
+  <header class="settings-page-header">
+   <div><h1>Users and permissions</h1><p>Administrators manage accounts and category access. Changes apply immediately.</p></div>
+  </header>
+  <section class="admin-card" style="margin-bottom:24px">
+   <h2>Create account</h2>
+   <form action="/admin/users" method="post" class="settings-form-v3">
+    <input type="hidden" name="editor_token" value="{{ editor_token }}">
+    <div class="settings-grid-v3">
+     <label><span>Username</span><input name="username" required minlength="3" maxlength="64" pattern="[A-Za-z0-9_.-]+" autocomplete="off"></label>
+     <label><span>Initial password (minimum 8 characters)</span><input name="password" type="password" minlength="8" required autocomplete="new-password"></label>
+     <label><span>Role</span><select name="role" required><option value="cc">Content creator (cc)</option><option value="editor">Editor</option><option value="admin">Administrator</option></select></label>
+    </div>
+    <fieldset style="border:1px solid #dbe2e9;border-radius:9px;padding:14px;margin:16px 0">
+     <legend>Allowed categories (content creator only)</legend>
+     {% for cat in categories %}
+     <label style="display:inline-flex;align-items:center;gap:6px;margin:6px 18px 6px 0"><input type="checkbox" name="categories" value="{{ cat.id }}"> {{ cat.name }}</label>
+     {% else %}<span>No categories yet.</span>{% endfor %}
+    </fieldset>
+    <button class="settings-primary" type="submit">Create user</button>
+   </form>
+  </section>
+  <section class="admin-card">
+   <h2>Existing accounts</h2>
+   {% for person in accounts %}
+   <form method="post" action="/admin/users/{{ person.id }}" class="settings-form-v3" style="border-top:1px solid #dbe2e9;padding:20px 0">
+    <input type="hidden" name="editor_token" value="{{ editor_token }}">
+    <h3>{{ person.username }} <small style="font-weight:normal">#{{ person.id }}</small></h3>
+    <div class="settings-grid-v3">
+     <label><span>Role</span><select name="role">
+      <option value="cc" {% if person.role == 'cc' %}selected{% endif %}>Content creator (cc)</option>
+      <option value="editor" {% if person.role == 'editor' %}selected{% endif %}>Editor</option>
+      <option value="admin" {% if person.role == 'admin' %}selected{% endif %}>Administrator</option>
+     </select></label>
+     <label><span>New password (blank = unchanged)</span><input type="password" name="password" minlength="8" autocomplete="new-password"></label>
+    </div>
+    <fieldset style="border:1px solid #dbe2e9;border-radius:9px;padding:12px;margin:14px 0">
+     <legend>Content creator category grants</legend>
+     {% for cat in categories %}
+     <label style="display:inline-flex;align-items:center;gap:6px;margin:6px 18px 6px 0"><input type="checkbox" name="categories" value="{{ cat.id }}" {% if cat.id in person.category_ids %}checked{% endif %}> {{ cat.name }}</label>
+     {% endfor %}
+    </fieldset>
+    <button class="settings-primary" type="submit">Save permissions</button>
+    {% if person.username != user %}
+    <button class="settings-danger" type="submit" formaction="/admin/users/{{ person.id }}/delete" onclick="return confirm('Delete this user? Existing content will be preserved.')">Delete user</button>
+    {% endif %}
+   </form>
+   {% else %}<p>No users available.</p>{% endfor %}
+  </section>
+ </div>
+</main>
+{% endblock %}
