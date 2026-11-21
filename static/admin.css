@@ -642,3 +642,11 @@
     margin: 0;
   }
 }
+
+
+/* Keep the Admin / Logout footer clear of browsers' link-preview overlay. */
+@media (min-width: 1024px) {
+  .hyperui-admin .admin-sidebar-footer {
+    padding-bottom: calc(28px + env(safe-area-inset-bottom, 0px));
+  }
+}
