@@ -14,7 +14,9 @@ def test_all_builtin_ui_locales_have_admin_navigation_and_builder_labels():
     required = (
         "dashboard.wizard_intro", "dashboard.wizard_text", "dashboard.wizard_action",
         "builder.section_add", "builder.section_add_placeholder", "builder.section_add_section",
-        "admin.documentation",
+        "admin.documentation", "admin.users", "users.title", "users.role_cc",
+        "users.role_editor", "users.role_admin", "users.categories",
+        "categories.edit_title",
     )
     for lang in LANGUAGES:
         for key in required:
