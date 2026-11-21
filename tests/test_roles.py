@@ -245,3 +245,19 @@ def test_admin_post_form_exposes_separate_publish_and_draft(site):
     assert 'id="builder-save-draft"' in page.text
     assert 'id="builder-save"' in page.text
     assert 'value="published"' in page.text
+
+
+def test_creator_cannot_view_another_creator_draft(site):
+    client, db = site
+    with sqlite3.connect(db) as conn:
+        cat = conn.execute("SELECT id FROM categories ORDER BY id LIMIT 1").fetchone()[0]
+    _make_user(db, "draft_author", categories=[cat])
+    _make_user(db, "draft_other", categories=[cat])
+    _as(client, "draft_author")
+    result = _create_post(client, "Private creator draft", cat)
+    assert result.status_code == 303
+    with sqlite3.connect(db) as conn:
+        slug = conn.execute("SELECT slug FROM posts WHERE title=?", ("Private creator draft",)).fetchone()[0]
+    assert client.get(f"/posts/{slug}").status_code == 200
+    _as(client, "draft_other")
+    assert client.get(f"/posts/{slug}").status_code == 404
