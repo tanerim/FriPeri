@@ -2770,6 +2770,31 @@ async def save_language(request: Request) -> Response:
     return RedirectResponse('/admin/language?saved=1', status_code=303)
 
 
+def _same_origin_admin_request(request: Request) -> bool:
+    """Reject browser cross-origin mutation attempts, including sibling domains.
+
+    This complements explicit form tokens on high-impact backup endpoints.
+    """
+    host = request.headers.get("host", "").lower()
+    if not host:
+        return False
+    site = request.headers.get("sec-fetch-site", "").lower()
+    if site in {"cross-site", "same-site"}:
+        return False
+    origin = request.headers.get("origin")
+    referer = request.headers.get("referer")
+    for candidate in (origin, referer):
+        if not candidate:
+            continue
+        try:
+            parsed = urlsplit(candidate)
+            if parsed.scheme not in {"http", "https"} or parsed.netloc.lower() != host:
+                return False
+        except ValueError:
+            return False
+    return True
+
+
 @app.middleware('http')
 async def first_run_gate(request: Request, call_next):
     # A cheap file identity check handles deletion/replacement and other workers;
