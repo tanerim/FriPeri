@@ -85,7 +85,7 @@ def test_creator_category_creation_grants_only_new_category(site):
         assert conn.execute("SELECT 1 FROM user_categories WHERE user_id=? AND category_id=?", (uid, cid)).fetchone()
 
 
-def test_editor_can_manage_content_but_not_site_users(site):
+def test_editor_can_manage_content_and_category_access_but_not_site_settings(site):
     client, db = site
     _make_user(db, "ed", "editor")
     _as(client, "ed")
