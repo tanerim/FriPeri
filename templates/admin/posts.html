@@ -22,7 +22,7 @@
               <td>{{ post["created_at"]|format_date }}</td>
               <td class="admin-table-actions">
                 <a class="admin-secondary" href="/admin/posts/{{ post['id'] }}/edit">{{ t(lang, "common.edit") }}</a>
-                <form class="inline-form" method="post" action="/admin/posts/{{ post['id'] }}/delete" data-confirm="{{ t(lang, 'admin.delete_content_confirm') }}"><button class="danger admin-danger" type="submit">{{ t(lang, "common.delete") }}</button></form>
+                {% if account_role != "cc" %}<form class="inline-form" method="post" action="/admin/posts/{{ post['id'] }}/delete" data-confirm="{{ t(lang, 'admin.delete_content_confirm') }}"><button class="danger admin-danger" type="submit">{{ t(lang, "common.delete") }}</button></form>{% endif %}
               </td>
             </tr>
           {% else %}
