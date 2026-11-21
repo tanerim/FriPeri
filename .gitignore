@@ -1,23 +1,66 @@
+# Environment blocks
 .env
-*.db
-db/*.db
+!.env.example
+*.pem
+*.key
+
+# Python virtual environments
+.venv/
+venv/
+ENV/
+env/
+
+# Python cache
 __pycache__/
+*.py[cod]
 .pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Databases
+*.db
+*.db-*
+*.sqlite
+*.sqlite3
+*.sqlite-*
+*.sqlite3-*
+db/*
+db/*.db
+!db/.gitkeep
+
+# User uploads
 static/uploads/*
 !static/uploads/.gitkeep
+
+# Generated files
 /static/sitemap.xml
 /static/images/friperi-section-*.svg
 /static/images/.section-svg-*
-backups/
 
-.env.bak
-db/*.bak
-db/*-wal
-db/*-shm
-db/*-journal
-db/.setup.lock
-db/.friperi-setup-*
-.idea/*
-!.idea/friperi.iml
-.junie
+
+# Backups
+backups/
+*.bak
+
+# IDE and development tools
+.idea/
+.vscode/
+.junie/
 /.ollamassist/
+
+# Build and distribution
+build/
+dist/
+*.egg-info/
+
+# Logs and test coverage
+*.log
+.coverage
+htmlcov/
+
+# Operating system files
+.DS_Store
+Thumbs.db
+.agents
+.aws
+.codex
