@@ -60,3 +60,7 @@ After setup, `GET /health` returns `status`, `database`, and `uploads`. It repor
 ---
 
 [Documentation index](index.md) · [Complete README](../README.md)
+
+## Automated regression tests
+
+For an isolated test environment, dependency installation, ASGI endpoint tests, the optional Playwright browser suite and the manual mobile/browser checklist, see [Local regression and UI testing](testing.md). Tests are run locally, not through GitHub Actions.
