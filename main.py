@@ -770,7 +770,7 @@ def template_context(request: Request, title: str, user: str | None = None) -> d
         "secondary_language": secondary_language(site_settings),
         "localized": lambda values, field: localized_value(values, field, lang),
         "user": user,
-        "account_role": actor(request)["role"] if user and actor(request) else None,
+        "account_role": (account["role"] if (account := actor(request)) else None),
         "menu_categories": menu_categories,
         "menu_items": menu_items,
         "social_platforms": SOCIAL_PLATFORMS,
@@ -1282,7 +1282,9 @@ async def login(request: Request) -> Response:
             status_code=401,
         )
     login_succeeded(client_address, username)
-    response = RedirectResponse("/admin", status_code=303)
+    # Send content-only accounts directly to their permitted workspace.
+    destination = "/admin" if user["role"] == "admin" else "/admin/posts"
+    response = RedirectResponse(destination, status_code=303)
     # Use v3 format: ties session to immutable user_id so deletion invalidates the session
     response.set_cookie(
         SESSION_COOKIE,
