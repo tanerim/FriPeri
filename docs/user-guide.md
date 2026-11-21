@@ -2,7 +2,7 @@
 
 ### Finding Your Way Around the Admin Panel
 
-Sign in at `/login`, then open `/admin`. The sidebar groups tools by purpose:
+Sign in at `/login`, then open `/admin`. Available screens depend on your account role; see [Users and permissions](user-roles.md). The administrator's sidebar groups tools by purpose:
 
 | Group | Screen | Purpose |
 | --- | --- | --- |
@@ -20,6 +20,7 @@ Sign in at `/login`, then open `/admin`. The sidebar groups tools by purpose:
 | Configuration | Language | Configure the secondary language and custom interface translations. |
 | Configuration | Contact Details | Configure contact-page text and the optional contact email address. |
 | Configuration | Backup | Create, download, upload, and restore ZIP backups. |
+| Configuration | Users | Create accounts, assign content roles and grant creators access to categories. |
 
 The navigation collapses on small screens. The admin interface uses its own colors; changing public website colors does not change the admin theme. Interface labels follow the selected language.
 
@@ -28,7 +29,7 @@ The navigation collapses on small screens. The admin interface uses its own colo
 1. Open the content list and choose **New Content**.
 2. Enter the English title and excerpt.
 3. Build the body with the shared block editor: add headings, formatted text, lists, links, tables, images, and other supported blocks.
-4. Select a category, or leave the content uncategorized.
+4. Select a category, or leave the content uncategorized (editor/admin only). Content creators must choose an assigned category.
 5. Add optional tags separated by commas and an optional preview image.
 6. If a secondary language is configured, use the editor's language selector to add its title, excerpt, and blocks.
 7. Choose **Draft** or **Published**, then save using the corresponding action.
