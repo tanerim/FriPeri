@@ -1177,7 +1177,8 @@ async def backup_upload(request: Request, file: UploadFile = Form(...)) -> Respo
     dest = safe_backup_path(BACKUP_DIR, name)
     try:
         size = 0
-        with dest.open("xb") as output:
+        fd = os.open(dest, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
+        with os.fdopen(fd, "wb") as output:
             while chunk := await file.read(1024 * 1024):
                 size += len(chunk)
                 if size > MAX_UPLOAD_BYTES:
