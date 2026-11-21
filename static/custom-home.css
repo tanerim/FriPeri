@@ -278,25 +278,7 @@
 .section-content > .tone-dark { color: var(--text-color, #f8fafc); }
 .section-content > .tone-accent { color: var(--text-color, var(--color-feature-text,#1d0303)); }
 .custom-section[data-layout=actions] > .section-content { display: flex; flex-wrap: wrap; }
-.custom-section[data-layout=actions] > /* A nested block takes its own spacing; custom properties on the parent section
-   still cascade to the decorations and wrapper that use them. */
-.section-content > .custom-block {
-  --block-padding-x: initial;
-  --block-padding-y: initial;
-  --block-radius: initial;
-}
-.section-content > .custom-section {
-  --block-min-height: initial;
-  --block-content-width: initial;
-  --block-gap: initial;
-  --block-svg-primary: initial;
-  --block-svg-secondary: initial;
-  --block-svg-opacity: initial;
-  --block-overlay-color: initial;
-  --block-overlay-opacity: initial;
-  --block-edge-color: initial;
-}
-.section-content > .custom-block { width: auto; }
+.custom-section[data-layout=actions] > .section-content > .custom-block { width: auto; }
 .custom-section.align-center[data-layout=actions] > .section-content { justify-content: center; }
 .custom-section.align-right[data-layout=actions] > .section-content { justify-content: end; }
 @container friperi-section (min-width: 540px) {
@@ -308,6 +290,7 @@
 @container friperi-section (min-width: 1050px) {
   .custom-section[data-layout=six] > .section-content { grid-template-columns: repeat(6,minmax(0,1fr)); }
 }
+.custom-section > .section-content:has(> .custom-block:only-child) { grid-template-columns: minmax(0,1fr); }
 .custom-heading[data-heading-size] > :is(h1,h2,h3) { font-size: clamp(18px, 10vw, var(--block-font-size, 160px)); }
 .custom-heading[data-heading-weight=normal] > :is(h1,h2,h3) { font-weight: 400; }
 .custom-heading[data-heading-weight=bold] > :is(h1,h2,h3) { font-weight: 700; }

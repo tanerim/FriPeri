@@ -1,6 +1,6 @@
 {% from 'partials/section_art.html' import section_art, section_edge %}
 {% macro render_content_blocks(custom_blocks) %}
-  {% for block in custom_blocks if block.type != 'category' or block.posts %}
+  {% for block in custom_blocks if (block.type != 'category' or block.posts) and (block.type != 'image' or block.url) %}
   {% set appearance = block.appearance|default({}) %}
   <section class="custom-block custom-{{ block.type }} tone-{{ block.tone }} align-{{ block.align }} width-{{ block.width }}"
     {% if block.type == 'section' %}

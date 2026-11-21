@@ -1,4 +1,7 @@
 {
+  "builder.remove_block_title": "Diesen Block entfernen?",
+  "builder.remove_block_help": "In dieser Bearbeitungssitzung können Sie den Block mit Rückgängig wiederherstellen.",
+  "builder.hero_image_optional": "Lassen Sie das Bild leer, damit der Text die volle Breite des Abschnitts nutzt.",
   "builder.hero_section": "Hero-Abschnitt",
   "builder.hero_copy_fields": "Überschrift und Beschreibung",
   "builder.hero_primary_button": "Primäre Schaltfläche",

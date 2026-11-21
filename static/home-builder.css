@@ -282,3 +282,28 @@
 .builder-svg-controls .builder-field { margin: 0; }
 .builder-svg-controls input[type=range] { padding-inline: 0; }
 .builder-svg-generator > .builder-help { margin: 8px 0 0; }
+
+.builder-block-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 4px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: #596981;
+  text-align: left;
+  cursor: pointer;
+}
+.builder-block-toggle:hover { background: #eceffa; }
+.builder-block-chevron { width: 7px; height: 7px; margin-inline: 4px; border-right: 2px solid; border-bottom: 2px solid; transform: rotate(45deg); }
+.builder-block-toggle[aria-expanded=false] .builder-block-chevron { transform: rotate(-45deg); }
+.hyperui-admin .builder-block.is-collapsed > :not(.builder-block-header) { display: none; }
+.hyperui-admin .builder-block.is-collapsed > .builder-block-header { border-bottom: 0; }
+
+#builder-remove-dialog { width: min(430px, calc(100% - 32px)); border: 1px solid #dfe6ef; border-radius: 14px; padding: 22px; color: #233454; }
+#builder-remove-dialog::backdrop { background: #14253691; }
+#builder-remove-dialog h2 { margin: 0; font-size: 18px; }
+#builder-remove-name { margin: 12px 0 0; font-weight: 700; }
+#builder-remove-help { margin: 4px 0 18px; }
+#builder-remove-dialog .builder-actions { justify-content: flex-end; }

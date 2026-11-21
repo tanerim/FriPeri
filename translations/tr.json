@@ -1,4 +1,7 @@
 {
+  "builder.remove_block_title": "Bu blok silinsin mi?",
+  "builder.remove_block_help": "Bu düzenleme oturumunda Geri al ile bloğu geri getirebilirsiniz.",
+  "builder.hero_image_optional": "Metnin bölümün tamamına yayılması için görseli boş bırakın.",
   "builder.hero_section": "Tanıtım bölümü",
   "builder.hero_copy_fields": "Başlık ve açıklama",
   "builder.hero_primary_button": "Birincil düğme",

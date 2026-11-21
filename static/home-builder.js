@@ -13,6 +13,13 @@
   const status = document.getElementById('builder-status');
   const saveButton = document.getElementById('builder-save');
   const previewButton = document.getElementById('builder-preview');
+  const removeDialog = document.getElementById('builder-remove-dialog');
+  const collapsedBlocks = new WeakSet();
+  let pendingRemoval;
+  removeDialog.addEventListener('close',()=>{
+    if (removeDialog.returnValue === 'remove') pendingRemoval?.();
+    pendingRemoval=undefined;
+  });
   const historyReplace = url => window.history.replaceState(null,'',url);
   const snapshot = () => JSON.stringify(documents);
   const blocks = () => documents[language];
@@ -746,6 +753,7 @@
                       field(t('url'),action.url,value=>{action.url=value.trim();}));
     });
     const image=group('hero_visual');
+    image.append(el('p','builder-help',t('hero_image_optional')));
     media(hero.image,image);
     return editor;
   }
@@ -844,7 +852,23 @@
         Array.from(canvas.children).forEach((node,i)=>node.classList.toggle('is-selected',i===index));
       });
       const hero=heroContent(block);
-      const header=el('header','builder-block-header');header.append(el('strong','',String(index+1).padStart(2,'0')+' / '+t(hero ? 'hero_section' : block.type)));
+      const label=String(index+1).padStart(2,'0')+' / '+t(hero ? 'hero_section' : block.type);
+      const header=el('header','builder-block-header');
+      const toggle=button('',()=>{
+        if (collapsedBlocks.has(block)) collapsedBlocks.delete(block);
+        else collapsedBlocks.add(block);
+        showBlockState();
+      },'builder-block-toggle');
+      const chevron=el('span','builder-block-chevron');
+      chevron.setAttribute('aria-hidden','true');
+      toggle.append(chevron,el('strong','',label));
+      const showBlockState=()=>{
+        const expanded=!collapsedBlocks.has(block);
+        toggle.setAttribute('aria-expanded',String(expanded));
+        card.classList.toggle('is-collapsed',!expanded);
+      };
+      showBlockState();
+      header.append(toggle);
       const actions=el('div','builder-block-actions');
       const move = direction => mutate(()=>{
         [items[index+direction],items[index]]=[items[index],items[index+direction]];
@@ -863,7 +887,21 @@
         });
       });
       if (hero) actions.append(button(t('preview'),()=>previewButton.click()));
-      actions.append(up,down,copy,button(t('remove'),()=>mutate(()=>{items.splice(index,1);if (!depth) selected=Math.min(index,items.length-1);})));header.append(actions);card.append(header);
+      const remove=button(t('remove'),()=>{
+        pendingRemoval=()=>{
+          mutate(()=>{
+            items.splice(index,1);
+            if (!depth) selected=Math.min(index,items.length-1);
+          });
+          const card = canvas.children[Math.max(selected,0)];
+          (card?.querySelector('.builder-block-toggle') || document.querySelector('#builder-add-blocks button'))?.focus();
+        };
+        removeDialog.returnValue='cancel';
+        document.getElementById('builder-remove-name').textContent=label;
+        removeDialog.showModal();
+      });
+      actions.append(up,down,copy,remove);
+      header.append(actions); card.append(header);
       const styles=el('div','builder-style-controls');
       for (const [key,values] of [['tone',['plain','soft','accent','dark','white','custom']],['align',['left','center','right']],['width',['normal','wide']]])styles.append(select(t(key),block[key],values.map(v=>[v,t(v)]),v=>{block[key]=v;}));
       // Text/color picker — always available for any block type

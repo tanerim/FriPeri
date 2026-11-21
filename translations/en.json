@@ -1,4 +1,7 @@
 {
+  "builder.remove_block_title": "Remove this block?",
+  "builder.remove_block_help": "You can restore the block with Undo during this editing session.",
+  "builder.hero_image_optional": "Leave the image empty to give the text the full section width.",
   "builder.hero_section": "Hero section",
   "builder.hero_copy_fields": "Heading and description",
   "builder.hero_primary_button": "Primary button",

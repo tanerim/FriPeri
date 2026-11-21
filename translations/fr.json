@@ -1,4 +1,7 @@
 {
+  "builder.remove_block_title": "Supprimer ce bloc ?",
+  "builder.remove_block_help": "Vous pouvez restaurer le bloc avec Annuler pendant cette session de modification.",
+  "builder.hero_image_optional": "Laissez l’image vide pour que le texte occupe toute la largeur de la section.",
   "builder.hero_section": "Section d’accueil",
   "builder.hero_copy_fields": "Titre et description",
   "builder.hero_primary_button": "Bouton principal",
