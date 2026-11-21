@@ -551,5 +551,8 @@
   "categories.edit_description": "Açıklama",
   "categories.edit_secondary_label": "İkinci dil etiketi",
   "categories.edit_secondary_description": "İkinci dil açıklaması",
-  "categories.edit_save": "Kategoriyi kaydet"
+  "categories.edit_save": "Kategoriyi kaydet",
+  "users.select_category": "İzinli bir kategori seçin",
+  "users.create_help": "Hesap oluşturun ve içerik yetkilerini belirleyin.",
+  "users.manage_help": "Yetkilerini düzenlemek veya şifresini yenilemek için hesabı açın."
 }
