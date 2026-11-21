@@ -30,6 +30,7 @@ python -m pytest -q tests/
 - `test_backup_security.py`: SQLite backup/restore, archive path safety and corrupt archive handling.
 - `test_security_guards.py`: same-origin administrative requests and login attempt thresholds.
 - `test_localization_media.py`: UI labels in four languages, secondary-language fallback and image signature validation.
+- `test_roles.py`: account roles, content ownership, category grants and admin-only user management.
 - `test_integration_flows.py`: a temporary initialized site, first-run setup, login/logout, authorization, post create/edit/delete, contact submissions, documentation route and health response.
 - `test_browser_smoke.py`: optional Playwright checks; skipped unless an isolated local test URL is explicitly configured.
 
