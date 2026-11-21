@@ -45,3 +45,17 @@ Run smoke tests for setup, login, post editing, file uploads, custom homepages, 
 - Do not declare the repository security-cleared until these steps have passed.
 
 No GitHub Actions should be enabled or executed for this project.
+
+
+## Security pin update (2026-11-21)
+
+The current `requirements.txt` pins were changed to `fastapi==0.120.4`, `starlette==0.49.3`, `python-multipart==0.0.31`, and `pillow==13.0.0`. FastAPI was upgraded alongside Starlette because the previous FastAPI release constrained Starlette below the security-fixed range. These are version changes in source control; **they are not proof that a clean installation, audit or application regression test has passed.** Run the local release checks below before production use.
+
+```bash
+python -m pip install -r requirements.txt
+python -m pip check
+python -m pip_audit -r requirements.txt
+python -m pytest -q tests/test_backup_security.py tests/test_security_guards.py tests/test_nested_sections.py tests/test_documentation.py
+```
+
+Keep the previously reviewed vulnerable pins in the historical table above as audit context; the table no longer describes the current source requirements. Any remaining issues found by the scanner need triage before declaring a production-ready release.
