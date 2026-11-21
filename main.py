@@ -13,6 +13,7 @@ import shutil
 import zipfile
 import sqlite3
 import tempfile
+import time
 import xml.etree.ElementTree as ET
 from contextlib import asynccontextmanager
 from datetime import datetime, timezone
@@ -310,12 +311,11 @@ def sign_session(username: str) -> str:
 
 
 def sign_session_v3(username: str, user_id: int) -> str:
-    """Sign a session cookie that ties the session to an immutable user_id.
+    """Sign a session cookie, with nanosecond issuance time for revocation.
 
-    Format (v3): ``v3:user_id:username:timestamp:signature:token``
-    The user_id is validated on every verification to detect account deletion.
+    Previous v3 cookies with second timestamps remain supported until invalidated.
     """
-    now = str(int(datetime.now(timezone.utc).timestamp()))
+    now = str(time.time_ns())
     token = secrets.token_hex(32)
     payload = f"{user_id}:{username}:{now}"
     signature = hmac.new(SECRET_KEY.encode(), payload.encode(), hashlib.sha256).hexdigest()
@@ -372,9 +372,11 @@ def verify_session_v3(raw: str) -> str | None:
     except ValueError:
         return None
 
-    # Enforce 7-day expiry
+    # Old v3 tokens used Unix seconds; new tokens use nanoseconds.
+    issued_ns = ts if ts >= 10**15 else ts * 1_000_000_000
     max_age = 7 * 24 * 60 * 60
-    if datetime.now(timezone.utc).timestamp() - ts > max_age:
+    age_seconds = datetime.now(timezone.utc).timestamp() - issued_ns / 1_000_000_000
+    if age_seconds > max_age or age_seconds < -60:
         return None
 
     # Verify HMAC signature over <user_id>:<username>:<timestamp>
@@ -384,8 +386,8 @@ def verify_session_v3(raw: str) -> str | None:
 
     # --- Check that the user still exists (catches deletion) ---
     with get_db() as conn:
-        exists = conn.execute("SELECT username FROM users WHERE id = ?", (user_id,)).fetchone()
-        if not exists or exists["username"] != username:
+        exists = conn.execute("SELECT username, session_epoch FROM users WHERE id = ?", (user_id,)).fetchone()
+        if not exists or exists["username"] != username or issued_ns <= exists["session_epoch"]:
             return None
 
         # --- Check token revocation ---
@@ -434,7 +436,8 @@ def verify_session(raw: str) -> str | None:
         with get_db() as conn:
             if _is_token_revoked(conn, token):
                 return None
-            if conn.execute("SELECT 1 FROM users WHERE username=?", (username,)).fetchone() is None:
+            account = conn.execute("SELECT session_epoch FROM users WHERE username=?", (username,)).fetchone()
+            if account is None or ts * 1_000_000_000 <= account["session_epoch"]:
                 return None
         return username
 
@@ -456,7 +459,8 @@ def verify_session(raw: str) -> str | None:
     if not hmac.compare_digest(signature, expected_signature):
         return None
     with get_db() as conn:
-        if conn.execute("SELECT 1 FROM users WHERE username=?", (username,)).fetchone() is None:
+        account = conn.execute("SELECT session_epoch FROM users WHERE username=?", (username,)).fetchone()
+        if account is None or ts * 1_000_000_000 <= account["session_epoch"]:
             return None
     return username
 
@@ -3147,7 +3151,9 @@ async def update_account(account_id: int, request: Request) -> Response:
         ids = _selected_categories(conn, form)
         if ids is None:
             return Response("Invalid category assignment", status_code=400)
-        conn.execute("UPDATE users SET role=? WHERE id=?", (role, account_id))
+        # Revoke old tokens after a role change, password reset or grant update.
+        conn.execute("UPDATE users SET role=?, session_epoch=? WHERE id=?",
+                     (role, time.time_ns(), account_id))
         if password:
             salt, secret = hash_password(password)
             conn.execute("UPDATE users SET password_salt=?, password_hash=? WHERE id=?",
