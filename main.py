@@ -761,6 +761,7 @@ def template_context(request: Request, title: str, user: str | None = None) -> d
         "secondary_language": secondary_language(site_settings),
         "localized": lambda values, field: localized_value(values, field, lang),
         "user": user,
+        "account_role": actor(request)["role"] if user and actor(request) else None,
         "menu_categories": menu_categories,
         "menu_items": menu_items,
         "social_platforms": SOCIAL_PLATFORMS,
@@ -1333,6 +1334,68 @@ async def logout(request: Request) -> Response:
 
 def require_user(request: Request) -> str | None:
     return current_user(request)
+
+
+def actor(request: Request) -> dict[str, Any] | None:
+    username = current_user(request)
+    if not username:
+        return None
+    with get_db() as conn:
+        row = conn.execute("SELECT id, username, role FROM users WHERE username=?", (username,)).fetchone()
+    return dict(row) if row else None
+
+
+def can_write_post(conn: sqlite3.Connection, account: dict, post_id: int) -> bool:
+    if account["role"] in ("admin", "editor"):
+        return True
+    post = conn.execute("SELECT author_id FROM posts WHERE id=?", (post_id,)).fetchone()
+    return bool(post and post["author_id"] == account["id"])
+
+
+def allowed_category(conn: sqlite3.Connection, account: dict, raw: str) -> bool:
+    if account["role"] != "cc":
+        return not raw or (raw.isdigit() and conn.execute(
+            "SELECT 1 FROM categories WHERE id=?", (int(raw),)).fetchone() is not None)
+    return bool(raw.isdigit() and conn.execute(
+        "SELECT 1 FROM user_categories WHERE user_id=? AND category_id=?",
+        (account["id"], int(raw))).fetchone())
+
+
+@app.middleware("http")
+async def enforce_roles(request: Request, call_next):
+    """Apply authorization to every admin route, including upload/preview APIs."""
+    path = request.url.path
+    if not (path == "/admin" or path.startswith("/admin/")):
+        return await call_next(request)
+    account = actor(request)
+    if account is None:
+        return await call_next(request)  # Existing handlers redirect unauthenticated users.
+    role = account["role"]
+    if role == "admin":
+        return await call_next(request)
+    method = request.method
+    allowed = path in ("/admin", "/admin/documentation") and method in ("GET", "HEAD")
+    if path.startswith("/admin/posts"):
+        allowed = method in ("GET", "HEAD", "POST") and not (
+            role == "cc" and path.endswith("/delete"))
+        match = re.fullmatch(r"/admin/posts/(\\d+)/(?:edit(?:/preview|/upload)?|delete)", path)
+        if allowed and match and role == "cc":
+            with get_db() as conn:
+                allowed = can_write_post(conn, account, int(match.group(1)))
+    elif path == "/admin/categories":
+        allowed = method in ("GET", "HEAD", "POST")
+    elif path.startswith("/admin/categories/"):
+        allowed = role == "editor" and method == "POST" and bool(
+            re.fullmatch(r"/admin/categories/\\d+/delete", path))
+    elif role == "editor":
+        allowed = (path == "/admin/pages" or path.startswith("/admin/pages/")
+                   or path == "/admin/about" or path.startswith("/admin/about/")
+                   or path == "/admin/custom-home" or path.startswith("/admin/custom-home/")
+                   or path == "/admin/section-svg"
+                   or (path == "/admin/homepage" and method in ("GET", "HEAD")))
+    if not allowed:
+        return Response("Forbidden: insufficient permissions", status_code=403)
+    return await call_next(request)
 
 
 @app.get("/admin/documentation", response_class=HTMLResponse)
