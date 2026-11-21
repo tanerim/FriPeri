@@ -1,6 +1,6 @@
 # FriPeri
 
-**Documentation:** [Browse the complete documentation](docs/index.md) · [Security policy](SECURITY.md) · [Dependency security review](docs/dependency-security.md).
+**Documentation:** [Browse the complete documentation](docs/index.md) · [Security policy](SECURITY.md) · [Dependency security review](docs/dependency-security.md) · [Third-party notices](THIRD_PARTY_NOTICES.md).
 
 <p align="center">
 <img height="250" src="static/images/FriPeri_Logo.png" alt="FriPeri logo" />
@@ -625,6 +625,6 @@ FriPeri is distributed under the **MIT License**.
 
 Copyright © 2026 **Taner Sezer — NextNLP**.
 
-See [LICENSE](LICENSE) for the full terms, including the copyright notice requirement and warranty disclaimer.
+See [LICENSE](LICENSE) for the full terms, including the copyright notice requirement and warranty disclaimer.\n\n**Third-party components:** See [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) for the frontend components, pinned Python dependencies and open provenance checks. License notices for HyperUI and Tailwind CSS are preserved in [licenses/](licenses/). For an installed-dependency inventory run `python scripts/audit_third_party_licenses.py`.
 
-Parts of the admin interface adapt HyperUI application patterns by **Mark Mead**, also under the MIT License. The corresponding third-party notice is included in [licenses/HyperUI-MIT.txt](licenses/HyperUI-MIT.txt).
+Parts of the admin interface adapt HyperUI application patterns by **Mark Mead**, also under the MIT License. The corresponding third-party notice is included in [licenses/HyperUI-MIT.txt](licenses/HyperUI-MIT.txt). Tailwind CSS v4.1.18 is also distributed in compiled frontend CSS under the MIT license; see [licenses/TailwindCSS-MIT.txt](licenses/TailwindCSS-MIT.txt).
