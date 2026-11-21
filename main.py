@@ -1788,11 +1788,12 @@ async def admin_categories(request: Request) -> Response:
     lang = pick_lang(request)
     with get_db() as conn:
         categories = fetch_categories(conn)
+        account = actor(request)
     return render_template(
         request,
         "admin/categories.html",
         t(lang, "admin.categories"),
-        {"categories": categories, "active_admin": "categories"},
+        {"categories": categories, "active_admin": "categories", "can_delete_categories": account and account["role"] != "cc"},
         user,
     )
 
@@ -1809,7 +1810,7 @@ async def create_category(request: Request) -> Response:
     desc = str(form.get("description", "")).strip()
     if name:
         with get_db() as conn:
-            conn.execute(
+            inserted = conn.execute(
                 """
                 INSERT OR IGNORE INTO categories
                 (name, slug, description, menu_label_secondary, menu_label_en, description_secondary, show_in_menu, sort_order, created_at)
@@ -1818,7 +1819,7 @@ async def create_category(request: Request) -> Response:
                 (name, unique_slug(conn, "categories", name), desc, str(form.get("menu_label_secondary", "")).strip(), name, str(form.get("description_secondary", "")).strip(), now_iso()),
             )
             account = actor(request)
-            if account and account["role"] == "cc":
+            if account and account["role"] == "cc" and inserted.rowcount == 1:
                 created = conn.execute("SELECT id FROM categories WHERE name=?", (name,)).fetchone()
                 if created:
                     conn.execute("INSERT OR IGNORE INTO user_categories (user_id, category_id) VALUES (?, ?)",
