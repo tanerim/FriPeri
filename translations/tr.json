@@ -1,4 +1,13 @@
 {
+  "admin.head_snippet": "Sayfa başlığı kodu (<head>)",
+  "admin.head_snippet_help": "Google Search Console doğrulama etiketi veya reklam ve analiz kodu gibi güvendiğiniz HTML kodlarını yapıştırın. Alanı boş kaydederek kodu kaldırabilirsiniz.",
+  "sitemap.title": "Site haritası",
+  "sitemap.help": "Herkese açık sayfaların adreslerini sitemap.xml dosyasına yazın.",
+  "sitemap.origin": "Sitenin herkese açık adresi",
+  "sitemap.generate": "Site haritası oluştur",
+  "sitemap.generated": "Site haritası oluşturuldu.",
+  "sitemap.invalid_origin": "Sitenin ana adresini HTTPS veya HTTP ile girin (ör. https://example.com).",
+  "sitemap.too_large": "Site haritası tek bir XML dosyası için izin verilen sınırı aşıyor.",
   "builder.inline_image": "Metin içine görsel",
   "builder.image_flow": "Metin akışı",
   "builder.image_left": "Görsel solda · metin sağda",

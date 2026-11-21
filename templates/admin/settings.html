@@ -8,6 +8,7 @@
 
     <form class="settings-form-v3" method="post" action="/admin/settings" enctype="multipart/form-data">
       <input type="hidden" name="content_language_code" value="{{ secondary_language.code if secondary_language else '' }}" />
+      <input type="hidden" name="settings_token" value="{{ settings_token }}" />
       <header class="settings-page-header">
         <div>
           <h1><span class="page-heading-icon">{{ icon('settings') }}</span>{{ t(lang, "admin.settings") }}</h1>
@@ -28,6 +29,14 @@
           <label><span>{{ t(lang, 'admin.site_name') }}</span><input name="site_name" value="{{ settings['site_name'] }}" required maxlength="120" /></label>
           <label><span>{{ t(lang, 'admin.site_description') }}</span><input name="site_description" value="{{ settings['site_description'] }}" required maxlength="220" /></label>
         </div>
+      </section>
+
+      <section class="settings-card-v3">
+        <header>
+          <h2>{{ t(lang, 'admin.head_snippet') }}</h2>
+          <p id="head-snippet-help">{{ t(lang, 'admin.head_snippet_help') }}</p>
+        </header>
+        <textarea name="head_snippet" rows="6" spellcheck="false" aria-label="{{ t(lang, 'admin.head_snippet') }}" aria-describedby="head-snippet-help">{{ settings.head_snippet }}</textarea>
       </section>
 
       <section class="settings-card-v3">
@@ -83,6 +92,25 @@
         </div>
       </section>
       <div class="settings-save-bar"><span>{{ t(lang, 'dashboard.save_help') }}</span><button class="settings-primary" type="submit">{{ icon('save') }}{{ t(lang, 'common.save_changes') }}</button></div>
+    </form>
+
+    <form id="sitemap" class="settings-card-v3" method="post" action="/admin/settings/sitemap">
+      <input type="hidden" name="settings_token" value="{{ settings_token }}" />
+      <header>
+        <h2>{{ t(lang, 'sitemap.title') }}</h2>
+        <p>{{ t(lang, 'sitemap.help') }}</p>
+      </header>
+      {% if sitemap_generated %}<p class="notice" role="status">{{ t(lang, 'sitemap.generated') }}</p>{% endif %}
+      <div class="settings-grid-v3">
+        <label>
+          <span>{{ t(lang, 'sitemap.origin') }}</span>
+          <input type="url" name="sitemap_origin" value="{{ sitemap_origin }}" required />
+        </label>
+      </div>
+      <div class="settings-save-bar">
+        <button class="settings-primary" type="submit">{{ t(lang, 'sitemap.generate') }}</button>
+        {% if sitemap_exists %}<a class="settings-secondary" href="/sitemap.xml">sitemap.xml</a>{% endif %}
+      </div>
     </form>
   </div>
 </main>

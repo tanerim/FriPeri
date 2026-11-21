@@ -1,4 +1,13 @@
 {
+  "admin.head_snippet": "Page head snippet",
+  "admin.head_snippet_help": "Paste trusted HTML such as a Google Search Console verification tag or an advertising or analytics script. Save the field empty to remove the snippet.",
+  "sitemap.title": "Sitemap",
+  "sitemap.help": "Write the public page URLs to sitemap.xml.",
+  "sitemap.origin": "Public site address",
+  "sitemap.generate": "Generate sitemap",
+  "sitemap.generated": "Sitemap generated.",
+  "sitemap.invalid_origin": "Enter the site’s root address with HTTPS or HTTP (for example, https://example.com).",
+  "sitemap.too_large": "The sitemap exceeds the limit for a single XML file.",
   "builder.inline_image": "Image in text",
   "builder.image_flow": "Text wrapping",
   "builder.image_left": "Image left · text right",

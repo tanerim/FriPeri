@@ -3,6 +3,7 @@ import os
 DEFAULT_SITE_SETTINGS = {
     "site_name": os.getenv("SITE_NAME", "Personal Site"),
     "site_description": os.getenv("SITE_DESCRIPTION", "A personal publishing site."),
+    "head_snippet": "",
     "hero_kicker_secondary": os.getenv("HERO_KICKER_SECONDARY", ""),
     "hero_kicker_en": os.getenv("HERO_KICKER_EN", "Personal Publishing"),
     "hero_title_secondary": os.getenv("HERO_TITLE_SECONDARY", ""),

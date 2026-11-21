@@ -1,4 +1,13 @@
 {
+  "admin.head_snippet": "Code für den Seitenkopf (<head>)",
+  "admin.head_snippet_help": "Fügen Sie vertrauenswürdigen HTML-Code ein, etwa ein Bestätigungs-Tag für die Google Search Console oder ein Skript für Werbung oder Analysen. Speichern Sie das Feld leer, um den Code zu entfernen.",
+  "sitemap.title": "Sitemap",
+  "sitemap.help": "Schreiben Sie die URLs der öffentlichen Seiten in sitemap.xml.",
+  "sitemap.origin": "Öffentliche Website-Adresse",
+  "sitemap.generate": "Sitemap erstellen",
+  "sitemap.generated": "Sitemap erstellt.",
+  "sitemap.invalid_origin": "Geben Sie die Hauptadresse der Website mit HTTPS oder HTTP ein (z. B. https://example.com).",
+  "sitemap.too_large": "Die Sitemap überschreitet das Limit für eine einzelne XML-Datei.",
   "builder.inline_image": "Bild im Text",
   "builder.image_flow": "Textumfluss",
   "builder.image_left": "Bild links · Text rechts",

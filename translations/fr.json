@@ -1,4 +1,13 @@
 {
+  "admin.head_snippet": "Code de l’en-tête (<head>)",
+  "admin.head_snippet_help": "Collez du HTML de confiance, par exemple une balise de validation Google Search Console ou un script publicitaire ou de mesure d’audience. Enregistrez le champ vide pour supprimer le code.",
+  "sitemap.title": "Plan du site",
+  "sitemap.help": "Écrivez les URL des pages publiques dans sitemap.xml.",
+  "sitemap.origin": "Adresse publique du site",
+  "sitemap.generate": "Générer le plan du site",
+  "sitemap.generated": "Plan du site généré.",
+  "sitemap.invalid_origin": "Saisissez l’adresse principale du site avec HTTPS ou HTTP (par exemple https://example.com).",
+  "sitemap.too_large": "Le plan du site dépasse la limite autorisée pour un seul fichier XML.",
   "builder.inline_image": "Image dans le texte",
   "builder.image_flow": "Habillage du texte",
   "builder.image_left": "Image à gauche · texte à droite",

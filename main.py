@@ -11,10 +11,12 @@ import secrets
 import shutil
 import zipfile
 import sqlite3
+import tempfile
+import xml.etree.ElementTree as ET
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
-from urllib.parse import urlsplit
+from urllib.parse import quote, urlsplit
 
 from PIL import Image
 from localization import (LANGUAGES, TRANSLATIONS, LOCALIZED_SETTINGS, content_languages,
@@ -49,6 +51,7 @@ def project_path(value: str) -> Path:
 
 DB_PATH = project_path(os.getenv("SITE_DB_PATH", "db/site.db"))
 STATIC_DIR = project_path(os.getenv("SITE_STATIC_DIR", "static"))
+SITEMAP_PATH = STATIC_DIR / "sitemap.xml"
 TEMPLATES_DIR = project_path(os.getenv("SITE_TEMPLATES_DIR", "templates"))
 UPLOAD_DIR = project_path(os.getenv("SITE_UPLOAD_DIR", "static/uploads"))
 SESSION_COOKIE = os.getenv("SESSION_COOKIE_NAME", "site_session")
@@ -64,6 +67,12 @@ app = FastAPI(
     version="2.0.0",
 )
 app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
+
+@app.api_route("/sitemap.xml", methods=["GET", "HEAD"], include_in_schema=False)
+async def sitemap() -> Response:
+    if not SITEMAP_PATH.is_file():
+        return Response(status_code=404)
+    return FileResponse(SITEMAP_PATH, media_type="application/xml")
 
 @app.get("/app-ads.txt", include_in_schema=False)
 async def app_ads_txt():
@@ -1918,6 +1927,7 @@ async def save_menu(request: Request) -> Response:
 SITE_SETTING_KEYS = (
     "site_name",
     "site_description",
+    "head_snippet",
     "hero_kicker_secondary",
     "hero_kicker_en",
     "hero_title_secondary",
@@ -1953,21 +1963,42 @@ def fetch_settings_categories():
         return fetch_categories(conn)
 
 
+def settings_form_token(request: Request, user: str) -> str:
+    session = request.cookies.get(SESSION_COOKIE, "")
+    return hmac.new(_csrf_secret(user).encode(), f"settings:{session}".encode(), hashlib.sha256).hexdigest()
+
+
+def settings_response(request, user, settings, *, error="", status_code=200, sitemap_origin=None):
+    lang = pick_lang(request)
+    return render_template(
+        request,
+        "admin/settings.html",
+        t(lang, "admin.settings"),
+        {
+            "settings": settings,
+            "saved": request.query_params.get("saved") == "1",
+            "error": error,
+            "active_admin": "settings",
+            "card_categories": fetch_settings_categories(),
+            "category_cards": category_card_settings(settings),
+            "settings_token": settings_form_token(request, user),
+            "sitemap_origin": str(request.base_url).rstrip("/") if sitemap_origin is None else sitemap_origin,
+            "sitemap_exists": SITEMAP_PATH.is_file(),
+            "sitemap_generated": request.query_params.get("sitemap") == "generated",
+        },
+        user,
+        status_code=status_code,
+    )
+
+
 @app.get("/admin/settings", response_class=HTMLResponse)
 async def admin_settings(request: Request) -> Response:
     user = require_user(request)
     if not user:
         return RedirectResponse("/login", status_code=303)
-    lang = pick_lang(request)
     with get_db() as conn:
         settings = get_site_settings(conn)
-    return render_template(
-        request,
-        "admin/settings.html",
-        t(lang, "admin.settings"),
-        {"settings": settings, "saved": request.query_params.get("saved") == "1", "active_admin": "settings", "card_categories": [dict(cat) for cat in fetch_settings_categories()], "category_cards": category_card_settings(settings)},
-        user,
-    )
+    return settings_response(request, user, settings)
 
 
 @app.post("/admin/settings", response_class=HTMLResponse)
@@ -1977,6 +2008,10 @@ async def save_settings(request: Request) -> Response:
         return RedirectResponse("/login", status_code=303)
     lang = pick_lang(request)
     form = await request.form()
+    if "head_snippet" in form and not hmac.compare_digest(
+        str(form.get("settings_token", "")).encode(), settings_form_token(request, user).encode()
+    ):
+        return Response(status_code=403)
     stale = stale_language_form(request, form)
     if stale is not None:
         return stale
@@ -2006,17 +2041,55 @@ async def save_settings(request: Request) -> Response:
         "hero_copy_en",
     ]
     if any(not settings[key] for key in required):
-        return render_template(
-            request,
-            "admin/settings.html",
-            t(lang, "admin.settings"),
-            {"settings": settings, "saved": False, "error": t(lang, "common.required"), "active_admin": "settings", "card_categories": fetch_settings_categories(), "category_cards": category_card_settings(settings)},
-            user,
-            status_code=400,
-        )
+        return settings_response(request, user, settings, error=t(lang, "common.required"), status_code=400)
     with get_db() as conn:
         set_site_settings(conn, settings)
     return RedirectResponse("/admin/settings?saved=1", status_code=303)
+
+
+@app.post("/admin/settings/sitemap")
+async def generate_sitemap(request: Request) -> Response:
+    user = require_user(request)
+    if not user:
+        return RedirectResponse("/login", status_code=303)
+    form = await request.form()
+    if not hmac.compare_digest(
+        str(form.get("settings_token", "")).encode(), settings_form_token(request, user).encode()
+    ):
+        return Response(status_code=403)
+    origin = str(form.get("sitemap_origin", "")).strip().rstrip("/")
+    with get_db() as conn:
+        settings = get_site_settings(conn)
+        if not valid_url(origin) or not re.fullmatch(r"https?://[^/?#@]+", origin, re.IGNORECASE):
+            return settings_response(request, user, settings, sitemap_origin=origin,
+                                     error=t(pick_lang(request), "sitemap.invalid_origin"), status_code=400)
+        paths = ["/", "/about", "/contact"]
+        for prefix, query in (
+            ("category", "SELECT slug FROM categories ORDER BY slug"),
+            ("posts", "SELECT slug FROM posts WHERE status = 'published' ORDER BY slug"),
+            ("pages", "SELECT slug FROM custom_pages WHERE published = 1 ORDER BY slug"),
+        ):
+            paths.extend(f"/{prefix}/{quote(row['slug'], safe='')}" for row in conn.execute(query))
+
+    urlset = ET.Element("urlset", xmlns="http://www.sitemaps.org/schemas/sitemap/0.9")
+    for path in paths:
+        ET.SubElement(ET.SubElement(urlset, "url"), "loc").text = origin + path
+    ET.indent(urlset)
+    xml = ET.tostring(urlset, encoding="utf-8", xml_declaration=True)
+    if len(paths) > 50_000 or len(xml) > 52_428_800:
+        return settings_response(request, user, settings, sitemap_origin=origin,
+                                 error=t(pick_lang(request), "sitemap.too_large"), status_code=400)
+
+    temporary_path = None
+    try:
+        with tempfile.NamedTemporaryFile(dir=STATIC_DIR, prefix=".sitemap-", delete=False) as output:
+            temporary_path = Path(output.name)
+            output.write(xml)
+        temporary_path.replace(SITEMAP_PATH)
+    finally:
+        if temporary_path:
+            temporary_path.unlink(missing_ok=True)
+    return RedirectResponse("/admin/settings?sitemap=generated#sitemap", status_code=303)
 
 
 DESIGN_SETTING_KEYS = (

@@ -29,6 +29,9 @@
     {% block extra_head %}{% endblock %}
     <script src="{{ static_url('editor.js') }}" defer></script>
     <script src="{{ static_url('navigation.js') }}" defer></script>
+    {% if not request.url.path.startswith('/admin') %}
+    {{ site_settings.head_snippet | safe }}
+    {% endif %}
   </head>
   <body class="{{ 'admin-site' if request.url.path.startswith('/admin') else 'public-site' }}">
     <header class="site-header">{% include "partials/nav.html" %}</header>
