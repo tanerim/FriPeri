@@ -26,7 +26,7 @@
             <label class="content-publishing-field">
               <span class="field-label">{{ t(lang, "content.category") }}</span>
               <select class="modern-select" name="category_id" {% if account_role == 'cc' %}required{% endif %}>
-                {% if account_role != 'cc' %}<option value="" {{ 'selected' if not values.get('category_id') else '' }}>{{ t(lang, 'common.uncategorized') }}</option>{% endif %}
+                {% if account_role == 'cc' %}<option value="" disabled {% if not values.get('category_id') %}selected{% endif %}>{{ t(lang, 'users.select_category') }}</option>{% else %}<option value="" {{ 'selected' if not values.get('category_id') else '' }}>{{ t(lang, 'common.uncategorized') }}</option>{% endif %}
                 {% for cat in categories %}
                   <option value="{{ cat['id'] }}" {{ "selected" if values.get("category_id", "")|string == cat["id"]|string else "" }}>{{ cat["name"] }}</option>
                 {% endfor %}
@@ -66,7 +66,8 @@
             </div>
 
             <div class="content-publishing-actions">
-              <button class="settings-primary submit-status" id="builder-save" type="button" data-draft-label="{{ t(lang, 'content.save_as_draft') }}" data-publish-label="{{ t(lang, 'content.publish') }}">{{ t(lang, 'content.publish') if status_value == 'published' else t(lang, 'content.save_as_draft') }}</button>
+              <button class="admin-secondary submit-status" id="builder-save-draft" type="button">{{ t(lang, 'content.save_as_draft') }}</button>
+              <button class="settings-primary submit-status" id="builder-save" type="button">{{ t(lang, 'content.publish') }}</button>
             </div>
           </div>
         </section>
