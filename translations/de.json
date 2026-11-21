@@ -512,5 +512,8 @@
   "categories.edit_description": "Beschreibung",
   "categories.edit_secondary_label": "Bezeichnung in zweiter Sprache",
   "categories.edit_secondary_description": "Beschreibung in zweiter Sprache",
-  "categories.edit_save": "Kategorie speichern"
+  "categories.edit_save": "Kategorie speichern",
+  "users.select_category": "Zugewiesene Kategorie wählen",
+  "users.create_help": "Konten erstellen und Inhaltsrechte zuweisen.",
+  "users.manage_help": "Konto wählen, um Berechtigungen oder Passwort zu ändern."
 }
