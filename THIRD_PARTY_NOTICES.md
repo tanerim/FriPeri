@@ -71,7 +71,7 @@ Review entries marked `UNKNOWN`, `MISSING`, or license files not discoverable th
 
 - `templates/admin/partials/icons.html` contains inline SVG path definitions used for admin interface actions. The repository does **not** contain enough provenance to certify that every path was drawn independently rather than adapted from an external icon library. **Attribution review remains open**; if the icons are derived from an existing collection, add that collection's copyright and license notice.
 - `templates/partials/social_icon.html` contains SVG marks or simplified representations of external platforms (including LinkedIn, X, GitHub, ORCID, ResearchGate, Bluesky, etc.). These identify services; the corresponding names and logos may be protected as **trademarks** independently of copyright licenses. Do not imply endorsement, partnership or transfer of trademark rights. If any mark was sourced directly from a third-party icon package, retain that package's license as well.
-- `static/images/FriPeri.png`, `FriPeri_Icon.png` and `FriPeri_Logo.png` appear to be FriPeri-branded assets, but **their creator, commissioning terms, and rights chain have not been independently verified**. Obtain confirmation from the asset owner before asserting exclusive ownership or unrestricted redistribution.
+- **FriPeri brand assets:** `static/images/FriPeri.png`, `static/images/FriPeri_Icon.png` and `static/images/FriPeri_Logo.png` belong to **Taner Sezer**, as confirmed by the project owner. They are project-owned branding, not third-party assets. This ownership statement does not independently settle trademark registration or any separate permission terms for using the FriPeri name and logo outside the project.
 - The committed CSS uses a system-font fallback chain, including an `Inter` family name, but this repository does not include an Inter font file or download the font from a third-party service. Therefore no Inter font binary is being redistributed with the repo. If a font file is added later, check its license and add its notice.
 
 ## User-generated and embedded external content
@@ -83,7 +83,7 @@ FriPeri supports media uploads, links, optional iframe embeds (YouTube/Vimeo), a
 1. Retain `LICENSE`, `licenses/HyperUI-MIT.txt`, `licenses/TailwindCSS-MIT.txt`, and this file in every source distribution.
 2. Run the installed-dependency audit, inspect third-party package metadata and license files, and resolve unknown/missing entries before distributing a bundled runtime.
 3. If shipping Playwright browsers, system fonts, native binaries or other bundled dependencies, include their own applicable license notices.
-4. Confirm the provenance of inline SVG icons and the rights to the FriPeri logo/other project images; add notices if an external source is identified.
+4. Confirm the provenance of inline SVG icons and any other newly introduced images; add notices if an external source is identified. FriPeri logo ownership has been confirmed by the project owner.
 5. Recheck the inventory when packages, assets, fonts, icon sets, build tools or embed libraries change.
 
 This inventory is a transparency aid, not a guarantee that no additional third-party rights exist or legal advice.
