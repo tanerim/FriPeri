@@ -534,7 +534,7 @@
   "users.initial_password": "İlk şifre (en az 8 karakter)",
   "users.new_password": "Yeni şifre (boş bırakılırsa değişmez)",
   "users.role": "Rol",
-  "users.role_cc": "İçerik üreticisi (cc)",
+  "users.role_cc": "İçerik Üreticisi",
   "users.role_editor": "Editör",
   "users.role_admin": "Yönetici",
   "users.categories": "İçerik üreticisinin kategori izinleri",
