@@ -16,7 +16,7 @@ Built with **Python · FastAPI · SQLite · Jinja2**. No external database serve
 - **Customize:** choose a content-feed homepage or build a custom layout with reusable blocks, images, and video.
 - **Organize:** nested navigation, category presentation controls, built-in social profile links, and contact messages.
 - **Translate:** English content with an optional secondary language and English fallback.
-- **Manage:** browser-based first-run installation, administrator login, media cropping, backups, and recovery.
+- **Manage:** browser-based installation, role-based access for content creators, editors and administrators, media cropping, backups, and recovery.
 - **Own your data:** content and settings are stored in SQLite; uploaded media stays on your server.
 
 For exact behavior, limitations, and examples, see the [full feature overview](docs/overview.md) and [administrator guide](docs/user-guide.md).
@@ -47,6 +47,7 @@ Everything you need to set up, manage, and extend FriPeri. Browse the [complete 
 - **[Overview and features](docs/overview.md)** — What FriPeri does and how it works.
 - **[Installation and setup](docs/installation.md)** — Requirements, first-run setup, and CLI installation.
 - **[Administrator user guide](docs/user-guide.md)** — Publishing, pages, homepage design, and languages.
+- **[Users and permissions](docs/user-roles.md)** — Content creators, editors, administrators, and category assignments.
 
 ### Running your site
 
