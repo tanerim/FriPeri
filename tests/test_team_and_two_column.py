@@ -27,7 +27,7 @@ def test_team_validation_round_trip_and_shapes():
     assert blocks[0]["width"] == "wide"
     assert blocks[0]["items"][0] == {
         "photo": "/static/uploads/example.png", "name": "Ada Yılmaz",
-        "title": "Researcher", "shape": "circle", "fit": "cover",
+        "title": "Researcher", "shape": "circle", "fit": "cover", "orientation": "landscape",
         "zoom": 1.0, "focal_x": 50.0, "focal_y": 50.0,
     }
     assert blocks[0]["items"][1]["shape"] == "rectangle"
@@ -176,7 +176,7 @@ def test_team_photo_crop_renders_on_published_page(site):
     assert response.status_code == 200
     assert "shape-circle" in response.text
     assert "object-position: 20.0% 70.0%" in response.text
-    assert "transform: scale(2.2)" in response.text
+    assert "translate(" in response.text and "scale(2.2)" in response.text
 
 
 def test_team_photo_fit_modes_are_preserved():
@@ -187,3 +187,54 @@ def test_team_photo_fit_modes_are_preserved():
     assert validated[0]["items"][1]["fit"] == "cover"
     assert "object-fit: {{ member.fit" in (
         ROOT / "templates/partials/content_blocks.html").read_text(encoding="utf-8")
+
+
+@pytest.mark.parametrize("orientation", ["landscape", "portrait"])
+def test_rectangle_orientation_is_saved(orientation):
+    doc = team_doc()
+    doc[0]["items"][1]["orientation"] = orientation
+    result = validate_document(json.dumps(doc, ensure_ascii=False))
+    assert result[0]["items"][1]["orientation"] == orientation
+
+
+def test_unknown_team_orientation_defaults_to_landscape():
+    doc = team_doc()
+    doc[0]["items"][1]["orientation"] = "diagonal"
+    assert validate_document(json.dumps(doc))[0]["items"][1]["orientation"] == "landscape"
+
+
+def test_team_photo_panning_and_orientation_are_exposed():
+    js = (ROOT / "static/home-builder.js").read_text(encoding="utf-8")
+    css = (ROOT / "static/home-builder.css").read_text(encoding="utf-8")
+    published_css = (ROOT / "static/custom-home.css").read_text(encoding="utf-8")
+    assert "portrait.dataset.orientation" in js
+    assert "team_orientation" in js
+    assert "team_landscape" in js and "team_portrait" in js
+    assert "portrait.setPointerCapture(event.pointerId)" in js
+    assert "translate(${offsetX}%, ${offsetY}%)" in js
+    assert "grid-template-columns:minmax(180px,240px)" in css
+    assert "orientation-portrait" in published_css
+    assert "orientation-landscape" in published_css
+
+
+def test_published_team_portrait_ratio_and_pan(site):
+    import sqlite3
+
+    client, db = site
+    doc = team_doc()
+    doc[0]["items"][1].update(
+        orientation="portrait", shape="rectangle",
+        fit="cover", zoom=2.0, focal_x=30.0, focal_y=70.0
+    )
+    blocks = validate_document(json.dumps(doc, ensure_ascii=False))
+    with sqlite3.connect(db) as conn:
+        conn.execute("""
+            INSERT INTO posts(title, slug, excerpt, body, body_html, post_blocks_json,
+                              status, created_at, updated_at)
+            VALUES (?, ?, '', '', '', ?, 'published', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+        """, ("Portrait team", "portrait-team", json.dumps({"en": blocks}, ensure_ascii=False)))
+    response = client.get("/posts/portrait-team")
+    assert response.status_code == 200
+    assert "shape-rectangle orientation-portrait" in response.text
+    assert "object-position: 30.0% 70.0%" in response.text
+    assert "translate(10.0%, -10.0%) scale(2.0)" in response.text
