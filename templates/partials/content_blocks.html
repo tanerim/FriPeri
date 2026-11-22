@@ -10,7 +10,7 @@
     data-position="{{ appearance.get('background_position', 'center') }}" data-edge="{{ appearance.get('edge', 'flat') }}"
     {% elif block.type == 'heading' %}
     {% if 'font_size' in appearance %}data-heading-size{% endif %} data-heading-weight="{{ appearance.get('font_weight', '') }}" data-accent="{{ appearance.get('accent_style', '') }}" data-accent-new-line="{{ appearance.get('accent_new_line', 'no') }}"
-    {% elif block.type == 'button' %}
+    {% elif block.type in ['button', 'icon_button'] %}
     data-variant="{{ appearance.get('variant', 'solid') }}"
     {% endif %}
     data-stats-columns="{{ appearance.get('columns', '') }}"
@@ -45,8 +45,10 @@
       <figure><img src="{{ block.url }}" alt="{{ block.alt }}" loading="lazy" />{% if block.caption %}<figcaption>{{ block.caption }}</figcaption>{% endif %}</figure>
     {% elif block.type == 'video' and block.video %}
       <figure>{% if block.video.kind == 'embed' %}<iframe src="{{ block.video.url }}" title="{{ block.alt or block.caption or t(lang, 'builder.video') }}" loading="lazy" allow="fullscreen; picture-in-picture" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe>{% else %}<video src="{{ block.video.url }}" controls preload="metadata" aria-label="{{ block.alt or t(lang, 'builder.video') }}"></video>{% endif %}{% if block.caption %}<figcaption>{{ block.caption }}</figcaption>{% endif %}</figure>
+    {% elif block.type == 'icon_button' and block.url %}
+      <a class="custom-button custom-icon-button" href="{{ block.url }}" aria-label="{{ block.text }}" title="{{ block.text }}"{% if appearance.get('target') == 'new_tab' %} target="_blank" rel="noopener noreferrer"{% endif %}><i class="bi bi-{{ block.icon_name }}" aria-hidden="true"></i></a>
     {% elif block.type == 'button' and block.url %}
-      {% set arrow = appearance.get('icon', 'external') %}
+      {% set arrow = appearance.get('icon', 'none') %}
       <a class="custom-button" href="{{ block.url }}"{% if appearance.get('target') == 'new_tab' %} target="_blank" rel="noopener noreferrer"{% endif %}>{{ block.text }}{% if arrow != 'none' %} <span aria-hidden="true">{{ '→' if arrow == 'arrow' else '↗' }}</span>{% endif %}</a>
     {% elif block.type == 'category' %}
       <div class="category-page category-{{ block.category }}"><div class="archive-list category-list" data-items="{{ block.posts|length }}">
