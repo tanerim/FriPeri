@@ -111,7 +111,7 @@
       heading:{text:t('heading_hint'),level:'h2'}, text:{html:'',foreground:''},
       list:{items:[t('item')],ordered:false}, table:{rows:[[t('heading'),t('heading')],[t('item'),t('item')]],caption:''},
       image:{url:'',alt:'',caption:'',link_url:'',link_target:'same_tab'},video:{url:'',alt:'',caption:''},button:{text:t('starter_button'),url:'',appearance:{icon:'none'}},brand_logo:{width:'wide'},icon_button:{text:'Home',url:'/',icon_name:'house',appearance:{variant:'solid'}},divider:{line_width:2,line_style:'single',line_color:'#a5b3be'},
-      quote:{text:t('quote_hint'),attribution:''},callout:{title:t('callout'),text:t('text_hint')},
+      quote:{text:t('quote_hint'),attribution:''},callout:{title:t('callout'),text:t('text_hint'),image_url:'',image_alt:''},
       stats:{items:[{value:'100+',label:t('stat_label')}]},team:{width:'wide',items:[{photo:'',name:'',title:'',shape:'rectangle',orientation:'landscape',fit:'cover',zoom:1,focal_x:50,focal_y:50}]},faq:{items:[{question:t('question'),answer:t('answer')}]},legacy_html:{html:''}
     }[type]);
   }
@@ -632,6 +632,21 @@
       ['loading',['lazy','eager']],['decoding',['async','auto','sync']],
       ['fetch_priority',['auto','high','low']]
     ],
+    callout: [
+      ['accent_side',['left','right','top','bottom','none']],
+      ['accent_color','color',config.design?.accent || '#286e7a'],['accent_width',0,24,5],
+      ['shadow',['none','soft','medium','strong']],['background_color','color','#ffffff'],
+      ['border_color','color','#dbe3ec'],['border_width',0,10,1],['radius',0,80,20],
+      ['padding',8,96,28],['title_color','color','#17243b'],['title_size',14,90,32],
+      ['title_weight',['normal','medium','semibold','bold','heavy']],
+      ['title_style',['normal','italic']],['title_decoration',['none','underline']],
+      ['body_color','color','#17243b'],['body_size',10,48,16],
+      ['body_weight',['normal','medium','semibold','bold']],
+      ['body_style',['normal','italic']],['body_decoration',['none','underline']],
+      ['image_position',['none','left','right','top','bottom']],['image_width',15,65,35],
+      ['image_fit',['cover','contain']],['image_ratio',['original','square','four_three','wide','portrait']],
+      ['image_radius',0,60,12],['gap',0,80,20]
+    ],
     quote: [['font_size',12,72,28],['attribution_size',10,36,14],['quote_color','color','#17243b'],['attribution_color','color','#65738a'],['border_color','color','#65738a'],['border_width',0,12,3],['font_style',['normal','italic']]],
     stats: [['value_color','color','#17243b'],['label_color','color','#65738a'],['card_background','color','#ffffff'],['value_size',16,120,48],['label_size',10,48,14],['columns',1,4,3],['gap',0,64,24],['padding',0,64,0]]
   };
@@ -655,6 +670,11 @@
       });
       if (a.height_px > 0) body.dataset.imageHeight='custom';
       else delete body.dataset.imageHeight;
+    }
+    if(block.type==='callout'){
+      const a=block.appearance||{};body.dataset.accentSide=a.accent_side||'left';
+      const content=body.querySelector('.friperi-callout-inner');
+      if(content)content.dataset.imagePosition=a.image_position||'none';
     }
     body.dataset.buttonWidth = block.appearance?.width_mode || 'auto';
     body.dataset.statsColumns = block.appearance?.columns ?? '';
@@ -774,6 +794,28 @@
       details.append(heading,controls);wrapper.append(details);
     }
     return wrapper;
+  }
+  const calloutPanelOpen=new WeakMap();
+  function calloutAppearanceControls(block,body) {
+    const groups=[
+      ['Accent & frame',['accent_side','accent_color','accent_width','shadow','background_color','border_color','border_width','radius','padding']],
+      ['Heading typography',['title_color','title_size','title_weight','title_style','title_decoration']],
+      ['Body typography',['body_color','body_size','body_weight','body_style','body_decoration']],
+      ['Image layout',['image_position','image_width','image_fit','image_ratio','image_radius','gap']]
+    ];
+    const opened=calloutPanelOpen.get(block) || new Set(['Accent & frame','Heading typography','Body typography','Image layout']);
+    const root=el('div','builder-callout-appearance');
+    for(const [name,keys] of groups){
+      const panel=el('details','builder-image-panel');panel.open=opened.has(name);
+      panel.addEventListener('toggle',()=>{
+        const next=new Set(calloutPanelOpen.get(block)||opened);
+        if(panel.open)next.add(name);else next.delete(name);
+        calloutPanelOpen.set(block,next);
+      });
+      panel.append(el('summary','',name),appearanceControls(block,body,appearanceFields.callout.filter(([key])=>keys.includes(key))));
+      root.append(panel);
+    }
+    return root;
   }
   function syncCellStyles(block) {
     if(block.cell_styles) block.cell_styles=block.rows.map((row,r)=>row.map((_,c)=>block.cell_styles[r]?.[c] || {}));
@@ -1106,7 +1148,7 @@
       if(block.foreground) body.style.setProperty('--text-color',block.foreground);
       if (block.type === 'section') sectionEditor(block,body,card,depth,hero);
       else {
-        const appearance=block.type==='image'?imageAppearanceControls(block,body):appearanceControls(block,body);if(appearance)card.append(appearance);
+        const appearance=block.type==='image'?imageAppearanceControls(block,body):block.type==='callout'?calloutAppearanceControls(block,body):appearanceControls(block,body);if(appearance)card.append(appearance);
       }
       if(block.type==='category') {
         const options = config.categories.map(cat=>[cat.slug,cat.name]);
@@ -1182,8 +1224,40 @@
         const figure=el('figure');figure.append(quote,editable('figcaption',block.attribution,t('attribution'),v=>{block.attribution=v;}));body.append(figure);
       }
       if(block.type==='callout') {
-        body.append(editable('h3',block.title,t('heading_hint'),v=>{block.title=v;}),
+        const content=el('div','friperi-callout-inner');
+        content.dataset.imagePosition=block.appearance?.image_position||'none';
+        const copy=el('div','friperi-callout-copy');
+        copy.append(editable('h3',block.title,t('heading_hint'),v=>{block.title=v;}),
                     editable('p',block.text,t('text_hint'),v=>{block.text=v;}));
+        const renderCalloutImage=()=>{
+          content.querySelector('.friperi-callout-media')?.remove();
+          if(block.image_url && (block.appearance?.image_position||'none')!=='none'){
+            const frame=el('figure','friperi-callout-media');
+            const img=el('img');img.src=block.image_url;img.alt=block.image_alt||'';
+            img.loading='lazy';frame.append(img);content.prepend(frame);
+          }
+          content.dataset.imagePosition=block.appearance?.image_position||'none';
+        };
+        content.append(copy);body.append(content);renderCalloutImage();
+        const fields=el('div','builder-callout-media-fields');
+        const url=field('Image URL (optional)',block.image_url||'',v=>{block.image_url=v.trim();renderCalloutImage();});
+        fields.append(url);
+        const uploadLabel=el('label','builder-field');
+        uploadLabel.append(el('span','','Upload image (PNG, JPEG or WebP)'));
+        const file=el('input');file.type='file';file.accept='image/png,image/jpeg,image/webp';
+        file.addEventListener('change',()=>upload(file.files[0],{type:'image'},value=>{
+          block.image_url=value;url.querySelector('input').value=value;
+          if((block.appearance?.image_position||'none')==='none')block.appearance={...block.appearance,image_position:'right'};
+          renderCalloutImage();change();
+        }));
+        uploadLabel.append(file);fields.append(uploadLabel);
+        fields.append(field('Image alternative text',block.image_alt||'',v=>{
+          block.image_alt=v;content.querySelector('.friperi-callout-media img')?.setAttribute('alt',v);
+        }));
+        fields.append(button('Remove image',()=>{
+          block.image_url='';url.querySelector('input').value='';renderCalloutImage();change();
+        }));
+        body.append(fields);
       }
       if(block.type==='team') {
         const group=el('div','custom-team-grid builder-team-grid');
