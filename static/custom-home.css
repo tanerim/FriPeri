@@ -436,3 +436,85 @@
 .custom-block.custom-icon_button[data-variant=underlined] > .custom-icon-button{background:transparent;box-shadow:none;color:var(--block-button-background,var(--color-accent,#286e7a))}
 .custom-block.custom-icon_button > .custom-icon-button .bi{line-height:1;display:block}
 @media(prefers-reduced-motion:reduce){.custom-block.custom-icon_button > .custom-icon-button{transition:none}}
+
+
+/* FriPeri editorial landing — selectively enabled through validated section styles. */
+.custom-section[data-landing-style]:not([data-landing-style=none]) {isolation:isolate;overflow:hidden}
+.custom-section[data-landing-style=hero]{
+  background:radial-gradient(circle at 75% 12%,#6f58be77,transparent 40%),linear-gradient(122deg,#142e52 0%,#225d83 55%,#4e368d 100%)!important;
+  color:#fff!important;
+}
+.custom-section[data-landing-style=hero] > .section-content{align-items:center}
+.custom-section[data-landing-style=hero] h1{
+  font-size:clamp(54px,7.3vw,112px);line-height:1.01;letter-spacing:-.065em;
+}
+.custom-section[data-landing-style=hero] h3{
+  font-size:12px;letter-spacing:.22em;text-transform:uppercase;color:#9be9e4;
+}
+.custom-section[data-landing-style=hero] .custom-text{max-width:56ch;line-height:1.7}
+.custom-section[data-landing-style=hero] .custom-button{
+  border-radius:11px;box-shadow:none;
+}
+.custom-section[data-landing-style=hero] .custom-heading,.custom-section[data-landing-style=hero] .custom-text{position:relative;z-index:1}
+.custom-section[data-landing-style=intro] > .section-content{text-align:center;justify-items:center;gap:30px}
+.custom-section[data-landing-style=intro] h2{font-size:clamp(38px,5vw,75px);letter-spacing:-.06em;max-width:14ch;margin-inline:auto}
+.custom-section[data-landing-style=intro] .custom-text{max-width:66ch;margin-inline:auto;line-height:1.8}
+.custom-section[data-landing-style=features] > .section-content{text-align:center;justify-items:center}
+.custom-section[data-landing-style=features] > .section-content > .custom-section[data-layout=three]{width:100%;margin-top:25px}
+.custom-section[data-landing-style=features] .section-content > .custom-section.tone-white{
+  border:1px solid #e2def4;box-shadow:0 18px 35px #242d5512;border-radius:22px;
+  position:relative;overflow:hidden;min-height:220px;
+}
+.custom-section[data-landing-style=features] .section-content > .custom-section.tone-white::before{
+  content:'';position:absolute;inset:auto -20% -65% 10%;height:95px;
+  background:linear-gradient(90deg,#8bdedc55,#df93cf66);transform:rotate(-9deg);pointer-events:none;
+}
+.custom-section[data-landing-style=features] .section-content > .custom-section.tone-white h3{font-size:clamp(18px,1.7vw,25px)}
+.custom-section[data-landing-style=features] .section-content > .custom-section.tone-white p{font-size:15px;line-height:1.7}
+.custom-section[data-landing-style=showcase]{
+  background:radial-gradient(circle at 10% 80%,#2d6175 0%,transparent 39%),linear-gradient(110deg,#12253c,#1d335c 56%,#392e73)!important;
+  color:#fff!important;
+}
+.custom-section[data-landing-style=showcase] > .section-content{align-items:center}
+.custom-section[data-landing-style=showcase] h2{font-size:clamp(38px,5vw,78px);letter-spacing:-.06em}
+.custom-section[data-landing-style=steps] > .section-content{text-align:center;justify-items:center}
+.custom-section[data-landing-style=steps] > .section-content > .custom-section[data-layout=two]{width:100%}
+.custom-section[data-landing-style=steps] .section-content .custom-section.tone-white{
+  border:1px solid #e2e8f0;border-radius:20px;box-shadow:0 14px 34px #142e520c;text-align:left;min-height:170px;
+}
+.custom-section[data-landing-style=steps] h3{font-size:clamp(18px,2vw,28px)}
+.custom-section[data-landing-style=contrast] > .section-content,
+.custom-section[data-landing-style=closing] > .section-content{text-align:center;justify-items:center}
+.custom-section[data-landing-style=contrast] h2,.custom-section[data-landing-style=closing] h2{
+  max-width:15ch;margin-inline:auto;font-size:clamp(42px,6.2vw,90px);letter-spacing:-.06em;
+}
+.custom-section[data-landing-style=contrast] .custom-text,
+.custom-section[data-landing-style=closing] .custom-text{max-width:67ch;margin-inline:auto;line-height:1.75}
+.custom-section[data-landing-style=closing]{
+  background:radial-gradient(circle at 70% 30%,#7050bb66,transparent 44%),linear-gradient(120deg,#142e52,#253f78 60%,#54377e)!important;
+  color:#fff!important;
+}
+.custom-section[data-landing-style=closing] .custom-brand_logo{max-width:470px;margin:30px auto 0}
+.friperi-logo-feature{position:relative;display:flex;flex-direction:column;gap:13px;align-items:center;justify-content:center;
+  width:100%;min-height:360px;padding:26px;background:linear-gradient(140deg,#ffffff,#eef5ff 72%,#e6e3ff);
+  border:1px solid #ffffffaa;border-radius:28px;color:#182f52;box-shadow:0 25px 70px #0a12354d;overflow:hidden;
+}
+.friperi-logo-feature::before{content:'';position:absolute;width:310px;height:310px;border-radius:50%;right:-125px;top:-145px;background:#9ee5df88}
+.friperi-logo-feature::after{content:'';position:absolute;width:260px;height:260px;border-radius:50%;left:-120px;bottom:-170px;background:#bb9bff55}
+.friperi-logo-mark{width:120px;height:120px;display:grid;place-items:center;background:#fff;border-radius:27px;padding:12px;box-shadow:0 10px 33px #213c6a17;z-index:1}
+.friperi-logo-mark img{width:100%;height:100%;object-fit:contain;border-radius:0}
+.friperi-logo-feature-copy{position:relative;z-index:1;display:flex;align-items:center;flex-direction:column;gap:3px;color:#182f52}
+.friperi-logo-feature-copy strong{font-size:clamp(30px,3vw,44px);letter-spacing:-.055em}
+.friperi-logo-feature-copy span{font-size:13px;letter-spacing:.04em;opacity:.65}
+.friperi-product-mock{position:relative;z-index:1;display:grid;grid-template-columns:56px minmax(0,1fr);width:min(100%,300px);height:105px;margin-top:14px;background:#fff;border:1px solid #d9e6f2;border-radius:13px;overflow:hidden;box-shadow:0 12px 30px #162a5522}
+.friperi-product-mock .mock-sidebar{padding:13px 10px;background:#172e54;display:flex;flex-direction:column;gap:7px}
+.friperi-product-mock .mock-sidebar i{display:block;background:#90c7d299;border-radius:3px;height:8px}
+.friperi-product-mock .mock-content{padding:15px;display:flex;flex-direction:column;align-items:start;gap:10px}
+.friperi-product-mock .mock-content b{display:block;width:63%;height:12px;background:#284b71;border-radius:3px}
+.friperi-product-mock .mock-content i{display:block;width:91%;height:6px;background:#dae2ed;border-radius:3px}
+.friperi-product-mock .mock-content em{display:block;width:36%;height:18px;background:#67b3b4;border-radius:5px}
+@media(max-width:740px){
+  .custom-section[data-landing-style=hero] h1{font-size:clamp(42px,12vw,70px)}
+  .friperi-logo-feature{min-height:300px}
+  .custom-section[data-landing-style=hero],.custom-section[data-landing-style=showcase]{text-align:center}
+}
