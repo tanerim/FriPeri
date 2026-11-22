@@ -1261,7 +1261,7 @@
       ['Minimal Portfolio','Simple introduction, gallery and contact',()=>[h('Selected work','h1'),p('A concise introduction to your portfolio.'),section([picture(),picture()],'two'),h('What I do'),p('Describe your work and expertise.'),action('Contact','/contact')]]
     ];
     layouts.forEach(([name,description,build],i)=>{
-      const item=button('','', 'page-layout-tile');
+      const item=button('',()=>{},'page-layout-tile');
       // Replace the default handler with a deliberate template action.
       item.textContent='';
       item.dataset.layoutIndex=String(i);
