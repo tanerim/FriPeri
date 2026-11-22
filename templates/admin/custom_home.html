@@ -6,7 +6,7 @@
 {% if builder_page|default('home') != 'post' %}
     <header class="settings-page-header">
       <div><h2 id="custom-home-title"><span class="page-heading-icon">{{ icon('design') }}</span>{{ t(lang, 'admin.pages' if builder_page|default('home') == 'page' else ('admin.about' if builder_page|default('home') == 'about' else 'admin.custom_home')) }}</h2><p>{{ t(lang, 'builder.intro') }}</p></div>
-      <div class="builder-actions"><button type="button" class="admin-secondary" id="builder-preview">{{ t(lang, 'common.preview') }}</button><button type="button" class="settings-primary" id="builder-save">{{ icon('save') }}{{ t(lang, 'builder.publish') }}</button></div>
+      <div class="builder-actions">{% if builder_page|default('home') == 'page' %}<button type="button" class="admin-secondary" id="builder-collapse-all" aria-expanded="true" aria-controls="builder-canvas">Collapse All</button>{% endif %}<button type="button" class="admin-secondary" id="builder-preview">{{ t(lang, 'common.preview') }}</button><button type="button" class="settings-primary" id="builder-save">{{ icon('save') }}{{ t(lang, 'builder.publish') }}</button></div>
     </header>
 {% endif %}
     <noscript><p class="error">{{ t(lang, 'builder.javascript') }}</p></noscript>
