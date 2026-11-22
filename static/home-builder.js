@@ -111,7 +111,7 @@
       list:{items:[t('item')],ordered:false}, table:{rows:[[t('heading'),t('heading')],[t('item'),t('item')]],caption:''},
       image:{url:'',alt:'',caption:''},video:{url:'',alt:'',caption:''},button:{text:t('starter_button'),url:''},divider:{},
       quote:{text:t('quote_hint'),attribution:''},callout:{title:t('callout'),text:t('text_hint')},
-      stats:{items:[{value:'100+',label:t('stat_label')}]},faq:{items:[{question:t('question'),answer:t('answer')}]},legacy_html:{html:''}
+      stats:{items:[{value:'100+',label:t('stat_label')}]},team:{width:'wide',items:[{photo:'',name:'',title:'',shape:'rectangle'}]},faq:{items:[{question:t('question'),answer:t('answer')}]},legacy_html:{html:''}
     }[type]);
   }
   function add(type) {
@@ -152,16 +152,42 @@
     canvas.children[selected]?.scrollIntoView({block:'nearest',behavior:'smooth'});
     canvas.children[selected]?.querySelector('.builder-hero-editor input')?.focus({preventScroll:true});
   }
-  const symbols = {section:'▥',heading:'H',text:'¶',list:'☷',table:'▦',image:'▧',video:'▷',button:'↗',quote:'❝',callout:'!',stats:'№',faq:'?',divider:'―',category:'▤',legacy_html:'<>'};
+  const symbols = {section:'▥',heading:'H',text:'¶',list:'☷',table:'▦',image:'▧',video:'▷',button:'↗',quote:'❝',callout:'!',stats:'№',team:'♙',faq:'?',divider:'―',category:'▤',legacy_html:'<>'};
   Object.keys(symbols).forEach(type => {
     const node = button('', () => add(type), 'builder-add-button');
     node.dataset.blockType = type;
     node.append(el('span','builder-block-symbol',symbols[type]),el('span','',t(type)));
     document.getElementById('builder-add-blocks').append(node);
   });
+  function addTwoColumnHero() {
+    const makeColumn = (heading, text, url) => ({
+      ...newBlock('section'),
+      appearance:{layout:'stack', surface:'standard', gap:22, padding_y:12, padding_x:12},
+      children:[
+        {...newBlock('heading'), level:blocks().length ? 'h2' : 'h1', text:heading},
+        {...newBlock('text'), html:el('p','',text).outerHTML},
+        {...newBlock('button'), text:t('starter_button'), url}
+      ]
+    });
+    const section = {
+      ...newBlock('section'),
+      tone:'soft',
+      appearance:{layout:'two',surface:'full',content_width:1440,padding_y:72,gap:40,edge:'flat'},
+      children:[
+        makeColumn(t('two_column_first_heading'),t('starter_text'),'/contact'),
+        makeColumn(t('two_column_second_heading'),t('starter_text'),'/about')
+      ]
+    };
+    if (blockCount(blocks()) + blockCount([section]) > 80) return message(t('limit'),true);
+    mutate(()=>{
+      selected=selected<0 ? blocks().length : selected+1;
+      blocks().splice(selected,0,section);
+    });
+    canvas.children[selected]?.scrollIntoView({block:'nearest',behavior:'smooth'});
+  }
   const presets = document.getElementById('builder-section-presets');
-  for (const [theme,key] of [['dark','section_split_preset'],['light','section_light_preset']]) {
-    const preset=button('',()=>addSectionPreset(theme === 'dark'),'builder-preset');
+  for (const [theme,key] of [['dark','section_split_preset'],['two-column','two_column_hero'],['light','section_light_preset']]) {
+    const preset=button('',()=>theme === 'two-column' ? addTwoColumnHero() : addSectionPreset(theme === 'dark'),'builder-preset');
     preset.dataset.theme=theme;
     const thumbnail=el('span','builder-preset-thumbnail');
     thumbnail.setAttribute('aria-hidden','true');
@@ -992,6 +1018,38 @@
       if(block.type==='callout') {
         body.append(editable('h3',block.title,t('heading_hint'),v=>{block.title=v;}),
                     editable('p',block.text,t('text_hint'),v=>{block.text=v;}));
+      }
+      if(block.type==='team') {
+        const group=el('div','custom-team-grid builder-team-grid');
+        block.items.forEach((item,i)=>{
+          const row=el('div','builder-repeat-item builder-team-member');
+          const portrait=el('div','builder-team-portrait');
+          const image=el('img');
+          if(safeURL(item.photo||'',true)) {image.src=item.photo;image.alt='';portrait.append(image);}
+          else portrait.append(el('span','builder-team-photo-placeholder','＋'));
+          portrait.dataset.shape=item.shape || 'rectangle';
+          const controls=el('div','builder-team-controls');
+          controls.append(
+            field(t('team_name'),item.name||'',value=>{item.name=value;}),
+            field(t('team_title'),item.title||'',value=>{item.title=value;}),
+            field(t('team_photo'),item.photo||'',value=>{item.photo=value.trim();})
+          );
+          const uploader=el('label','builder-field');
+          uploader.append(el('span','',t('upload')));
+          const file=el('input');file.type='file';file.accept='image/png,image/jpeg,image/webp';
+          file.addEventListener('change',()=>upload(file.files[0],{type:'image'},url=>{
+            mutate(()=>{item.photo=url;});
+          }));
+          uploader.append(file);controls.append(uploader);
+          controls.append(select(t('team_shape'),item.shape||'rectangle',[
+            ['rectangle',t('team_rectangle')],['circle',t('team_circle')]
+          ],value=>{item.shape=value;}));
+          row.append(portrait,controls,button(t('remove'),()=>mutate(()=>block.items.splice(i,1))));
+          group.append(row);
+        });
+        body.append(group,button(t('add_item'),()=>{
+          if(block.items.length<8)mutate(()=>block.items.push({photo:'',name:'',title:'',shape:'rectangle'}));
+        }));
       }
       if(['stats','faq'].includes(block.type)) {
         const group=el('div',block.type==='stats'?'custom-stats-grid':'custom-faq-items');
