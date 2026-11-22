@@ -22,6 +22,7 @@ from typing import Any
 from urllib.parse import quote, urlsplit
 
 from PIL import Image
+from image_uploads import ImageUploadError, MAX_IMAGE_BYTES, store_image_upload
 from localization import (LANGUAGES, TRANSLATIONS, LOCALIZED_SETTINGS, content_languages,
                           primary_language, secondary_language, localized_value, translate, detect_locale)
 from language_migration import (backup_before_language_migration, migrate_languages,
@@ -626,109 +627,8 @@ def set_post_tags(conn: sqlite3.Connection, post_id: int, raw_tags: str) -> None
 
 
 async def save_upload(file: Any) -> str:
-    if not file or not getattr(file, "filename", ""):
-        return ""
-    # UploadFile.read() is async; validation needs the underlying binary stream.
-    detected_format, extension = _detect_image_format(file.file)
-    if extension is None:
-        return ""
-    filename = f"{datetime.now(timezone.utc).strftime('%Y%m%d%H%M%S')}-{secrets.token_hex(4)}{extension}"
-    target = UPLOAD_DIR / filename
-    try:
-        UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
-        with target.open("wb") as out:
-            shutil.copyfileobj(file.file, out)
-    except Exception:
-        # Clean up on write failure so no orphaned file is left behind
-        try:
-            target.unlink(missing_ok=True)
-        except OSError:
-            pass
-        return ""
-    return f"/static/uploads/{filename}"
-
-
-# Mapping from Pillow format names to the extensions FriPeri uses.
-_FORMAT_TO_EXT = {"PNG": ".png", "JPEG": ".jpg", "WEBP": ".webp"}
-
-
-def _detect_image_format(file) -> tuple[str | None, str | None]:
-    """Validate that *file* is a genuine, decodable image and return (format, extension).
-
-    Returns (None, None) when the file is not a valid supported image.  Validates
-    the actual file content with Pillow — never trusts *content_type* or *filename*.
-    """
-    if not hasattr(file, "read"):
-        return None, None
-
-    # Read a generous chunk for Pillow (most headers are short; large images
-    # still decode fine when Pillow sees the header).
-    if hasattr(file, "seekable"):
-        seekable = file.seekable()
-    else:
-        seekable = False
-
-    if seekable:
-        file.seek(0)
-    data = file.read(64 * 1024)  # 64 KB is plenty for any image header
-    if seekable:
-        file.seek(0)
-
-    if not data:
-        return None, None
-
-    if len(data) < 8:
-        return None, None
-
-    # First pass: Pillow open() — rejects truncated / corrupt files
-    try:
-        with Image.open(io.BytesIO(data)) as img:
-            img.verify()
-    except Exception:
-        return None, None
-
-    # Second pass: detect format via Pillow's open() and check against the
-    # format-specific header for each supported type so the format field in
-    # a JPEG metadata is not used to trick the extension.
-    try:
-        with Image.open(io.BytesIO(data)) as img:
-            img.verify()
-            fmt = img.format  # 'PNG', 'JPEG', 'WEBP'
-    except Exception:
-        return None, None
-
-    ext = _FORMAT_TO_EXT.get(fmt) if fmt else None
-    if ext is None:
-        # Pillow recognised it as an image, but format is not one FriPeri supports.
-        return None, None
-
-    # Triple-check the header matches the claimed format to defeat format spoofing.
-    if fmt == "PNG" and not data.startswith(b"\x89PNG\r\n\x1a\n"):
-        return None, None
-    if fmt == "JPEG" and not _is_jpeg_header(data):
-        return None, None
-    if fmt == "WEBP" and not data.startswith(b"RIFF") and b"WEBP" not in data[:12]:
-        return None, None
-
-    return fmt, ext
-
-
-def _is_jpeg_header(data: bytes) -> bool:
-    """Heuristic: JPEG starts with 0xFFD8 and has a valid APP0/APP1 marker after it."""
-    if len(data) < 6:
-        return False
-    if not (data[0] == 0xFF and data[1] == 0xD8):
-        return False
-    # After SOI (FFD8) comes the segment marker (FFxx), followed by 2-byte length.
-    marker = (data[2] << 8) | data[3]
-    # Markers must start with 0xFF; valid initial markers: APP0 (0xFFE0), APP1 (0xFFE1), COM (0xFFDA), SOF (0xFFC0+).
-    if data[2] != 0xFF:
-        return False
-    seg_len = int.from_bytes(data[4:6], "big")
-    # Segment length includes the 2 length bytes themselves, must be >= 2 and within data.
-    if seg_len < 2 or seg_len > (len(data) - 4):
-        return False
-    return True
+    """Return empty for an absent image; raise a typed error for invalid uploads."""
+    return await store_image_upload(file, UPLOAD_DIR, prefix="post-")
 
 
 def tags_by_post_ids(conn: sqlite3.Connection, post_ids: list[int]) -> dict[int, list[str]]:
@@ -1584,9 +1484,10 @@ async def save_block_post(request, form, post_id=None):
         except (ValueError, KeyError):
             return error(t(lang, 'builder.invalid'))
         image = form.get('image')
-        image_path = await save_upload(image)
-        if getattr(image, 'filename', '') and not image_path:
-            return error(t(lang, 'builder.upload_error'))
+        try:
+            image_path = await save_upload(image)
+        except ImageUploadError as exc:
+            return error(exc.message, exc.status_code)
         image_path = image_path or (post['image_path'] if post else '')
         if post:
             conn.execute('UPDATE posts SET title=?, excerpt=?, category_id=?, status=?, image_path=?, post_blocks_json=?, updated_at=? WHERE id=?',
@@ -1722,7 +1623,12 @@ async def create_post(request: Request) -> Response:
     with get_db() as conn:
         if not allowed_category(conn, actor(request), category_id):
             return Response("Forbidden: category not assigned", status_code=403)
-    image_path = await save_upload(image)
+    try:
+        image_path = await save_upload(image)
+    except ImageUploadError as exc:
+        values = {"title": title, "excerpt": excerpt, "category_id": category_id,
+                  "tags": tags, "body_html": body_html, "status": status, **secondary_values}
+        return post_form_response(request, user, values, exc.message, status_code=exc.status_code)
     with get_db() as conn:
         slug = unique_slug(conn, "posts", title)
         cursor = conn.execute(
@@ -1808,7 +1714,16 @@ async def update_post(post_id: int, request: Request) -> Response:
             return HTMLResponse(t(pick_lang(request), "common.not_found"), status_code=404)
         if not can_write_post(conn, actor(request), post_id) or not allowed_category(conn, actor(request), category_id):
             return Response("Forbidden", status_code=403)
-        image_path = await save_upload(image)
+        try:
+            image_path = await save_upload(image)
+        except ImageUploadError as exc:
+            values = {**dict(post), "title": title, "excerpt": excerpt,
+                      "category_id": category_id, "tags": tags, "body_html": body_html,
+                      "status": status, **secondary_values}
+            return post_form_response(request, user, values, exc.message,
+                                      action=f"/admin/posts/{post_id}/edit",
+                                      heading=title or t(lang, "common.edit"),
+                                      status_code=exc.status_code)
         if not image_path:
             image_path = post["image_path"]
         conn.execute(
@@ -2825,22 +2740,36 @@ async def upload_custom_home_media(request: Request) -> Response:
     kind = str(form.get('kind', 'image'))
     if kind not in {'image', 'video'}:
         return JSONResponse({'error': t(pick_lang(request), 'builder.upload_error')}, status_code=400)
-    allowed = ALLOWED_IMAGE_TYPES if kind == 'image' else {'video/mp4': '.mp4', 'video/webm': '.webm'}
+    if kind == 'image':
+        try:
+            path = await store_image_upload(upload, UPLOAD_DIR, prefix="home-")
+        except ImageUploadError as exc:
+            return JSONResponse({'error': exc.message, 'code': exc.code}, status_code=exc.status_code)
+        if not path:
+            return JSONResponse({'error': 'Choose an image to upload.', 'code': 'invalid'}, status_code=400)
+        return JSONResponse({'url': path})
+
+    # Video behavior stays unchanged: accepted MIME and container signatures.
+    allowed = {'video/mp4': '.mp4', 'video/webm': '.webm'}
     extension = allowed.get(getattr(upload, 'content_type', ''))
     if not extension or not hasattr(upload, 'read'):
         return JSONResponse({'error': t(pick_lang(request), 'builder.upload_error')}, status_code=400)
-    limit = (8 if kind == 'image' else 40) * 1024 * 1024
+    limit = 40 * 1024 * 1024
     data = await upload.read(limit + 1)
     signatures = {
-        '.png': data.startswith(b'\x89PNG\r\n\x1a\n'), '.jpg': data.startswith(b'\xff\xd8\xff'),
-        '.webp': data.startswith(b'RIFF') and data[8:12] == b'WEBP',
-        '.mp4': data[4:8] == b'ftyp', '.webm': data.startswith(b'\x1a\x45\xdf\xa3'),
+        '.mp4': data[4:8] == b'ftyp', '.webm': data.startswith(b'\\x1a\\x45\\xdf\\xa3'),
     }
-    if len(data) > limit or not signatures.get(extension):
-        return JSONResponse({'error': t(pick_lang(request), 'builder.upload_error')}, status_code=400)
+    if len(data) > limit:
+        return JSONResponse({'error': 'Video exceeds the 40 MB limit.'}, status_code=413)
+    if not signatures.get(extension):
+        return JSONResponse({'error': 'Invalid or unsupported video file.'}, status_code=400)
     filename = f'home-{secrets.token_hex(16)}{extension}'
-    UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
-    (UPLOAD_DIR / filename).write_bytes(data)
+    try:
+        UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
+        (UPLOAD_DIR / filename).write_bytes(data)
+    except OSError:
+        logging.getLogger(__name__).exception("Video upload failed")
+        return JSONResponse({'error': 'The server could not save the video.'}, status_code=500)
     return JSONResponse({'url': f'/static/uploads/{filename}'})
 
 
