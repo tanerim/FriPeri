@@ -62,10 +62,10 @@
       <div class="custom-team-grid">
         {% for member in block['items'] %}
         <div class="custom-team-member">
-          <div class="custom-team-photo-frame shape-{{ member.shape }}">
+          <div class="custom-team-photo-frame shape-{{ member.shape }} orientation-{{ member.orientation|default('landscape') }}">
             {% if member.photo %}
             <img class="custom-team-photo" src="{{ member.photo }}" alt="{{ member.name }}" loading="lazy" decoding="async"
-                 style="object-fit: {{ member.fit|default('cover') }}; object-position: {{ member.focal_x|default(50) }}% {{ member.focal_y|default(50) }}%; transform-origin: {{ member.focal_x|default(50) }}% {{ member.focal_y|default(50) }}%; transform: scale({{ member.zoom|default(1) }});" />
+                 style="object-fit: {{ member.fit|default('cover') }}; object-position: {{ member.focal_x|default(50) }}% {{ member.focal_y|default(50) }}%; transform-origin: center center; transform: translate({{ ((50 - (member.focal_x|default(50))) * ((member.zoom|default(1)) - 1) / (member.zoom|default(1)))|round(3) }}%, {{ ((50 - (member.focal_y|default(50))) * ((member.zoom|default(1)) - 1) / (member.zoom|default(1)))|round(3) }}%) scale({{ member.zoom|default(1) }});" />
             {% else %}
             <div class="custom-team-photo custom-team-photo-empty" aria-hidden="true"></div>
             {% endif %}
