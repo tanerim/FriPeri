@@ -2760,7 +2760,7 @@ async def upload_custom_home_media(request: Request) -> Response:
     limit = 40 * 1024 * 1024
     data = await upload.read(limit + 1)
     signatures = {
-        '.mp4': data[4:8] == b'ftyp', '.webm': data.startswith(b'\\x1a\\x45\\xdf\\xa3'),
+        '.mp4': data[4:8] == b'ftyp', '.webm': data.startswith(b'\x1a\x45\xdf\xa3'),
     }
     if len(data) > limit:
         return JSONResponse({'error': 'Video exceeds the 40 MB limit.'}, status_code=413)
