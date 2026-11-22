@@ -45,7 +45,7 @@
               <time datetime="{{ post['created_at'] }}">{{ post['created_at']|format_date }}</time>
               {% endif %}
               {% if archive_design.show_category %}<span class="category-publication-meta-line" aria-hidden="true"></span><span class="category-publication-meta-type">{{ category|category_label(lang) }}</span>{% endif %}
-              {% if archive_design.show_author and post['author_id'] %}<span class="category-publication-author">Author</span>{% endif %}
+              {% if archive_design.show_author and post['author_username'] %}<span class="category-publication-author">{{ post['author_username'] }}</span>{% endif %}
             </div>
             {% if archive_design.show_title and card_options.get('show_title', true) %}
             <h2 class="category-publication-card-title">
