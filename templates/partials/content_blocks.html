@@ -9,13 +9,13 @@
     data-vertical="{{ appearance.get('vertical_align', 'center') }}" data-fit="{{ appearance.get('background_fit', 'cover') }}"
     data-position="{{ appearance.get('background_position', 'center') }}" data-edge="{{ appearance.get('edge', 'flat') }}"
     {% elif block.type == 'heading' %}
-    {% if 'font_size' in appearance %}data-heading-size{% endif %} data-heading-weight="{{ appearance.get('font_weight', '') }}" data-accent="{{ appearance.get('accent_style', '') }}"
+    {% if 'font_size' in appearance %}data-heading-size{% endif %} data-heading-weight="{{ appearance.get('font_weight', '') }}" data-accent="{{ appearance.get('accent_style', '') }}" data-accent-new-line="{{ appearance.get('accent_new_line', 'no') }}"
     {% elif block.type == 'button' %}
     data-variant="{{ appearance.get('variant', 'solid') }}"
     {% endif %}
     data-stats-columns="{{ appearance.get('columns', '') }}"
     data-button-width="{{ appearance.get('width_mode', 'auto') }}"
-    style="{% if block.tone == 'custom' %}background: {{ block.background }};{% endif %}{% if block.foreground %}--text-color: {{ block.foreground }};{% endif %}{% for key, value in appearance.items() %}--block-{{ key|replace('_', '-') }}: {{ value }}{% if key in ['svg_opacity', 'overlay_opacity'] %}%{% elif value is number and key != 'columns' %}px{% endif %};{% endfor %}">
+    style="{% if block.tone == 'custom' %}background: {{ block.background }};{% endif %}{% if block.foreground %}--text-color: {{ block.foreground }};{% endif %}{% for key, value in appearance.items() %}--block-{{ key|replace('_', '-') }}: {{ value }}{% if key in ['svg_opacity', 'overlay_opacity', 'accent_opacity'] %}%{% elif value is number and key != 'columns' %}px{% endif %};{% endfor %}">
     {% if block.type == 'section' %}
       {% if block.image %}<img class="section-image" src="{{ block.image }}" alt="" decoding="async" />{% endif %}
       {% set pattern = appearance.get('svg_pattern', 'none') %}
@@ -29,7 +29,7 @@
       {{ section_edge() }}
       {% endif %}
     {% elif block.type == 'heading' %}
-      <{{ block.level }}>{{ block.text }}{% if block.accent %} <span class="section-heading-accent">{{ block.accent }}</span>{% endif %}</{{ block.level }}>
+      <{{ block.level }}><span class="section-heading-main">{{ block.text }}</span>{% if block.accent %}{% if appearance.get('accent_new_line', 'no') != 'yes' %} <span class="section-heading-accent-gap"></span>{% endif %}<span class="section-heading-accent">{{ block.accent }}</span>{% endif %}</{{ block.level }}>
     {% elif block.type in ['text', 'legacy_html'] %}
       <div class="custom-rich-text">{{ block.html|safe }}</div>
     {% elif block.type == 'list' %}
