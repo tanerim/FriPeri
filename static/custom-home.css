@@ -347,7 +347,7 @@
 .custom-team-photo-frame.shape-rectangle.orientation-landscape { aspect-ratio:4/3; }
 .custom-team-photo-frame.shape-rectangle.orientation-portrait { aspect-ratio:3/4; }
 
-.custom-team-photo {
+.custom-block .custom-team-photo {
   display:block;
   width:100%;
   height:100%;
