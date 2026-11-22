@@ -148,7 +148,7 @@ Use the **Add a block** palette in the wide left column to insert content after 
 
 Above the block list, **Split hero section** inserts the existing text-and-image hero. Directly underneath it, **Two Column Hero** inserts two equal-width columns, each with editable heading, text, and button blocks. Both columns stack on small screens; use the section layout controls to change the arrangement. The existing Light split hero remains available.
 
-A **Team** block follows the Statistics block's repeatable-item workflow. Each person has three content fields: a photo (upload or secure image URL), full name, and title. Choose **Rectangle** or **Circle** for each portrait. You can add or remove up to eight members and preview the resulting responsive grid.
+A **Team** block follows the Statistics block's repeatable-item workflow. Each person has three content fields: a photo (upload or secure image URL), full name, and title. Choose **Rectangle** or **Circle** for each portrait. You can add or remove up to eight members, use the **↑ / ↓** buttons beside each member to change their order, and preview the responsive grid. To frame a portrait, drag the image inside its preview to choose the visible area, adjust **Zoom** (100–300%), or select **Reset frame** to restore the original view. The chosen position and zoom are saved with the block; the original uploaded photo is not overwritten, so you can reframe it later.
 
 Blocks can be moved up or down, duplicated, and removed. **Undo** and **Redo** restore editor changes within the current editing session.
 
