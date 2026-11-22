@@ -628,7 +628,7 @@
       ['border_width',0,16,0],['border_color','color','#dae3ec'],
       ['frame_background','color','#ffffff'],['padding',0,80,0],
       ['shadow',['none','soft','medium','strong']],['hover',['none','zoom','lift']],
-      ['caption_align',['left','center','right']],['caption_size',10,32,14],
+      ['image_action',['auto','none','link','lightbox']],['caption_align',['left','center','right']],['caption_size',10,32,14],
       ['loading',['lazy','eager']],['decoding',['async','auto','sync']],
       ['fetch_priority',['auto','high','low']]
     ],
@@ -732,7 +732,7 @@
     const groups=[
       ['Size & crop', ['ratio','fit','position','width_mode','width_px','height_px']],
       ['Frame & effects', ['radius','border_width','border_color','frame_background','padding','shadow','hover']],
-      ['Caption & performance', ['caption_align','caption_size','loading','decoding','fetch_priority']]
+      ['Interaction & performance', ['image_action','caption_align','caption_size','loading','decoding','fetch_priority']]
     ];
     const wrapper=el('div','builder-image-appearance');
     for(const [title,names] of groups){
