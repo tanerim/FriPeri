@@ -9,7 +9,7 @@ MAX_DOCUMENT_BYTES = 500_000
 SECTION_SVG_FILENAME = r'friperi-section-[0-9a-f]{32}\.svg'
 SECTION_SVG_FIELDS = {'svg_pattern': ('ribbons', 'waves', 'grid'), 'svg_primary': 'color',
                       'svg_secondary': 'color', 'svg_opacity': (0, 100)}
-BLOCK_TYPES = {'section', 'heading', 'text', 'list', 'table', 'image', 'video', 'button', 'divider', 'category', 'quote', 'callout', 'stats', 'faq', 'legacy_html'}
+BLOCK_TYPES = {'section', 'heading', 'text', 'list', 'table', 'image', 'video', 'button', 'divider', 'category', 'quote', 'callout', 'stats', 'team', 'faq', 'legacy_html'}
 
 # Optional presentation settings keep existing documents on their theme defaults.
 APPEARANCE_FIELDS = {
@@ -329,16 +329,25 @@ def _validate_blocks(data, depth, remaining, anchors):
         elif kind == 'callout':
             block['title'] = text(item.get('title', ''), 500)
             block['text'] = text(item.get('text', ''), 5000)
-        elif kind in {'stats', 'faq'}:
+        elif kind in {'stats', 'team', 'faq'}:
             items = item.get('items', [])
-            if not isinstance(items, list) or len(items) > (8 if kind == 'stats' else 20):
+            if not isinstance(items, list) or len(items) > (8 if kind in {'stats', 'team'} else 20):
                 raise ValueError('Invalid block items')
-            fields = {'value': 100, 'label': 500} if kind == 'stats' else {'question': 500, 'answer': 5000}
+            fields = ({'value': 100, 'label': 500} if kind == 'stats'
+                      else {'name': 200, 'title': 300} if kind == 'team'
+                      else {'question': 500, 'answer': 5000})
             block['items'] = []
             for entry in items:
                 if not isinstance(entry, dict):
                     raise ValueError('Invalid block item')
-                block['items'].append({key: text(entry.get(key, ''), limit) for key, limit in fields.items()})
+                member = {key: text(entry.get(key, ''), limit) for key, limit in fields.items()}
+                if kind == 'team':
+                    raw_photo = text(entry.get('photo', ''), 2048)
+                    member['photo'] = safe_url(raw_photo, media=True)
+                    if raw_photo and not member['photo']:
+                        raise ValueError('Invalid team member photo')
+                    member['shape'] = entry.get('shape') if entry.get('shape') in ('circle', 'rectangle') else 'rectangle'
+                block['items'].append(member)
         elif kind == 'list':
             items = item.get('items', [])
             if not isinstance(items, list) or len(items) > 100:
