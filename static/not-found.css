@@ -1,0 +1,14 @@
+:root{color-scheme:light;font-family:Inter,ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+*,*::before,*::after{box-sizing:border-box}
+html,body{margin:0;min-height:100%;width:100%}
+body{background:radial-gradient(ellipse 58% 42% at 50% 44%,#eef9f8 0%,#f8fbfb 64%,#fff 100%);color:#1d303b}
+.not-found{display:grid;place-items:center;min-height:100vh;min-height:100svh;padding:28px 20px;text-align:center}
+.not-found-content{width:min(100%,620px);display:flex;flex-direction:column;align-items:center}
+.not-found-logo{display:block;width:clamp(102px,14vw,144px);height:auto;object-fit:contain;margin:0 auto 30px}
+.not-found-code{font-size:clamp(76px,13vw,128px);font-weight:800;line-height:1;letter-spacing:-.09em;margin:0 0 18px;color:#328a91}
+h1{font-size:clamp(25px,4.2vw,40px);font-weight:750;line-height:1.17;letter-spacing:-.045em;margin:0 0 16px;text-wrap:balance}
+.not-found-message{font-size:clamp(15px,2vw,17px);color:#637b82;line-height:1.65;margin:0 0 32px;text-wrap:balance}
+.not-found-home{display:inline-flex;align-items:center;justify-content:center;min-height:48px;min-width:156px;padding:12px 28px;background:#347f80;color:#fff;border-radius:10px;font-size:15px;font-weight:650;text-decoration:none;box-shadow:0 8px 18px #347f8020;transition:background .2s,transform .2s,box-shadow .2s}
+.not-found-home:hover{background:#286668;transform:translateY(-2px);box-shadow:0 11px 24px #347f802a}
+.not-found-home:focus-visible{outline:3px solid #e9bb50;outline-offset:4px}
+@media(prefers-reduced-motion:reduce){.not-found-home{transition:none}.not-found-home:hover{transform:none}}
