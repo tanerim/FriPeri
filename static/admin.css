@@ -755,3 +755,30 @@
   line-height:1.55;
   min-width:0;
 }
+
+/* CMS Design reuses the same accessible color control as site-wide Design. */
+.hyperui-admin .cms-design-page .color-control {
+  display:grid;
+  grid-template-columns:44px minmax(130px,1fr) minmax(90px,140px);
+  gap:10px;
+  align-items:center;
+  min-width:0;
+  padding:12px;
+}
+.hyperui-admin .cms-design-page .color-control > span {grid-column:2;grid-row:1}
+.hyperui-admin .cms-design-page .color-control > input[type=color] {grid-column:1;grid-row:1;min-height:42px;width:44px}
+.hyperui-admin .cms-design-page .color-control > input[data-color-value] {grid-column:3;grid-row:1;min-width:0;font-family:ui-monospace,monospace}
+.hyperui-admin .cms-design-page .color-control > .color-control-help {
+  display:block;
+  grid-column:1/-1;
+  grid-row:2;
+  color:#65748a;
+  font-size:11px;
+  line-height:1.55;
+  font-weight:400;
+}
+@media(max-width:650px) {
+  .hyperui-admin .cms-design-page .color-control {grid-template-columns:42px minmax(0,1fr)}
+  .hyperui-admin .cms-design-page .color-control > input[data-color-value] {grid-column:2;grid-row:2}
+  .hyperui-admin .cms-design-page .color-control > .color-control-help {grid-row:3}
+}
