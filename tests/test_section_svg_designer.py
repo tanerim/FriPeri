@@ -70,3 +70,39 @@ def test_four_palette_colors_used_only_when_selected():
     two = render_svg({**settings, "svg_colors": 2})
     assert DEFAULTS["svg_quaternary"] in four
     assert DEFAULTS["svg_quaternary"] not in two
+
+
+def test_classic_ribbons_retains_original_spacious_bezier_shapes():
+    values = {**DEFAULTS, "svg_pattern": "ribbons", "svg_colors": 2,
+              "svg_frequency": 3, "svg_amplitude": 45,
+              "svg_rotation": 0, "svg_scale": 100, "svg_placement": "full"}
+    svg = render_svg(validate_appearance(values, SECTION_SVG_FIELDS))
+    assert "M870-140h240C890.0 30.0 1180.0 290.0" in svg
+    assert "M1060-100h220" in svg
+    assert "M-130 750C265.0 620.0" in svg
+    # No former multi-band sinusoidal geometry in the classic two-color design.
+    assert svg.count("<path ") == 3
+
+
+def test_classic_waves_retains_original_two_quiet_layers():
+    values = {**DEFAULTS, "svg_pattern": "waves", "svg_colors": 2,
+              "svg_frequency": 3, "svg_amplitude": 45}
+    svg = render_svg(validate_appearance(values, SECTION_SVG_FIELDS))
+    assert "M0 500c275.0 -140.0 330.0 145.0 645 66" in svg
+    assert "M0 670c341.0 79.0 476.0 -126.0 757-96" in svg
+    assert svg.count("<path ") == 2
+
+
+def test_additional_palette_colors_are_quiet_overlays():
+    values = {**DEFAULTS, "svg_pattern": "ribbons", "svg_colors": 4,
+              "svg_frequency": 3, "svg_amplitude": 45}
+    svg = render_svg(validate_appearance(values, SECTION_SVG_FIELDS))
+    assert 'opacity="0.160"' in svg
+    assert 'opacity="0.130"' in svg
+
+
+def test_classic_grid_has_original_eighty_unit_spacing():
+    values = {**DEFAULTS, "svg_pattern": "grid", "svg_density": 8}
+    svg = render_svg(validate_appearance(values, SECTION_SVG_FIELDS))
+    assert "M80 0V760" in svg
+    assert "M0 60H1440" in svg
