@@ -1,0 +1,78 @@
+{% extends "admin/base.html" %}
+{% block content %}
+<main id="admin-content" class="admin-settings-page admin-compact-page cms-design-page" tabindex="-1">
+  <div class="admin-settings-container">
+    <header class="settings-page-header">
+      <div>
+        <h1>{{ t(lang, 'cms_design.title') }}</h1>
+        <p>{{ t(lang, 'cms_design.intro') }}</p>
+      </div>
+    </header>
+    {% if saved %}<p class="notice settings-notice">{{ t(lang, 'common.saved') }}</p>{% endif %}
+    {% if categories %}
+      <section class="admin-card" style="margin-bottom:20px">
+        <label for="cms-category-selector"><strong>{{ t(lang, 'cms_design.category') }}</strong></label>
+        <select id="cms-category-selector" class="modern-select" style="margin-top:8px;max-width:500px"
+                onchange="location.href='/admin/cms-design?category='+encodeURIComponent(this.value)">
+          {% for cat in categories %}
+          <option value="{{ cat.id }}" {% if selected.id == cat.id %}selected{% endif %}>{{ cat.name }}</option>
+          {% endfor %}
+        </select>
+        <p class="builder-help">{{ t(lang, 'cms_design.category_help') }}</p>
+      </section>
+      <form class="admin-card settings-form-v3" method="post" action="/admin/cms-design">
+        <input type="hidden" name="editor_token" value="{{ editor_token }}">
+        <input type="hidden" name="category_id" value="{{ selected.id }}">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
+          <h2>{{ selected.name }}</h2>
+          <a class="settings-secondary" href="/category/{{ selected.slug }}" target="_blank" rel="noopener">{{ t(lang, 'cms_design.preview') }}</a>
+        </div>
+        <div class="settings-grid-v3">
+          <label><span>{{ t(lang, 'cms_design.columns') }}</span>
+            <select name="columns">
+              {% for count in ['1','2','3'] %}
+              <option value="{{ count }}" {% if design.columns == count %}selected{% endif %}>{{ count }}</option>
+              {% endfor %}
+            </select>
+            <small>{{ t(lang, 'cms_design.columns_help') }}</small>
+          </label>
+          <label><span>{{ t(lang, 'cms_design.card_style') }}</span>
+            <select name="card_style">
+              {% for style in ['raised','outlined','flat'] %}
+              <option value="{{ style }}" {% if design.card_style == style %}selected{% endif %}>{{ t(lang, 'cms_design.style_' ~ style) }}</option>
+              {% endfor %}
+            </select>
+            <small>{{ t(lang, 'cms_design.card_style_help') }}</small>
+          </label>
+        </div>
+        <h3>{{ t(lang, 'cms_design.palette') }}</h3>
+        <p>{{ t(lang, 'cms_design.palette_help') }}</p>
+        <div class="settings-grid-v3">
+          {% for key in ['accent','background','card_background','text_color'] %}
+          <label class="cms-color-field">
+            <span>{{ t(lang, 'cms_design.' ~ key) }}</span>
+            <div style="display:flex;gap:8px;align-items:center">
+              <input type="color" value="{{ design[key] or ('#ffffff' if key in ['background','card_background'] else '#347f80') }}"
+                     aria-label="{{ t(lang, 'cms_design.' ~ key) }}"
+                     oninput="this.nextElementSibling.value=this.value" style="height:42px;width:55px;cursor:pointer">
+              <input type="text" name="{{ key }}" value="{{ design[key] }}" pattern="#[0-9a-fA-F]{6}"
+                     maxlength="7" placeholder="{{ t(lang, 'cms_design.inherit') }}" style="max-width:150px">
+            </div>
+            <small>{{ t(lang, 'cms_design.' ~ key ~ '_help') }}</small>
+          </label>
+          {% endfor %}
+        </div>
+        <div class="page-actions" style="margin-top:24px">
+          <button class="settings-primary" type="submit">{{ t(lang, 'common.save_changes') }}</button>
+          <a class="settings-secondary" href="/admin/categories">{{ t(lang, 'admin.categories') }}</a>
+        </div>
+      </form>
+    {% else %}
+      <section class="admin-card">
+        <p>{{ t(lang, 'cms_design.no_categories') }}</p>
+        <a href="/admin/categories">{{ t(lang, 'admin.categories') }}</a>
+      </section>
+    {% endif %}
+  </div>
+</main>
+{% endblock %}
