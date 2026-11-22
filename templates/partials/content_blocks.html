@@ -10,6 +10,8 @@
     data-position="{{ appearance.get('background_position', 'center') }}" data-edge="{{ appearance.get('edge', 'flat') }}" data-landing-style="{{ appearance.get('landing_style', 'none') }}"
     {% elif block.type == 'image' %}
     data-image-ratio="{{ appearance.get('ratio', 'original') }}" data-image-fit="{{ appearance.get('fit', 'cover') }}" data-image-position="{{ appearance.get('position', 'center') }}" data-image-width="{{ appearance.get('width_mode', 'auto') }}" data-image-shadow="{{ appearance.get('shadow', 'none') }}" data-image-hover="{{ appearance.get('hover', 'none') }}" data-caption-align="{{ appearance.get('caption_align', 'left') }}" {% if appearance.get('height_px', 0) > 0 %}data-image-height="custom"{% endif %}
+    {% elif block.type == 'callout' %}
+    data-accent-side="{{ appearance.get('accent_side', 'left') }}"
     {% elif block.type == 'heading' %}
     {% if 'font_size' in appearance %}data-heading-size{% endif %} data-heading-weight="{{ appearance.get('font_weight', '') }}" data-accent="{{ appearance.get('accent_style', '') }}" data-accent-new-line="{{ appearance.get('accent_new_line', 'no') }}"
     {% elif block.type in ['button', 'icon_button'] %}
@@ -70,7 +72,15 @@
     {% elif block.type == 'quote' %}
       <figure><blockquote><p>{{ block.text }}</p></blockquote>{% if block.attribution %}<figcaption>{{ block.attribution }}</figcaption>{% endif %}</figure>
     {% elif block.type == 'callout' %}
-      <h3>{{ block.title }}</h3><p>{{ block.text }}</p>
+      <div class="friperi-callout-inner" data-image-position="{{ appearance.get('image_position', 'none') }}">
+        {% if block.image_url and appearance.get('image_position', 'none') != 'none' %}
+          <figure class="friperi-callout-media"><img src="{{ block.image_url }}" alt="{{ block.image_alt }}" loading="lazy" decoding="async"></figure>
+        {% endif %}
+        <div class="friperi-callout-copy">
+          <h3>{{ block.title }}</h3>
+          <p>{{ block.text }}</p>
+        </div>
+      </div>
     {% elif block.type == 'stats' %}
       <dl class="custom-stats-grid">{% for item in block['items'] %}<div><dt>{{ item.label }}</dt><dd>{{ item.value }}</dd></div>{% endfor %}</dl>
     {% elif block.type == 'team' %}
