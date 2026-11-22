@@ -744,3 +744,14 @@
   line-height:1.5;
   color:#65748a;
 }
+
+.hyperui-admin .design-settings-page .color-control .color-control-help {
+  grid-column:1/-1;
+  grid-row:2;
+  display:block;
+  color:#64748b;
+  font-weight:400;
+  font-size:11px;
+  line-height:1.55;
+  min-width:0;
+}
