@@ -30,6 +30,7 @@
     {% block extra_head %}{% endblock %}
     <script src="{{ static_url('editor.js') }}" defer></script>
     <script src="{{ static_url('navigation.js') }}" defer></script>
+    <script src="{{ static_url('image-lightbox.js') }}" defer></script>
     {% if not request.url.path.startswith('/admin') %}
     {{ site_settings.head_snippet | safe }}
     {% endif %}
