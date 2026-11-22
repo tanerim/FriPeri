@@ -6,7 +6,7 @@
   --archive-accent: var(--color-accent, #347f80);
   --archive-card-bg: #fff;
   --archive-card-text: #1e2c2b;
-  background: var(--color-page-bg, #f7f8f5);
+  background: var(--archive-page-bg, var(--color-page-bg, #f7f8f5));
   color: var(--archive-ink);
   min-width: 0;
 }
@@ -233,4 +233,26 @@
 @media (prefers-reduced-motion: reduce) {
   .category-publication :is(.category-publication-card,.category-publication-image img,.category-publication-read > span) { transition: none; }
   .category-publication .category-publication-card:hover { transform: none; }
+}
+
+/* CMS Design: per-category presentation overrides, independent of global Design. */
+@media (min-width: 941px) {
+  .category-publication[data-archive-columns="1"] .category-publication-list { grid-template-columns: minmax(0, 1fr); max-width: 850px; }
+  .category-publication[data-archive-columns="2"] .category-publication-list { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (min-width: 621px) and (max-width: 940px) {
+  .category-publication[data-archive-columns="1"] .category-publication-list { grid-template-columns: minmax(0, 1fr); }
+}
+.category-publication[data-archive-card-style="outlined"] .category-publication-card {
+  box-shadow: none;
+  border-width: 2px;
+}
+.category-publication[data-archive-card-style="flat"] .category-publication-card {
+  box-shadow: none;
+  border: 0;
+  border-radius: 6px;
+}
+.category-publication[data-archive-card-style="flat"] .category-publication-card:hover {
+  transform: none;
+  box-shadow: none;
 }
