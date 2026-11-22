@@ -111,7 +111,7 @@
       list:{items:[t('item')],ordered:false}, table:{rows:[[t('heading'),t('heading')],[t('item'),t('item')]],caption:''},
       image:{url:'',alt:'',caption:''},video:{url:'',alt:'',caption:''},button:{text:t('starter_button'),url:''},divider:{},
       quote:{text:t('quote_hint'),attribution:''},callout:{title:t('callout'),text:t('text_hint')},
-      stats:{items:[{value:'100+',label:t('stat_label')}]},team:{width:'wide',items:[{photo:'',name:'',title:'',shape:'rectangle',zoom:1,focal_x:50,focal_y:50}]},faq:{items:[{question:t('question'),answer:t('answer')}]},legacy_html:{html:''}
+      stats:{items:[{value:'100+',label:t('stat_label')}]},team:{width:'wide',items:[{photo:'',name:'',title:'',shape:'rectangle',fit:'cover',zoom:1,focal_x:50,focal_y:50}]},faq:{items:[{question:t('question'),answer:t('answer')}]},legacy_html:{html:''}
     }[type]);
   }
   function add(type) {
@@ -1032,6 +1032,7 @@
           const cropZoom=()=>Number.isFinite(item.zoom)?item.zoom:1;
           const updateCrop=()=>{
             if(!image.parentElement)return;
+            image.style.objectFit=item.fit||'cover';
             image.style.objectPosition=`${cropX()}% ${cropY()}%`;
             image.style.transformOrigin=`${cropX()}% ${cropY()}%`;
             image.style.transform=`scale(${cropZoom()})`;
@@ -1059,6 +1060,9 @@
           ],value=>{item.shape=value;}));
 
           const cropControls=el('div','builder-team-crop-controls');
+          cropControls.append(select(t('team_fit'),item.fit||'cover',[
+            ['cover',t('team_fit_cover')],['contain',t('team_fit_contain')]
+          ],value=>{item.fit=value;}));
           const zoomLabel=el('label','builder-team-zoom');
           zoomLabel.append(el('span','',t('team_zoom')));
           const zoomSlider=el('input');
@@ -1111,7 +1115,7 @@
           group.append(row);
         });
         body.append(group,button(t('add_item'),()=>{
-          if(block.items.length<8)mutate(()=>block.items.push({photo:'',name:'',title:'',shape:'rectangle',zoom:1,focal_x:50,focal_y:50}));
+          if(block.items.length<8)mutate(()=>block.items.push({photo:'',name:'',title:'',shape:'rectangle',fit:'cover',zoom:1,focal_x:50,focal_y:50}));
         }));
       }
       if(['stats','faq'].includes(block.type)) {
