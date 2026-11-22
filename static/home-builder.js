@@ -818,9 +818,26 @@
     body.dataset.buttonWidth = block.appearance?.width_mode || 'auto';
     body.dataset.statsColumns = block.appearance?.columns ?? '';
     if(block.type==='team'){
-      body.dataset.teamDirection=block.appearance?.direction||'vertical';
-      body.dataset.teamStyle=block.appearance?.style||'classic';
-      body.dataset.teamColumns=block.appearance?.columns||3;
+      const settings=block.appearance||{};
+      body.dataset.teamDirection=settings.direction||'vertical';
+      body.dataset.teamStyle=settings.style||'classic';
+      body.dataset.teamColumns=settings.columns||3;
+      const preview=body.querySelector('.builder-team-preview');
+      if(preview){
+        Object.assign(preview.dataset,{
+          teamDirection:settings.direction||'vertical',
+          teamStyle:settings.style||'classic',
+          teamColumns:settings.columns||3
+        });
+        for(const [key,value,unit] of [
+          ['photo-width',settings.photo_width||180,'px'],
+          ['gap',settings.gap||24,'px'],
+          ['card-padding',settings.card_padding??20,'px'],
+          ['radius',settings.radius??16,'px'],
+          ['card-background',settings.card_background||'#ffffff',''],
+          ['accent-color',settings.accent_color||'#286e7a','']
+        ])preview.style.setProperty('--block-'+key,value+unit);
+      }
     }
     const appearance = block.appearance || {};
     if (block.type === 'heading') {
@@ -1482,10 +1499,10 @@
           } else portrait.append(el('span','builder-team-photo-placeholder','＋'));
           const controls=el('div','builder-team-controls');
           controls.append(
-            field(t('team_name'),item.name||'',value=>{item.name=value;}),
-            field(t('team_title'),item.title||'',value=>{item.title=value;}),
+            field(t('team_name'),item.name||'',value=>{item.name=value;updateTeamPreview();}),
+            field(t('team_title'),item.title||'',value=>{item.title=value;updateTeamPreview();}),
             field('Short biography',item.bio||'',value=>{item.bio=value.slice(0,1500);updateTeamPreview();}),
-            field(t('team_photo'),item.photo||'',value=>{item.photo=value.trim();})
+            field(t('team_photo'),item.photo||'',value=>{item.photo=value.trim();updateTeamPreview();})
           );
           const uploader=el('label','builder-field');
           uploader.append(el('span','',t('upload')));
