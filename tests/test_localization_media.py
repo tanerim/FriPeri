@@ -21,6 +21,9 @@ def test_all_builtin_ui_locales_have_admin_navigation_and_builder_labels():
         "builder.team_photo", "builder.team_shape",
         "builder.team_rectangle", "builder.team_circle",
         "builder.team_orientation", "builder.team_landscape", "builder.team_portrait",
+        "builder.divider_line_width", "builder.divider_line_style", "builder.divider_line_color",
+        "builder.divider_single", "builder.divider_dashed", "builder.divider_dotted",
+        "builder.divider_wave", "builder.divider_wave_tight", "builder.divider_zigzag",
         "builder.two_column_hero", "builder.two_column_first_heading",
         "builder.two_column_second_heading",
     )
