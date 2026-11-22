@@ -67,6 +67,7 @@ APPEARANCE_FIELDS = {
         'padding': (0, 80),
         'shadow': ('none', 'soft', 'medium', 'strong'),
         'hover': ('none', 'zoom', 'lift'),
+        'image_action': ('auto', 'none', 'link', 'lightbox'),
         'caption_align': ('left', 'center', 'right'),
         'caption_size': (10, 32),
         'loading': ('lazy', 'eager'),
