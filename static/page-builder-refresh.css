@@ -1,0 +1,54 @@
+/* Page Builder 2: isolated design system for Pages, not Posts or Homepage. */
+.hyperui-admin .page-builder-refresh{--pb-border:#d9e1ea;--pb-muted:#67788d;--pb-accent:#3f55a8;padding:20px 26px 110px;background:#f4f6fa}
+.hyperui-admin .page-builder-refresh .admin-settings-container{width:100%;max-width:none}
+.hyperui-admin .page-builder-refresh .page-actions{margin:0 0 14px}
+.hyperui-admin .page-builder-refresh #page-details{border:1px solid var(--pb-border);border-radius:14px;background:white;box-shadow:0 3px 18px #1c314008;padding:20px 24px}
+.hyperui-admin .page-builder-refresh #page-details .settings-grid-v3{grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;align-items:start}
+.hyperui-admin .page-builder-refresh #page-details .settings-check{grid-column:1/-1}
+.hyperui-admin .page-builder-refresh #page-details>p{margin-top:8px;font-size:12px;color:var(--pb-muted)}
+.hyperui-admin .page-builder-refresh .page-layout-library{margin:15px 0 24px;padding:20px 24px;background:#fff;border:1px solid var(--pb-border);border-radius:14px;box-shadow:0 2px 15px #1c314008}
+.hyperui-admin .page-builder-refresh .page-library-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}
+.hyperui-admin .page-builder-refresh .page-library-heading h2{font-size:18px;font-weight:750;margin:0 0 3px;color:#1a2940}
+.hyperui-admin .page-builder-refresh .page-library-heading p{font-size:12px;margin:0;color:var(--pb-muted)}
+.hyperui-admin .page-library-count{font-size:11px;font-weight:650;color:#596c88;white-space:nowrap}
+.hyperui-admin .page-layout-gallery{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.hyperui-admin .page-layout-tile{min-width:0;display:flex;flex-direction:column;align-items:stretch;text-align:left;gap:5px;border:1px solid #dbe2ec;border-radius:11px;background:#fff;padding:10px;cursor:pointer;font:inherit;color:#22354d}
+.hyperui-admin .page-layout-tile:hover{border-color:#688ac2;background:#f7faff;box-shadow:0 5px 15px #1e4d8210}
+.hyperui-admin .page-layout-tile:focus-visible{outline:3px solid #6e87d7;outline-offset:2px}
+.hyperui-admin .page-layout-tile strong{font-size:12px;font-weight:700}
+.hyperui-admin .page-layout-tile small{font-size:10px;line-height:1.35;color:#667a91}
+.hyperui-admin .page-layout-sketch{height:72px;background:#edf3f9;border-radius:7px;display:grid;grid-template-columns:repeat(2,1fr);grid-template-rows:repeat(2,1fr);gap:5px;padding:9px;margin-bottom:3px}
+.hyperui-admin .page-layout-sketch i{background:#b8c9da;border-radius:3px;min-width:0}
+.hyperui-admin .page-layout-sketch i:first-child{background:#467d90}
+.hyperui-admin .sketch-0 i:first-child,.hyperui-admin .sketch-5 i:first-child{grid-column:span 2}
+.hyperui-admin .sketch-1 i:last-child,.hyperui-admin .sketch-4 i:first-child{grid-column:span 2}
+.hyperui-admin .sketch-2 i:first-child,.hyperui-admin .sketch-3 i:first-child{grid-row:span 2}
+.hyperui-admin .sketch-6 i:last-child{grid-column:span 2}
+.hyperui-admin .sketch-7 i:nth-child(2){grid-row:span 2}
+.hyperui-admin #page-layout-notice{font-size:12px;color:#315c6e;margin:8px 0 0;min-height:0}
+.hyperui-admin .page-builder-refresh .settings-page-header{margin:0 0 12px;padding:8px 0;gap:16px}
+.hyperui-admin .page-builder-refresh .settings-page-header h2{font-size:18px}
+.hyperui-admin .page-builder-refresh .builder-layout{grid-template-columns:215px minmax(0,1fr);gap:16px;align-items:start}
+.hyperui-admin .page-builder-refresh .builder-palette{position:sticky;top:18px;max-height:calc(100vh - 150px);overflow:auto;padding:14px;background:#fff;border:1px solid var(--pb-border);border-radius:12px}
+.hyperui-admin .page-builder-refresh #builder-add-blocks{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;margin-top:10px}
+.hyperui-admin .page-builder-refresh .builder-add-button{min-height:55px;flex-direction:column;align-items:start;justify-content:center;gap:3px;padding:8px;font-size:10px}
+.hyperui-admin .page-builder-refresh .builder-block-symbol{width:22px;height:22px;font-size:12px;border-radius:5px}
+.hyperui-admin .page-builder-refresh .builder-preset{min-width:0}
+.hyperui-admin .page-builder-refresh .builder-palette h2{font-size:14px}
+.hyperui-admin .page-builder-refresh .builder-palette p{font-size:11px}
+.hyperui-admin .page-builder-refresh .builder-canvas{border:1px solid #d6e0ed;border-radius:12px;background:#e9eef5;padding:12px}
+.hyperui-admin .page-builder-refresh .builder-block{margin-bottom:12px;border-radius:10px}
+.hyperui-admin .page-builder-refresh .builder-block-header{padding:8px 12px}
+.hyperui-admin .page-builder-refresh .builder-style-controls{gap:8px;padding:9px 12px}
+.hyperui-admin .page-builder-refresh .builder-select{flex:1 1 110px}
+.hyperui-admin .page-builder-refresh .builder-block:not(.is-selected) .builder-appearance-controls{display:none}
+.hyperui-admin .page-builder-refresh .builder-block-header .builder-tool{min-height:27px}
+.hyperui-admin .page-builder-refresh .settings-page-header>.builder-actions{position:fixed;bottom:0;right:0;left:0;z-index:35;justify-content:flex-end;padding:12px max(24px,3vw);background:#fffffff2;backdrop-filter:blur(12px);border-top:1px solid var(--pb-border);box-shadow:0 -7px 24px #1224390f}
+.hyperui-admin .page-builder-refresh .settings-page-header>.builder-actions button{min-height:42px}
+.hyperui-admin .page-builder-refresh #builder-status:not(:empty){position:sticky;top:0;z-index:10;padding:8px 14px;margin-bottom:10px;border-radius:8px}
+.hyperui-admin .page-builder-refresh #builder-starter{display:none!important}
+.hyperui-admin .page-builder-refresh .builder-topbar{border:1px solid var(--pb-border);background:#fff;border-radius:9px;padding:10px 12px;margin:0 0 12px}
+.hyperui-admin .page-builder-refresh .builder-workspace{min-width:0}
+@media(max-width:1150px){.hyperui-admin .page-layout-gallery{grid-template-columns:repeat(2,minmax(0,1fr))}.hyperui-admin .page-builder-refresh .builder-layout{grid-template-columns:180px minmax(0,1fr)}}
+@media(max-width:800px){.hyperui-admin .page-builder-refresh{padding:12px 12px 110px}.hyperui-admin .page-builder-refresh .builder-layout{grid-template-columns:1fr}.hyperui-admin .page-builder-refresh .builder-palette{position:static;max-height:none}.hyperui-admin .page-builder-refresh #builder-add-blocks{grid-template-columns:repeat(4,minmax(0,1fr))}}
+@media(max-width:580px){.hyperui-admin .page-builder-refresh #page-details .settings-grid-v3{grid-template-columns:1fr}.hyperui-admin .page-layout-gallery{grid-template-columns:1fr 1fr;gap:7px}.hyperui-admin .page-builder-refresh .page-layout-library{padding:12px}.hyperui-admin .page-library-count{display:none}.hyperui-admin .page-builder-refresh #builder-add-blocks{grid-template-columns:repeat(3,minmax(0,1fr))}.hyperui-admin .page-builder-refresh .settings-page-header>.builder-actions{padding:10px 14px}}
