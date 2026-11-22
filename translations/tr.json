@@ -574,5 +574,8 @@
   "builder.team_drag_help": "Görünecek bölgeyi seçmek için fotoğrafı sürükleyin. Kaydırıcıyla yakınlaştırıp uzaklaştırın.",
   "builder.team_fit": "Fotoğraf yerleşimi",
   "builder.team_fit_cover": "Çerçeveyi doldur (kırp)",
-  "builder.team_fit_contain": "Fotoğrafın tamamını göster"
+  "builder.team_fit_contain": "Fotoğrafın tamamını göster",
+  "builder.team_orientation": "Çerçeve yönü",
+  "builder.team_landscape": "Yatay (geniş)",
+  "builder.team_portrait": "Dikey (uzun)"
 }
