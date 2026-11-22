@@ -4,7 +4,7 @@
 {% endblock %}
 
 {% block content %}
-<main class="page category-page category-{{ category['slug'] }} category-publication" data-archive-columns="{{ archive_design.columns }}" data-archive-card-style="{{ archive_design.card_style }}" {% if archive_style %}style="{{ archive_style }}"{% endif %}>
+<main class="page category-page category-{{ category['slug'] }} category-publication" data-archive-columns="{{ archive_design.columns }}" data-archive-card-style="{{ archive_design.card_style }}" data-layout="{{ archive_design.layout }}" data-orientation="{{ archive_design.orientation }}" data-image-position="{{ archive_design.image_position }}" data-image-ratio="{{ archive_design.image_ratio }}" data-card-height="{{ archive_design.card_height }}" data-spacing="{{ archive_design.spacing }}" data-text-align="{{ archive_design.text_align }}" data-excerpt-length="{{ archive_design.excerpt_length }}" {% if archive_style %}style="{{ archive_style }}"{% endif %}>
   <section class="category-archive" aria-labelledby="category-title">
     <div class="wide-container category-publication-inner">
       <header class="category-publication-header">
@@ -30,31 +30,32 @@
       {% if posts %}
       <div class="category-publication-list" aria-label="{{ category|category_label(lang) }}">
         {% for post in posts %}
-        <article class="category-publication-card{% if not post['image_path'] %} no-image{% endif %}"
+        <article class="category-publication-card{% if not post['image_path'] or not archive_design.show_image %} no-image{% endif %}"
           {% if (not archive_design.card_background and card_options.background) or (not archive_design.text_color and card_options.text_color) %}
           style="{% if not archive_design.card_background and card_options.background %}--archive-card-bg: {{ card_options.background }};{% endif %}{% if not archive_design.text_color and card_options.text_color %}--archive-card-text: {{ card_options.text_color }};{% endif %}"
           {% endif %}>
-          {% if post['image_path'] %}
+          {% if archive_design.show_image and post['image_path'] %}
           <a class="category-publication-image" href="/posts/{{ post['slug'] }}" tabindex="-1" aria-hidden="true">
             <img src="{{ post['image_path'] }}" alt="" loading="lazy" />
           </a>
           {% endif %}
           <div class="category-publication-card-content">
             <div class="category-publication-meta">
-              {% if card_options.get('show_date', true) %}
+              {% if archive_design.show_date and card_options.get('show_date', true) %}
               <time datetime="{{ post['created_at'] }}">{{ post['created_at']|format_date }}</time>
               {% endif %}
-              <span class="category-publication-meta-line" aria-hidden="true"></span>
-              <span class="category-publication-meta-type">{{ category|category_label(lang) }}</span>
+              {% if archive_design.show_category %}<span class="category-publication-meta-line" aria-hidden="true"></span><span class="category-publication-meta-type">{{ category|category_label(lang) }}</span>{% endif %}
+              {% if archive_design.show_author and post['author_id'] %}<span class="category-publication-author">Author</span>{% endif %}
             </div>
-            {% if card_options.get('show_title', true) %}
+            {% if archive_design.show_title and card_options.get('show_title', true) %}
             <h2 class="category-publication-card-title">
               <a href="/posts/{{ post['slug'] }}">{{ post['title'] }}</a>
             </h2>
             {% endif %}
-            {% if card_options.get('show_excerpt', true) and post['excerpt'] %}
+            {% if archive_design.show_excerpt and archive_design.excerpt_length != 'hidden' and card_options.get('show_excerpt', true) and post['excerpt'] %}
             <p class="category-publication-card-excerpt">{{ post['excerpt'] }}</p>
             {% endif %}
+            {% if archive_design.show_likes or archive_design.show_comments %}<div class="cms-card-engagement">{% if archive_design.show_likes %}<span aria-label="Likes">♡ Likes</span>{% endif %}{% if archive_design.show_comments %}<span aria-label="Comments">▢ Comments</span>{% endif %}</div>{% endif %}
             <div class="category-publication-card-bottom">
               <div class="category-publication-tags">
                 {% for tag in post_tags.get(post['id'], []) %}
