@@ -518,3 +518,75 @@
   .friperi-logo-feature{min-height:300px}
   .custom-section[data-landing-style=hero],.custom-section[data-landing-style=showcase]{text-align:center}
 }
+
+
+/* Professional image figure. Shared by published pages, previews and Builder. */
+.custom-block.custom-image .friperi-image-figure{display:block;width:100%;min-width:0;margin:0 auto}
+.custom-block.custom-image[data-image-width=custom] .friperi-image-figure{width:min(100%,var(--block-width-px,640px))}
+.custom-block.custom-image[data-image-width=full] .friperi-image-figure{width:100%}
+.custom-block.custom-image .friperi-image-frame{
+  position:relative;display:block;width:100%;box-sizing:border-box;
+  padding:var(--block-padding,0px);
+  border:var(--block-border-width,0px) solid var(--block-border-color,transparent);
+  border-radius:var(--block-radius,14px);
+  background:var(--block-frame-background,transparent);
+  overflow:hidden;
+}
+.custom-block.custom-image .friperi-image-frame img{
+  display:block;width:100%;height:auto;max-width:100%;
+  border-radius:0;object-fit:var(--friperi-image-object-fit,cover);
+  object-position:var(--friperi-image-position,center);
+}
+.custom-image[data-image-fit=contain]{--friperi-image-object-fit:contain}
+.custom-image[data-image-fit=fill]{--friperi-image-object-fit:fill}
+.custom-image[data-image-fit=scale-down]{--friperi-image-object-fit:scale-down}
+.custom-image[data-image-position=top]{--friperi-image-position:center top}
+.custom-image[data-image-position=bottom]{--friperi-image-position:center bottom}
+.custom-image[data-image-position=left]{--friperi-image-position:left center}
+.custom-image[data-image-position=right]{--friperi-image-position:right center}
+.custom-image[data-image-position=top_left]{--friperi-image-position:left top}
+.custom-image[data-image-position=top_right]{--friperi-image-position:right top}
+.custom-image[data-image-position=bottom_left]{--friperi-image-position:left bottom}
+.custom-image[data-image-position=bottom_right]{--friperi-image-position:right bottom}
+.custom-image[data-image-ratio=square]{--friperi-image-ratio:1 / 1}
+.custom-image[data-image-ratio=four_three]{--friperi-image-ratio:4 / 3}
+.custom-image[data-image-ratio=three_two]{--friperi-image-ratio:3 / 2}
+.custom-image[data-image-ratio=wide]{--friperi-image-ratio:16 / 9}
+.custom-image[data-image-ratio=portrait]{--friperi-image-ratio:3 / 4}
+.custom-image[data-image-ratio=cinema]{--friperi-image-ratio:21 / 9}
+.custom-image[data-image-ratio]:not([data-image-ratio=original]) .friperi-image-frame{
+  aspect-ratio:var(--friperi-image-ratio);min-height:0;
+}
+.custom-image[data-image-ratio]:not([data-image-ratio=original]) .friperi-image-frame img,
+.custom-image[data-image-height=custom] .friperi-image-frame img{
+  position:absolute;inset:var(--block-padding,0px);
+  width:calc(100% - 2 * var(--block-padding,0px));
+  height:calc(100% - 2 * var(--block-padding,0px));
+  max-width:none;object-fit:var(--friperi-image-object-fit,cover);
+}
+.custom-image[data-image-height=custom] .friperi-image-frame{
+  height:var(--block-height-px,400px);aspect-ratio:auto!important;
+}
+.custom-image[data-image-shadow=soft] .friperi-image-frame{box-shadow:0 8px 22px #152d4720}
+.custom-image[data-image-shadow=medium] .friperi-image-frame{box-shadow:0 16px 38px #152d4733}
+.custom-image[data-image-shadow=strong] .friperi-image-frame{box-shadow:0 24px 65px #152d4745}
+.custom-image[data-image-hover=zoom] .friperi-image-frame img{transition:transform .3s ease}
+.custom-image[data-image-hover=zoom] .friperi-image-figure:hover img{transform:scale(1.045)}
+.custom-image[data-image-hover=lift] .friperi-image-frame{transition:transform .25s ease,box-shadow .25s ease}
+.custom-image[data-image-hover=lift] .friperi-image-figure:hover .friperi-image-frame{transform:translateY(-4px)}
+.custom-image .friperi-image-link{display:block;text-decoration:none;color:inherit;border-radius:var(--block-radius,14px)}
+.custom-image .friperi-image-link:focus-visible{outline:3px solid var(--color-accent,#286e7a);outline-offset:4px}
+.custom-image .friperi-image-figure figcaption{
+  margin-top:var(--block-caption-spacing,12px);
+  font-size:var(--block-caption-size,14px);
+  text-align:var(--friperi-caption-align,left);line-height:1.6;opacity:.78;
+}
+.custom-image[data-caption-align=center]{--friperi-caption-align:center}
+.custom-image[data-caption-align=right]{--friperi-caption-align:right}
+@media(max-width:640px){.custom-image[data-image-width=custom] .friperi-image-figure{max-width:100%}}
+@media(prefers-reduced-motion:reduce){
+.custom-image[data-image-hover] .friperi-image-frame,
+.custom-image[data-image-hover] .friperi-image-frame img{transition:none}
+.custom-image[data-image-hover=zoom] .friperi-image-figure:hover img,
+.custom-image[data-image-hover=lift] .friperi-image-figure:hover .friperi-image-frame{transform:none}
+}
