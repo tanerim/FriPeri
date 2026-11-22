@@ -1,6 +1,11 @@
 {% extends "admin/base.html" %}
 {% from "admin/partials/color_control.html" import color_control %}
-{% block extra_head %}<script src="{{ static_url('appearance-controls.js') }}" defer></script>{% endblock %}
+{% block extra_head %}
+<script src="{{ static_url('appearance-controls.js') }}" defer></script>
+<script src="{{ static_url('cms-design-preview.js') }}" defer></script>
+<link rel="stylesheet" href="{{ static_url('cms-design-preview.css') }}">
+<link rel="stylesheet" href="{{ static_url('category-archive.css') }}">
+{% endblock %}
 {% block content %}
 <main id="admin-content" class="admin-settings-page admin-compact-page cms-design-page" tabindex="-1">
   <div class="admin-settings-container">
@@ -51,6 +56,41 @@
             <small>{{ t(lang, 'cms_design.card_style_help') }}</small>
           </label>
         </div>
+
+        <h3>Card layout</h3>
+        <p class="builder-help">Choose how the category archive arranges its posts. Masonry keeps cards at their natural heights.</p>
+        <div class="cms-layout-options">
+          {% for key, title, description in [('grid','Standard Grid','Equal-height rows'),('masonry','Masonry','Variable-height columns'),('list','Horizontal List','Wide rows'),('featured','Featured Grid','Large first post')] %}
+          <label class="cms-layout-choice">
+            <input type="radio" name="layout" value="{{ key }}" {% if design.layout == key %}checked{% endif %}>
+            <span class="cms-layout-diagram cms-layout-{{ key }}" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+            <strong>{{ title }}</strong><small>{{ description }}</small>
+          </label>
+          {% endfor %}
+        </div>
+        <h3>Card appearance</h3>
+        <div class="settings-grid-v3">
+          {% for key, title, choices, help in [
+            ('orientation','Card orientation',[('vertical','Vertical'),('horizontal','Horizontal')],'Choose vertical or side-by-side card content.'),
+            ('image_position','Image position',[('top','Top'),('left','Left'),('right','Right')],'Position the featured image in each card.'),
+            ('image_ratio','Image ratio',[('original','Original'),('square','1:1'),('four_three','4:3'),('wide','16:9'),('portrait','3:4')],'Control featured image cropping. Original preserves the image proportions.'),
+            ('card_height','Card height',[('equal','Equal'),('auto','Auto')],'Auto follows content; Masonry always uses natural heights.'),
+            ('spacing','Card spacing',[('compact','Compact'),('normal','Normal'),('spacious','Spacious')],'Set distance between post cards.'),
+            ('text_align','Text alignment',[('left','Left'),('center','Center')],'Align title, date and excerpt.'),
+            ('excerpt_length','Excerpt length',[('hidden','Hidden'),('short','Short'),('medium','Medium'),('full','Full')],'Limit the text shown in each card.')
+          ] %}
+          <label><span>{{ title }}</span><select name="{{ key }}">
+            {% for value, label in choices %}<option value="{{ value }}" {% if design[key] == value %}selected{% endif %}>{{ label }}</option>{% endfor %}
+          </select><small>{{ help }}</small></label>
+          {% endfor %}
+        </div>
+        <h3>Card content</h3>
+        <p class="builder-help">Choose which elements appear in this category's post cards.</p>
+        <div class="cms-content-options">
+          {% for key, label in [('show_image','Featured image'),('show_title','Post title'),('show_date','Publish date'),('show_excerpt','Post excerpt'),('show_author','Author'),('show_category','Category label'),('show_likes','Like count'),('show_comments','Comment count')] %}
+          <label class="settings-check"><input type="checkbox" name="{{ key }}" {% if design[key] %}checked{% endif %}> {{ label }}</label>
+          {% endfor %}
+        </div>
         <h3>{{ t(lang, 'cms_design.palette') }}</h3>
         <p>{{ t(lang, 'cms_design.palette_help') }}</p>
         <div class="settings-grid-v3">
@@ -58,6 +98,45 @@
           {{ color_control(key, t(lang, 'cms_design.' ~ key), design[key], fallback=('#ffffff' if key in ['background','card_background'] else '#347f80'), help_text=t(lang, 'cms_design.' ~ key ~ '_help')) }}
           {% endfor %}
         </div>
+
+        <section class="cms-live-preview" aria-labelledby="cms-preview-title">
+          <div class="cms-preview-header">
+            <div><h3 id="cms-preview-title">Live preview</h3><p class="builder-help">Updates as you edit. Uses published posts from this category when available; nothing is saved until you select Save changes.</p></div>
+            <div class="cms-preview-devices" role="group" aria-label="Preview size">
+              <button type="button" data-device="desktop" aria-pressed="true">Desktop</button>
+              <button type="button" data-device="mobile" aria-pressed="false">Mobile</button>
+            </div>
+          </div>
+          <div class="cms-preview-viewport">
+            <div class="category-publication cms-preview-root" data-archive-columns="{{ design.columns }}" data-archive-card-style="{{ design.card_style }}">
+              <div class="category-publication-list">
+                {% for post in preview_posts %}
+                <article class="category-publication-card">
+                  {% if post.image_path %}<div class="category-publication-image"><img src="{{ post.image_path }}" alt="" loading="lazy"></div>{% else %}<div class="category-publication-image cms-preview-placeholder" aria-hidden="true"></div>{% endif %}
+                  <div class="category-publication-card-content">
+                    <div class="category-publication-meta"><time>{{ post.created_at[:10] }}</time><span class="category-publication-meta-type">{{ selected.name }}</span><span class="cms-preview-author">Author</span></div>
+                    <h4 class="category-publication-card-title">{{ post.title }}</h4>
+                    <p class="category-publication-card-excerpt">{{ post.excerpt or 'Explore this story and discover more details.' }}</p>
+                    <div class="cms-preview-engagement"><span class="cms-preview-likes">♡ Likes</span><span class="cms-preview-comments">▢ Comments</span></div>
+                  </div>
+                </article>
+                {% else %}
+                {% for n in range(1,5) %}
+                <article class="category-publication-card">
+                  <div class="category-publication-image cms-preview-placeholder" aria-hidden="true"><span>Sample image</span></div>
+                  <div class="category-publication-card-content">
+                    <div class="category-publication-meta"><time>2026-11-22</time><span class="category-publication-meta-type">{{ selected.name }}</span><span class="cms-preview-author">Author</span></div>
+                    <h4 class="category-publication-card-title">Sample story {{ n }}</h4>
+                    <p class="category-publication-card-excerpt">This is sample content to show the selected card layout, image placement, text length and visual settings.</p>
+                    <div class="cms-preview-engagement"><span class="cms-preview-likes">♡ Likes</span><span class="cms-preview-comments">▢ Comments</span></div>
+                  </div>
+                </article>
+                {% endfor %}
+                {% endfor %}
+              </div>
+            </div>
+          </div>
+        </section>
         <div class="page-actions" style="margin-top:24px">
           <button class="settings-primary" type="submit">{{ t(lang, 'common.save_changes') }}</button>
           <a class="settings-secondary" href="/admin/categories">{{ t(lang, 'admin.categories') }}</a>
