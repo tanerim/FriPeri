@@ -711,5 +711,6 @@
   "design.help_color_separator_3": "Third color in decorative section separator palettes.",
   "design.help_color_footer_bg": "Site-wide footer background.",
   "design.help_color_footer_text": "Site-wide footer text and link tones.",
-  "design.help_color_footer_border": "Footer upper divider/border."
+  "design.help_color_footer_border": "Footer upper divider/border.",
+  "cms_design.open": "Open category"
 }
