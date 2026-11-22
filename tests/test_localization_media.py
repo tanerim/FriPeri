@@ -17,6 +17,11 @@ def test_all_builtin_ui_locales_have_admin_navigation_and_builder_labels():
         "admin.documentation", "admin.users", "users.title", "users.role_cc",
         "users.role_editor", "users.role_admin", "users.categories",
         "categories.edit_title",
+        "builder.team", "builder.team_name", "builder.team_title",
+        "builder.team_photo", "builder.team_shape",
+        "builder.team_rectangle", "builder.team_circle",
+        "builder.two_column_hero", "builder.two_column_first_heading",
+        "builder.two_column_second_heading",
     )
     for lang in LANGUAGES:
         for key in required:
