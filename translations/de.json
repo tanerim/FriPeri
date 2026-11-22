@@ -547,5 +547,9 @@
   "builder.divider_dotted": "Gepunktet",
   "builder.divider_wave": "Sanfte Welle",
   "builder.divider_wave_tight": "Enge Welle",
-  "builder.divider_zigzag": "Zickzack"
+  "builder.divider_zigzag": "Zickzack",
+  "builder.accent_opacity": "Transparenz der Hervorhebung",
+  "builder.accent_new_line": "Position der Hervorhebung",
+  "builder.option_yes": "Neue Zeile",
+  "builder.option_no": "Gleiche Zeile"
 }
