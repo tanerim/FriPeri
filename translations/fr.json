@@ -597,5 +597,6 @@
   "design.help_color_separator_3": "Troisième couleur des séparateurs décoratifs.",
   "design.help_color_footer_bg": "Fond du pied de page sur tout le site.",
   "design.help_color_footer_text": "Texte et liens du pied de page.",
-  "design.help_color_footer_border": "Bordure supérieure du pied de page."
+  "design.help_color_footer_border": "Bordure supérieure du pied de page.",
+  "cms_design.open": "Ouvrir la catégorie"
 }
