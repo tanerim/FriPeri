@@ -2308,6 +2308,11 @@ async def cms_category_design(request: Request) -> Response:
     with get_db() as conn:
         categories = [dict(row) for row in conn.execute(
             "SELECT id, name, slug, archive_design_json FROM categories ORDER BY name COLLATE NOCASE")]
+        requested = request.query_params.get("category", "")
+        preview_category = next((cat for cat in categories if str(cat["id"]) == requested), None)
+        if preview_category is None and categories:
+            preview_category = categories[0]
+        preview_posts = [dict(row) for row in fetch_posts(conn, preview_category["slug"], 8)] if preview_category else []
     requested = request.query_params.get("category", "")
     selected = next((cat for cat in categories if str(cat["id"]) == requested), None)
     if selected is None and categories:
@@ -2315,7 +2320,7 @@ async def cms_category_design(request: Request) -> Response:
     design = parse_archive_design(selected["archive_design_json"] if selected else None)
     return render_template(request, "admin/cms_design.html", "CMS Design", {
         "active_admin": "cms_design", "categories": categories, "selected": selected,
-        "design": design, "editor_token": custom_home_token(user),
+        "design": design, "preview_posts": preview_posts, "editor_token": custom_home_token(user),
         "saved": request.query_params.get("saved") == "1",
     }, user)
 
