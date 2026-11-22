@@ -27,7 +27,7 @@ def test_team_validation_round_trip_and_shapes():
     assert blocks[0]["width"] == "wide"
     assert blocks[0]["items"][0] == {
         "photo": "/static/uploads/example.png", "name": "Ada Yılmaz",
-        "title": "Researcher", "shape": "circle",
+        "title": "Researcher", "shape": "circle", "fit": "cover",
         "zoom": 1.0, "focal_x": 50.0, "focal_y": 50.0,
     }
     assert blocks[0]["items"][1]["shape"] == "rectangle"
@@ -177,3 +177,13 @@ def test_team_photo_crop_renders_on_published_page(site):
     assert "shape-circle" in response.text
     assert "object-position: 20.0% 70.0%" in response.text
     assert "transform: scale(2.2)" in response.text
+
+
+def test_team_photo_fit_modes_are_preserved():
+    document = team_doc()
+    document[0]["items"][0]["fit"] = "contain"
+    validated = validate_document(json.dumps(document, ensure_ascii=False))
+    assert validated[0]["items"][0]["fit"] == "contain"
+    assert validated[0]["items"][1]["fit"] == "cover"
+    assert "object-fit: {{ member.fit" in (
+        ROOT / "templates/partials/content_blocks.html").read_text(encoding="utf-8")
