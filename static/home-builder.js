@@ -614,11 +614,11 @@
     };
     definitions.forEach(([key,kind,max,fallback]) => {
       const label=el('label','builder-select');
-      label.append(el('span','',t(key)+(typeof kind === 'number' && key !== 'columns' ? (key.endsWith('_opacity') ? ' (%)' : ' (px)') : '')));
+      label.append(el('span','', (key==='landing_style'?'Landing appearance':t(key))+(typeof kind === 'number' && key !== 'columns' ? (key.endsWith('_opacity') ? ' (%)' : ' (px)') : '')));
       let input;
       if(Array.isArray(kind)) {
         input=el('select'); input.add(new Option(t('theme_default'),''));
-        kind.forEach(value=>input.add(new Option(t('option_'+value),value)));
+        kind.forEach(value=>input.add(new Option(key==='landing_style'?({'none':'Standard','hero':'Branded Hero','intro':'Editorial Intro','features':'Feature Cards','showcase':'Product Showcase','steps':'Step Cards','contrast':'Highlight','closing':'Closing CTA'}[value]||value):t('option_'+value),value)));
         input.value=block.appearance?.[key] ?? '';
         input.addEventListener('change',()=>set(key,input.value || undefined));
       } else {
