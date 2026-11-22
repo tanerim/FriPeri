@@ -535,5 +535,8 @@
   "builder.team_drag_help": "Faites glisser la photo pour choisir la zone visible. Réglez le zoom avec le curseur.",
   "builder.team_fit": "Ajustement de l'image",
   "builder.team_fit_cover": "Remplir le cadre (recadrer)",
-  "builder.team_fit_contain": "Afficher toute la photo"
+  "builder.team_fit_contain": "Afficher toute la photo",
+  "builder.team_orientation": "Orientation du cadre",
+  "builder.team_landscape": "Paysage (large)",
+  "builder.team_portrait": "Portrait (vertical)"
 }
