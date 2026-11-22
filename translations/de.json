@@ -597,5 +597,6 @@
   "design.help_color_separator_3": "Dritte Farbe dekorativer Trenner.",
   "design.help_color_footer_bg": "Fußzeilenhintergrund auf allen Seiten.",
   "design.help_color_footer_text": "Text- und Linkfarbe der Fußzeile.",
-  "design.help_color_footer_border": "Oberer Rand der Fußzeile."
+  "design.help_color_footer_border": "Oberer Rand der Fußzeile.",
+  "cms_design.open": "Kategorie öffnen"
 }
