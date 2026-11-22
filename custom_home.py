@@ -347,6 +347,7 @@ def _validate_blocks(data, depth, remaining, anchors):
                     if raw_photo and not member['photo']:
                         raise ValueError('Invalid team member photo')
                     member['shape'] = entry.get('shape') if entry.get('shape') in ('circle', 'rectangle') else 'rectangle'
+                    member['fit'] = entry.get('fit') if entry.get('fit') in ('cover', 'contain') else 'cover'
                     # Non-destructive crop: zoom and focal point survive editing and publication.
                     for key, default, minimum, maximum in (
                         ('zoom', 1.0, 1.0, 3.0),
