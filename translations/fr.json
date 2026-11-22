@@ -538,5 +538,14 @@
   "builder.team_fit_contain": "Afficher toute la photo",
   "builder.team_orientation": "Orientation du cadre",
   "builder.team_landscape": "Paysage (large)",
-  "builder.team_portrait": "Portrait (vertical)"
+  "builder.team_portrait": "Portrait (vertical)",
+  "builder.divider_line_width": "Épaisseur du trait (px)",
+  "builder.divider_line_style": "Style de ligne",
+  "builder.divider_line_color": "Couleur du trait",
+  "builder.divider_single": "Continue",
+  "builder.divider_dashed": "Tirets",
+  "builder.divider_dotted": "Pointillés",
+  "builder.divider_wave": "Vague douce",
+  "builder.divider_wave_tight": "Vague serrée",
+  "builder.divider_zigzag": "Zigzag"
 }
