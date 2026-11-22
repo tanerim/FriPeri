@@ -661,5 +661,9 @@
   "builder.divider_dotted": "Dotted",
   "builder.divider_wave": "Smooth wave",
   "builder.divider_wave_tight": "Tight wave",
-  "builder.divider_zigzag": "Zigzag"
+  "builder.divider_zigzag": "Zigzag",
+  "builder.accent_opacity": "Highlight opacity",
+  "builder.accent_new_line": "Highlighted text position",
+  "builder.option_yes": "New line",
+  "builder.option_no": "Same line"
 }
