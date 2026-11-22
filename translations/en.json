@@ -649,5 +649,8 @@
   "builder.team_drag_help": "Drag the photo to choose the visible area. Zoom in or out with the slider.",
   "builder.team_fit": "Image fitting",
   "builder.team_fit_cover": "Fill frame (crop)",
-  "builder.team_fit_contain": "Full photo (no crop)"
+  "builder.team_fit_contain": "Full photo (no crop)",
+  "builder.team_orientation": "Frame orientation",
+  "builder.team_landscape": "Landscape (wide)",
+  "builder.team_portrait": "Portrait (tall)"
 }
