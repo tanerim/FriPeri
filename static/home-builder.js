@@ -381,7 +381,14 @@
     const choice = (key, options, action) => {
       const label = el('label', 'builder-rich-choice'); label.append(el('span', '', t(key)));
       const input = el('select'); options.forEach(([value, title]) => input.add(new Option(title, value)));
-      input.addEventListener('change', () => action(input.value)); label.append(input); settings.append(label);
+      // A select must not retain a one-time formatting action as its permanent state.
+      input.addEventListener('change', () => {
+        if (!input.value) return;
+        action(input.value);
+        if (key === 'semantic') input.value = '';
+      });
+      label.append(input); settings.append(label);
+      return input;
     };
     const wrap = tag => {
       checkpoint(); restore();
@@ -399,12 +406,45 @@
       command('createLink', value);
     });
     add('inline_code', () => wrap('code'));
-    choice('semantic', [['code',t('inline_code')],['mark',t('highlight')],['small',t('small_text')],['kbd',t('keyboard')],['abbr',t('abbreviation')],['cite',t('citation')]], value => {
+    const semanticTags = new Set(['code','mark','small','kbd','abbr','cite']);
+    const clearSemantic = () => {
+      checkpoint(); restore();
+      const active = range.startContainer.nodeType === Node.ELEMENT_NODE
+        ? range.startContainer : range.startContainer.parentElement;
+      const semantic = active?.closest?.('code,mark,small,kbd,abbr,cite');
+      if (semantic && editor.contains(semantic)) {
+        const parent=semantic.parentNode, next=semantic.nextSibling;
+        while (semantic.firstChild) parent.insertBefore(semantic.firstChild,semantic);
+        semantic.remove();
+        range=document.createRange();
+        if (next && parent.contains(next))range.setStartBefore(next);
+        else {range.selectNodeContents(parent);range.collapse(false);}
+        range.collapse(true);
+        commit(); restore();
+      } else {
+        document.execCommand('removeFormat',false,null);
+        commit();
+      }
+    };
+    choice('semantic', [
+      ['','Select semantic format…'], ['remove','Normal text / Remove semantic'],
+      ['code',t('inline_code')],['mark',t('highlight')],['small',t('small_text')],
+      ['kbd',t('keyboard')],['abbr',t('abbreviation')],['cite',t('citation')]
+    ], value => {
+      if (value === 'remove') return clearSemantic();
+      if (!semanticTags.has(value)) return;
       wrap(value);
-      if (value === 'abbr') { const title = prompt(t('abbreviation')); if (title) { range.commonAncestorContainer.title=title; commit(); } }
+      if (value === 'abbr') {
+        const semantic = range.startContainer.nodeType === Node.ELEMENT_NODE
+          ? range.startContainer.closest('abbr') : range.startContainer.parentElement?.closest('abbr');
+        const title=prompt(t('abbreviation'));
+        if(title && semantic){semantic.title=title;commit();}
+      }
     });
     add('definition_list', () => command('insertHTML', '<dl><dt>'+escaped('heading')+'</dt><dd>'+escaped('item')+'</dd></dl><p><br></p>'));
-    add('disclosure', () => command('insertHTML', '<details open><summary>'+escaped('heading')+'</summary><p>'+escaped('item')+'</p></details><p><br></p>'));
+    // HTML details defaults to COLLAPSED; "open" is intentionally absent.
+    add('disclosure', () => command('insertHTML',
+      '<details><summary>'+escaped('heading')+'</summary><p>'+escaped('item')+'</p></details><p><br></p>'));
     add('divider', () => command('insertHorizontalRule'));
     choice('font_family', [['sans-serif',t('sans_serif')],['serif',t('serif')],['monospace',t('monospace')]], value => command('fontName', value));
     choice('font_size', [12,14,16,18,20,24,32,48,72].map(n => [String(n), n+' px']), value => {
@@ -453,107 +493,178 @@
   }
 
   function inlineImages(editor, block) {
-    const panel = el('details', 'builder-inline-images');
-    const summary = el('summary', '', t('inline_image'));
-    const badge = el('span', 'builder-image-pending-badge', t('image_pending_short')); badge.hidden = true;
-    summary.append(badge); panel.append(summary);
-    const feedback = el('p', 'builder-image-feedback', t('image_apply_help'));
-    feedback.setAttribute('role', 'status'); feedback.setAttribute('aria-live', 'polite');
-    const controls = el('div', 'builder-inline-image-controls');
-    let selectedImage = null, insertionRange = null;
-    const rememberRange = () => {
-      const selection = window.getSelection();
-      if (selection.rangeCount && editor.contains(selection.anchorNode) && editor.contains(selection.focusNode)) {
-        insertionRange = selection.getRangeAt(0).cloneRange();
+    const panel = el('details','builder-inline-images');
+    const summary=el('summary','',t('inline_image'));
+    const badge=el('span','builder-image-pending-badge',t('image_pending_short'));
+    badge.hidden=true;summary.append(badge);panel.append(summary);
+    const feedback=el('p','builder-image-feedback',t('image_apply_help'));
+    feedback.setAttribute('role','status');feedback.setAttribute('aria-live','polite');
+    const controls=el('div','builder-inline-image-controls');
+    let selectedImage=null, insertionRange=null, insertionBlock=null, appliedValues='';
+    const rangeInsideEditor=(candidate)=>candidate && editor.contains(candidate.commonAncestorContainer);
+    const rememberRange=()=>{
+      const selection=window.getSelection();
+      if(!selection?.rangeCount || !editor.contains(selection.anchorNode)
+          || !editor.contains(selection.focusNode))return;
+      const next=selection.getRangeAt(0);
+      // Do not replace a carefully saved caret when leaving text for the settings panel.
+      if(!rangeInsideEditor(next))return;
+      insertionRange=next.cloneRange();
+      const node=next.startContainer.nodeType===Node.ELEMENT_NODE
+        ? next.startContainer : next.startContainer.parentElement;
+      insertionBlock=node.closest('p,div,li,blockquote,h1,h2,h3,h4,h5,h6,pre');
+      if(!insertionBlock || !editor.contains(insertionBlock))insertionBlock=null;
+    };
+    ['keyup','mouseup','pointerup','input','focusout'].forEach(type=>editor.addEventListener(type,rememberRange));
+    const observeSelection=()=>{
+      if(!editor.isConnected){
+        document.removeEventListener('selectionchange',observeSelection);
+        return;
       }
+      const selection=window.getSelection();
+      if(selection?.anchorNode && editor.contains(selection.anchorNode))rememberRange();
     };
-    ['keyup', 'mouseup', 'focusout'].forEach(event => editor.addEventListener(event, rememberRange));
-    const inputField = (label, type = 'text') => {
-      const wrapper = el('label', 'builder-field'), input = el('input');
-      input.type = type; wrapper.append(el('span', '', label), input); controls.append(wrapper);
-      return input;
+    document.addEventListener('selectionchange',observeSelection);
+    const inputField=(label,type='text')=>{
+      const wrapper=el('label','builder-field'),input=el('input');
+      input.type=type;wrapper.append(el('span','',label),input);controls.append(wrapper);return input;
     };
-    const url = inputField(t('url')); url.placeholder = 'https://… /static/uploads/…';
-    const alt = inputField(t('alt')); alt.maxLength = 500;
-    const choose = (label, options, value) => {
-      const wrapper = el('label', 'builder-field'), input = el('select');
-      options.forEach(([key, text]) => input.add(new Option(text, key)));
-      input.value = value; wrapper.append(el('span', '', label), input); controls.append(wrapper);
-      return input;
+    const url=inputField(t('url'));url.placeholder='https://… /static/uploads/…';
+    const alt=inputField(t('alt'));alt.maxLength=500;
+    const choose=(label,options,initial)=>{
+      const wrapper=el('label','builder-field'),input=el('select');
+      options.forEach(([key,text])=>input.add(new Option(text,key)));
+      input.value=initial;wrapper.append(el('span','',label),input);controls.append(wrapper);return input;
     };
-    const flow = choose(t('image_flow'), [['left', t('image_left')], ['right', t('image_right')], ['none', t('image_none')]], 'left');
-    const width = choose(t('image_width'), ['25','40','50','100'].map(value => [value, value + '%']), '40');
-    const values = () => JSON.stringify([url.value.trim(), alt.value, flow.value, width.value]);
-    let appliedValues = values();
-    const updatePending = (applied = false) => {
-      const pending = values() !== appliedValues;
-      panel.classList.toggle('has-pending-image', pending); badge.hidden = !pending;
-      apply.disabled = !pending;
-      apply.textContent = t(selectedImage ? 'image_update_action' : 'image_insert_action');
-      feedback.textContent = t(pending ? 'image_pending_help' : applied ? 'image_applied_help' : 'image_apply_help');
+    const flow=choose(t('image_flow'),[
+      ['left',t('image_left')],['right',t('image_right')],['none',t('image_none')]
+    ],'right');
+    const width=choose(t('image_width'),['25','40','50','100'].map(x=>[x,x+'%']),'25');
+    const placement=choose('Insert image',[
+      ['caret','At selected cursor position'],
+      ['before','Before selected paragraph'],
+      ['after','After selected paragraph'],
+      ['start','Beginning of text'],
+      ['end','End of text']
+    ],'caret');
+    const placementHelp=el('p','builder-help builder-inline-placement-help',
+      'Click inside the text to position the cursor, then choose the image. '+
+      'For text wrapping, select Left or Right and place the image before the relevant paragraph.');
+    controls.append(placementHelp);
+    const capture=button('Use current text cursor',()=>{
+      const selection=window.getSelection();
+      if(selection?.rangeCount && editor.contains(selection.anchorNode))rememberRange();
+      if(!insertionRange){
+        feedback.textContent='Click in your text first to choose where the image should appear.';
+        return;
+      }
+      selectedImage=null;
+      remove.disabled=true;
+      feedback.textContent='Cursor saved. Apply or upload an image to insert it here.';
+      panel.open=true;
+    },'builder-inline-position-button');
+    controls.append(capture);
+    const values=()=>JSON.stringify([url.value.trim(),alt.value,flow.value,width.value,placement.value]);
+    appliedValues=values();
+    const updatePending=(applied=false)=>{
+      const pending=values()!==appliedValues;
+      panel.classList.toggle('has-pending-image',pending);badge.hidden=!pending;
+      apply.disabled=!pending && !!selectedImage;
+      apply.textContent=t(selectedImage?'image_update_action':'image_insert_action');
+      feedback.textContent=t(pending?'image_pending_help':applied?'image_applied_help':'image_apply_help');
     };
-    [url, alt, flow, width].forEach(input => {
-      input.addEventListener('input', () => updatePending());
-      input.addEventListener('change', () => updatePending());
+    [url,alt,flow,width,placement].forEach(input=>{
+      input.addEventListener('input',()=>updatePending());
+      input.addEventListener('change',()=>updatePending());
     });
-    const file = inputField(t('upload'), 'file'); file.accept = 'image/png,image/jpeg,image/webp';
-    file.addEventListener('change', () => upload(file.files[0], {type:'image'}, value => {
-      if (!editor.isConnected) return;
-      if (safeURL(value, true)) {
-        url.value = value;
-        insertImage(value);
-      } else {
-        message(t('invalid'), true);
-      }
-    }));
-    const commit = action => {
-      checkpoint(); action(); block.html = editor.innerHTML; checkpoint();
+    const commit=action=>{
+      checkpoint();action();block.html=editor.innerHTML;checkpoint();
     };
-    function insertImage(src) {
-      commit(() => {
-        const image = selectedImage && editor.contains(selectedImage) ? selectedImage : el('img');
-        image.src = src; image.alt = alt.value;
-        image.className = `rich-image rich-image-${flow.value} rich-image-width-${width.value}`;
-        image.loading = 'lazy';
-        if (!editor.contains(image)) {
-          if (insertionRange && editor.contains(insertionRange.commonAncestorContainer)) {
-            insertionRange.collapse(false); insertionRange.insertNode(image);
-          } else editor.prepend(image);
+    function positionRange(){
+      const candidate=insertionRange && rangeInsideEditor(insertionRange)
+        ? insertionRange.cloneRange():null;
+      const range=document.createRange();
+      if(placement.value==='start'){
+        range.selectNodeContents(editor);range.collapse(true);return range;
+      }
+      if(placement.value==='end'){
+        range.selectNodeContents(editor);range.collapse(false);return range;
+      }
+      if(placement.value==='before' || placement.value==='after'){
+        const element=insertionBlock && editor.contains(insertionBlock)?insertionBlock:null;
+        if(element){
+          if(placement.value==='before')range.setStart(element,0);
+          else range.selectNodeContents(element),range.collapse(false);
+          range.collapse(true);return range;
         }
-        selectedImage = image;
-        insertionRange = document.createRange(); insertionRange.setStartAfter(image); insertionRange.collapse(true);
-        editor.focus(); const selection = window.getSelection(); selection.removeAllRanges(); selection.addRange(insertionRange);
-      });
-      remove.disabled = false; appliedValues = values(); updatePending(true); message('');
+      }
+      if(candidate){
+        candidate.collapse(true);return candidate;
+      }
+      // No caret was selected: insert at the beginning, not silently at the end.
+      range.selectNodeContents(editor);range.collapse(true);return range;
     }
-    const apply = button(t('image_apply'), () => {
-      const src = safeURL(url.value.trim(), true);
-      if (!src) { message(t('invalid'), true); url.focus(); return; }
+    function insertImage(src){
+      if(!safeURL(src,true))return message(t('invalid'),true);
+      commit(()=>{
+        const existing=selectedImage && editor.contains(selectedImage)?selectedImage:null;
+        const image=existing || el('img');
+        image.src=src;image.alt=alt.value;
+        image.className='rich-image rich-image-'+flow.value+' rich-image-width-'+width.value;
+        image.loading='lazy';image.decoding='async';
+        if(!existing){
+          const range=positionRange();
+          // A collapsed caret is never allowed to delete selected user text.
+          range.collapse(true);range.insertNode(image);
+        }
+        selectedImage=image;
+        insertionRange=document.createRange();
+        insertionRange.setStartAfter(image);insertionRange.collapse(true);
+        insertionBlock=image.closest('p,div,li,blockquote,h1,h2,h3,h4,h5,h6,pre');
+        editor.focus();
+        const selection=window.getSelection();
+        selection.removeAllRanges();selection.addRange(insertionRange);
+      });
+      remove.disabled=false;appliedValues=values();updatePending(true);message('');
+    }
+    const apply=button(t('image_apply'),()=>{
+      const src=safeURL(url.value.trim(),true);
+      if(!src){message(t('invalid'),true);url.focus();return;}
       insertImage(src);
     });
     apply.classList.add('builder-image-apply');
-    const remove = button(t('image_remove'), () => {
-      if (selectedImage && editor.contains(selectedImage)) commit(() => selectedImage.remove());
-      selectedImage = null; remove.disabled = true; url.value = ''; alt.value = '';
-      appliedValues = values(); updatePending();
+    const remove=button(t('image_remove'),()=>{
+      if(selectedImage && editor.contains(selectedImage))commit(()=>selectedImage.remove());
+      selectedImage=null;remove.disabled=true;url.value='';alt.value='';
+      appliedValues=values();updatePending();
     });
-    remove.disabled = true;
-    editor.addEventListener('click', event => {
-      const image = event.target.closest('img');
-      if (!image || !editor.contains(image)) return;
-      selectedImage = image && editor.contains(image) ? image : null;
-      remove.disabled = !selectedImage;
-      if (!selectedImage) return;
-      url.value = image.getAttribute('src'); alt.value = image.alt;
-      flow.value = ['left','right','none'].find(value => image.classList.contains('rich-image-' + value)) || 'none';
-      width.value = ['25','40','50','100'].find(value => image.classList.contains('rich-image-width-' + value)) || '40';
-      appliedValues = values(); updatePending();
-      panel.open = true;
+    const file=inputField(t('upload'),'file');
+    file.accept='image/png,image/jpeg,image/webp';
+    file.addEventListener('change',()=>upload(file.files[0],{type:'image'},value=>{
+      if(!editor.isConnected)return;
+      if(safeURL(value,true)){url.value=value;insertImage(value);}
+      else message(t('invalid'),true);
+    }));
+    editor.addEventListener('click',event=>{
+      const image=event.target.closest('img');
+      if(image && editor.contains(image)){
+        selectedImage=image;remove.disabled=false;
+        url.value=image.getAttribute('src') || '';alt.value=image.alt;
+        flow.value=['left','right','none'].find(v=>image.classList.contains('rich-image-'+v))||'none';
+        width.value=['25','40','50','100'].find(v=>image.classList.contains('rich-image-width-'+v))||'40';
+        appliedValues=values();updatePending();panel.open=true;
+      } else {
+        // Returning to text means the next image is a NEW insertion.
+        selectedImage=null;remove.disabled=true;rememberRange();updatePending();
+      }
     });
-    const actions = el('div', 'builder-actions'); actions.append(apply, remove);
-    panel.append(controls, feedback, actions, el('p', 'builder-help', t('image_flow_help')));
-    updatePending();
-    return panel;
+    const actions=el('div','builder-actions');
+    actions.append(apply,remove);
+    panel.append(controls,feedback,actions,el('p','builder-help',
+      'Place the cursor in the paragraph where the image belongs. '+
+      'Upload or apply the image; choose Left or Right to wrap text around it. '+
+      'Click an existing image in the text to update it.'));
+    updatePending();return panel;
   }
   function media(block, body) {
     if (block.type === 'image' && safeURL(block.url,true)) {

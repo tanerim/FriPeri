@@ -668,3 +668,16 @@
   .friperi-callout-inner:is([data-image-position=left],[data-image-position=right]){flex-direction:column;align-items:stretch}
   .friperi-callout-inner:is([data-image-position=left],[data-image-position=right]) .friperi-callout-media{width:100%;flex:auto}
 }
+
+/* Inline image flow belongs to its paragraph: avoid clipping floats. */
+.custom-rich-text{display:flow-root;overflow-x:visible}
+.custom-rich-text :is(p,div,blockquote,li){min-width:0}
+.custom-rich-text img.rich-image{display:block;height:auto;max-width:100%;border-radius:12px}
+.custom-rich-text img.rich-image-left{float:left;clear:left;margin:6px 22px 14px 0}
+.custom-rich-text img.rich-image-right{float:right;clear:right;margin:6px 0 14px 22px}
+.custom-rich-text img.rich-image-none{float:none;clear:both;margin:16px auto}
+.custom-rich-text details:not([open]) > :not(summary){display:none}
+.custom-rich-text details[open] > :not(summary){display:block}
+@media(max-width:640px){
+  .custom-rich-text img.rich-image{float:none!important;clear:both;display:block;max-width:100%;width:100%;margin:16px 0}
+}

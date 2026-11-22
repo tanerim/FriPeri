@@ -569,3 +569,8 @@
 .hyperui-admin .builder-image-link-settings>.builder-select{min-width:0}
 .hyperui-admin .custom-image .friperi-image-figure{max-width:100%;margin-inline:auto}
 @media(max-width:650px){.hyperui-admin .builder-image-link-settings{grid-template-columns:1fr}}
+
+.hyperui-admin .builder-inline-placement-help{grid-column:1/-1;line-height:1.55}
+.hyperui-admin .builder-inline-position-button{grid-column:1/-1;justify-self:start;border:1px solid #a9b9d7;border-radius:8px;background:#fff;padding:9px 12px;color:#233f66;cursor:pointer}
+.hyperui-admin .builder-inline-position-button:focus-visible{outline:3px solid #5145d5;outline-offset:3px}
+.hyperui-admin .builder-inline-images .builder-inline-image-controls select{max-width:100%}
