@@ -548,7 +548,7 @@
   const appearanceFields = {
     section: [...sectionControls.flatMap(([, fields]) => fields),
       ['svg_pattern'],['svg_primary'],['svg_secondary'],['svg_opacity']],
-    heading: [['font_size',18,160,48],['font_weight',['normal','bold','heavy']],['accent_color','color','#2563eb'],['accent_style',['color_only','underline']]],
+    heading: [['font_size',18,160,48],['font_weight',['normal','bold','heavy']],['accent_color','color','#2563eb'],['accent_opacity',0,100,100],['accent_style',['color_only','underline']],['accent_new_line',['no','yes']]],
     list: [['font_size',10,72,18],['item_gap',0,48,8]],
     table: [['cell_background','color','#ffffff'],['cell_color','color','#17243b'],['header_background','color','#eef2ff'],['header_color','color','#17243b']],
     button: [['button_background','color','#2563eb'],['button_hover','color','#1d4ed8'],['button_text','color','#ffffff'],['button_hover_text','color','#ffffff'],['font_size',10,48,16],['width_mode',['auto','full','custom']],['width_px',40,1200,240],['height',24,240,56],['radius',0,120,100],
@@ -573,6 +573,7 @@
     if (block.type === 'heading') {
       body.dataset.headingWeight = appearance.font_weight || '';
       body.dataset.accent = appearance.accent_style || '';
+      body.dataset.accentNewLine = appearance.accent_new_line || 'no';
       body.toggleAttribute('data-heading-size', appearance.font_size !== undefined);
     }
     if (block.type === 'button') {
@@ -976,7 +977,9 @@
       if (block.type==='heading') {
         const heading=el(block.level);
         const accent=el('span','section-heading-accent',block.accent || '');
-        heading.append(editable('span',block.text,t('heading_hint'),v=>{block.text=v;}),' ',accent);
+        const highlightedText=editable('span',block.text,t('heading_hint'),v=>{block.text=v;});
+        const space=el('span','section-heading-accent-gap',' ');
+        heading.append(highlightedText,space,accent);
         body.append(heading,field(t('heading_accent'),block.accent,value=>{block.accent=value;accent.textContent=value;}));
       }
       if(block.type==='legacy_html') {
