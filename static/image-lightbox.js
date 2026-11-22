@@ -1,9 +1,9 @@
 "use strict";
 /* Accessible, reusable HTML5 dialog for published Image blocks. */
 document.addEventListener("click", event => {
-  const trigger=event.target.closest?.(".friperi-image-lightbox-trigger");
-  if(!trigger)return;
-  const source=trigger.querySelector("img");
+  const trigger=event.target.closest?.(".friperi-image-lightbox-trigger, .custom-rich-text img.rich-image[data-rich-action='lightbox']");
+  if(!trigger || trigger.closest('[contenteditable]'))return;
+  const source=trigger.matches('img')?trigger:trigger.querySelector("img");
   if(!source?.src)return;
   let dialog=document.getElementById("friperi-image-lightbox");
   if(!dialog){

@@ -269,8 +269,42 @@ class InlineHTML(HTMLParser):
             if not src:
                 return
             alt = html.escape((values.get('alt') or '')[:500], quote=True)
+            loading = 'eager' if values.get('data-rich-loading') == 'eager' else 'lazy'
             attributes = (f' src="{html.escape(src, quote=True)}" alt="{alt}"'
-                          f' class="rich-image rich-image-{align} rich-image-width-{width}" loading="lazy"')
+                          f' class="rich-image rich-image-{align} rich-image-width-{width}"'
+                          f' loading="{loading}"')
+            options = {
+                'ratio': ('original','square','four_three','three_two','wide','portrait','cinema'),
+                'fit': ('cover','contain','fill','scale-down'),
+                'position': ('center','top','bottom','left','right','top_left','top_right','bottom_left','bottom_right'),
+                'shadow': ('none','soft','medium','strong'),
+                'hover': ('none','zoom','lift'),
+                'action': ('none','lightbox','link'),
+                'loading': ('lazy','eager'),
+                'caption-align': ('left','center','right'),
+            }
+            limits = {
+                'radius': (0,120), 'border': (0,16), 'padding': (0,80),
+                'custom-width': (0,1920), 'height': (0,1200),
+            }
+            for key, allowed in options.items():
+                value = values.get('data-rich-' + key)
+                if value in allowed:
+                    attributes += f' data-rich-{key}="{value}"'
+            for key, (low,high) in limits.items():
+                value = values.get('data-rich-' + key, '') or ''
+                if re.fullmatch(r'[0-9]{1,4}', value) and low <= int(value) <= high:
+                    attributes += f' data-rich-{key}="{value}"'
+            for key in ('border-color','frame-color'):
+                value = values.get('data-rich-' + key, '') or ''
+                if re.fullmatch(r'#[a-fA-F0-9]{6}', value):
+                    attributes += f' data-rich-{key}="{value}"'
+            link = values.get('data-rich-link', '')
+            if link and link.startswith('https://') and safe_url(link):
+                attributes += f' data-rich-link="{html.escape(link,quote=True)}"'
+            caption = (values.get('data-rich-caption') or '')[:500]
+            if caption:
+                attributes += f' data-rich-caption="{html.escape(caption,quote=True)}"'
         if tag == 'a':
             href = safe_text_url(values.get('href', ''))
             if href:

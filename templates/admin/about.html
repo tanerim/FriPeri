@@ -3,6 +3,7 @@
 <link rel="stylesheet" href="{{ static_url('custom-home.css') }}" />
 <link rel="stylesheet" href="{{ static_url('home-builder.css') }}" />
 {% if builder_page|default('home') == 'page' %}<link rel="stylesheet" href="{{ static_url('page-builder-refresh.css') }}" />{% endif %}
+<script src="{{ static_url('inline-image-design.js') }}" defer></script>
 <script src="{{ static_url('home-builder.js') }}" defer></script>
 {% endblock %}
 {% block content %}

@@ -600,3 +600,8 @@
   .hyperui-admin .builder-canvas .custom-section[data-layout=six] > .builder-section-content{grid-template-columns:repeat(6,minmax(0,1fr))}
 }
 .hyperui-admin .builder-canvas .custom-section[data-layout=stack] > .builder-section-content{grid-template-columns:minmax(0,1fr)}
+
+.hyperui-admin .builder-inline-image-advanced{grid-column:1/-1;border:1px solid #dce4ed;border-radius:10px;padding:12px;background:#fff}
+.hyperui-admin .builder-inline-image-advanced>summary{cursor:pointer;font-size:13px;font-weight:700;color:#293c59}
+.hyperui-admin .builder-inline-image-advanced-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:9px 14px;margin-top:12px}
+.hyperui-admin .builder-inline-image-advanced-grid .builder-field{margin:0}

@@ -711,3 +711,13 @@
 @container friperi-section (min-width:1050px){
   .custom-section[data-layout=six] > .section-content{grid-template-columns:repeat(6,minmax(0,1fr))}
 }
+
+/* Text-embedded images share visual effects with the standalone Image block. */
+.custom-rich-text img.rich-image{box-sizing:border-box;transition:transform .2s ease,box-shadow .2s ease}
+.custom-rich-text img.rich-image[data-rich-hover=zoom]:hover{transform:scale(1.035)}
+.custom-rich-text img.rich-image[data-rich-hover=lift]:hover{transform:translateY(-4px)}
+.custom-rich-text img.rich-image[data-rich-action=lightbox]{cursor:zoom-in}
+.custom-rich-text img.rich-image[data-rich-action=link]{cursor:pointer}
+.custom-rich-text img.rich-image[data-rich-caption]:not([data-rich-caption=""]){margin-bottom:12px}
+@media(prefers-reduced-motion:reduce){.custom-rich-text img.rich-image{transition:none}
+.custom-rich-text img.rich-image[data-rich-hover]:hover{transform:none}}

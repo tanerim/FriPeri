@@ -540,6 +540,7 @@
       ['left',t('image_left')],['right',t('image_right')],['none',t('image_none')]
     ],'right');
     const width=choose(t('image_width'),['25','40','50','100'].map(x=>[x,x+'%']),'25');
+    const advanced=window.FriPeriInlineImage?.attach(controls,()=>selectedImage);
     const placement=choose('Insert image',[
       ['caret','At selected cursor position'],
       ['before','Before selected paragraph'],
@@ -564,7 +565,7 @@
       panel.open=true;
     },'builder-inline-position-button');
     controls.append(capture);
-    const values=()=>JSON.stringify([url.value.trim(),alt.value,flow.value,width.value,placement.value]);
+    const values=()=>JSON.stringify([url.value.trim(),alt.value,flow.value,width.value,placement.value,advanced?.values()]);
     appliedValues=values();
     const updatePending=(applied=false)=>{
       const pending=values()!==appliedValues;
@@ -577,6 +578,7 @@
       input.addEventListener('input',()=>updatePending());
       input.addEventListener('change',()=>updatePending());
     });
+    advanced?.onChange(()=>updatePending());
     const commit=action=>{
       checkpoint();action();block.html=editor.innerHTML;checkpoint();
     };
@@ -612,6 +614,7 @@
         image.src=src;image.alt=alt.value;
         image.className='rich-image rich-image-'+flow.value+' rich-image-width-'+width.value;
         image.loading='lazy';image.decoding='async';
+        advanced?.apply(image);
         if(!existing){
           const range=positionRange();
           // A collapsed caret is never allowed to delete selected user text.
@@ -630,19 +633,19 @@
     const apply=button(t('image_apply'),()=>{
       const src=safeURL(url.value.trim(),true);
       if(!src){message(t('invalid'),true);url.focus();return;}
-      insertImage(src);
+      try{insertImage(src);}catch(error){message(error.message,true);}
     });
     apply.classList.add('builder-image-apply');
     const remove=button(t('image_remove'),()=>{
       if(selectedImage && editor.contains(selectedImage))commit(()=>selectedImage.remove());
-      selectedImage=null;remove.disabled=true;url.value='';alt.value='';
+      selectedImage=null;remove.disabled=true;url.value='';alt.value='';advanced?.reset();
       appliedValues=values();updatePending();
     });
     const file=inputField(t('upload'),'file');
     file.accept='image/png,image/jpeg,image/webp';
     file.addEventListener('change',()=>upload(file.files[0],{type:'image'},value=>{
       if(!editor.isConnected)return;
-      if(safeURL(value,true)){url.value=value;insertImage(value);}
+      if(safeURL(value,true)){url.value=value;try{insertImage(value);}catch(error){message(error.message,true);}}
       else message(t('invalid'),true);
     }));
     editor.addEventListener('click',event=>{
@@ -652,10 +655,11 @@
         url.value=image.getAttribute('src') || '';alt.value=image.alt;
         flow.value=['left','right','none'].find(v=>image.classList.contains('rich-image-'+v))||'none';
         width.value=['25','40','50','100'].find(v=>image.classList.contains('rich-image-width-'+v))||'40';
+        advanced?.load(image);
         appliedValues=values();updatePending();panel.open=true;
       } else {
         // Returning to text means the next image is a NEW insertion.
-        selectedImage=null;remove.disabled=true;rememberRange();updatePending();
+        selectedImage=null;remove.disabled=true;rememberRange();advanced?.reset();updatePending();
       }
     });
     const actions=el('div','builder-actions');
