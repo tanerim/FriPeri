@@ -31,8 +31,8 @@
       <div class="category-publication-list" aria-label="{{ category|category_label(lang) }}">
         {% for post in posts %}
         <article class="category-publication-card{% if not post['image_path'] %} no-image{% endif %}"
-          {% if card_options.background or card_options.text_color %}
-          style="{% if card_options.background %}--archive-card-bg: {{ card_options.background }};{% endif %}{% if card_options.text_color %}--archive-card-text: {{ card_options.text_color }};{% endif %}"
+          {% if (not archive_design.card_background and card_options.background) or (not archive_design.text_color and card_options.text_color) %}
+          style="{% if not archive_design.card_background and card_options.background %}--archive-card-bg: {{ card_options.background }};{% endif %}{% if not archive_design.text_color and card_options.text_color %}--archive-card-text: {{ card_options.text_color }};{% endif %}"
           {% endif %}>
           {% if post['image_path'] %}
           <a class="category-publication-image" href="/posts/{{ post['slug'] }}" tabindex="-1" aria-hidden="true">
