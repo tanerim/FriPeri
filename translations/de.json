@@ -538,5 +538,14 @@
   "builder.team_fit_contain": "Ganzes Foto zeigen",
   "builder.team_orientation": "Rahmenausrichtung",
   "builder.team_landscape": "Querformat (breit)",
-  "builder.team_portrait": "Hochformat (hoch)"
+  "builder.team_portrait": "Hochformat (hoch)",
+  "builder.divider_line_width": "Linienstärke (px)",
+  "builder.divider_line_style": "Linienstil",
+  "builder.divider_line_color": "Linienfarbe",
+  "builder.divider_single": "Durchgezogen",
+  "builder.divider_dashed": "Gestrichelt",
+  "builder.divider_dotted": "Gepunktet",
+  "builder.divider_wave": "Sanfte Welle",
+  "builder.divider_wave_tight": "Enge Welle",
+  "builder.divider_zigzag": "Zickzack"
 }
