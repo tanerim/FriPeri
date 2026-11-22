@@ -7,8 +7,13 @@ from urllib.parse import urlsplit, parse_qs
 
 MAX_DOCUMENT_BYTES = 500_000
 SECTION_SVG_FILENAME = r'friperi-section-[0-9a-f]{32}\.svg'
-SECTION_SVG_FIELDS = {'svg_pattern': ('ribbons', 'waves', 'grid'), 'svg_primary': 'color',
-                      'svg_secondary': 'color', 'svg_opacity': (0, 100)}
+SECTION_SVG_FIELDS = {'svg_pattern': ('ribbons', 'waves', 'grid', 'dots', 'orbits', 'topography', 'diagonals', 'mesh'),
+                      'svg_primary': 'color', 'svg_secondary': 'color', 'svg_opacity': (0, 100),
+                      'svg_tertiary': 'color', 'svg_quaternary': 'color',
+                      'svg_colors': (2, 4), 'svg_placement': ('full', 'left', 'right', 'center', 'top', 'bottom', 'top_left', 'top_right', 'bottom_left', 'bottom_right'),
+                      'svg_rotation': (-180, 180), 'svg_scale': (25, 220),
+                      'svg_frequency': (1, 12), 'svg_amplitude': (5, 120),
+                      'svg_density': (2, 24), 'svg_stroke': (1, 12)}
 # Bootstrap Icons (MIT); allowlisted icon names are safe in CSS classes.
 ICON_BUTTON_NAMES = (
     'house', 'arrow-right', 'arrow-left', 'arrow-up-right', 'envelope',
@@ -30,9 +35,13 @@ APPEARANCE_FIELDS = {
                 'padding_x': (0, 120), 'gap': (0, 100), 'radius': (0, 120),
                 'background_fit': ('cover', 'contain'), 'background_position': ('center', 'left', 'right', 'top', 'bottom'),
                 'overlay_color': 'color', 'overlay_opacity': (0, 100),
-                'svg_pattern': ('none', 'ribbons', 'waves', 'grid'),
-                'svg_primary': 'color', 'svg_secondary': 'color',
-                'svg_opacity': (0, 100), 'edge': ('flat', 'wave'), 'edge_color': 'color',
+                'svg_pattern': ('none', 'ribbons', 'waves', 'grid', 'dots', 'orbits', 'topography', 'diagonals', 'mesh'),
+                'svg_primary': 'color', 'svg_secondary': 'color', 'svg_opacity': (0, 100),
+                'svg_tertiary': 'color', 'svg_quaternary': 'color',
+                      'svg_colors': (2, 4), 'svg_placement': ('full', 'left', 'right', 'center', 'top', 'bottom', 'top_left', 'top_right', 'bottom_left', 'bottom_right'),
+                      'svg_rotation': (-180, 180), 'svg_scale': (25, 220),
+                      'svg_frequency': (1, 12), 'svg_amplitude': (5, 120),
+                      'svg_density': (2, 24), 'svg_stroke': (1, 12), 'edge': ('flat', 'wave'), 'edge_color': 'color',
                 'landing_style': ('none', 'hero', 'intro', 'features', 'showcase', 'steps', 'contrast', 'closing')},
     'heading': {'font_size': (18, 160), 'font_weight': ('normal', 'bold', 'heavy'),
                 'accent_color': 'color', 'accent_opacity': (0, 100), 'accent_style': ('color_only', 'underline'), 'accent_new_line': ('yes', 'no')},

@@ -873,10 +873,17 @@
       });
       const currentArt = body.querySelector(':scope > .section-art');
       const pattern = appearance.svg_pattern || 'none';
-      if (currentArt?.dataset.pattern !== pattern) {
+      const artKey = block.svg_url || pattern;
+      if (currentArt?.dataset.pattern !== artKey) {
         currentArt?.remove();
-        const art = document.getElementById('builder-art-'+pattern)?.content.firstElementChild.cloneNode(true);
-        if (art) { art.dataset.pattern = pattern; body.prepend(art); }
+        let art=null;
+        if(pattern!=='none' && block.svg_url){
+          art=el('img','section-art section-art-saved');
+          art.src=block.svg_url;art.alt='';
+        }else if(pattern!=='none'){
+          art=document.getElementById('builder-art-'+pattern)?.content.firstElementChild.cloneNode(true);
+        }
+        if(art){art.dataset.pattern=artKey;body.prepend(art);}
       }
       const edge = body.querySelector(':scope > .section-edge');
       if (edge) edge.hidden = appearance.edge !== 'wave';
@@ -1027,82 +1034,127 @@
   }
 
   function sectionSvgGenerator(block, body) {
-    const panel = el('details','builder-section-panel builder-svg-generator');
-    panel.open = true;
-    panel.append(el('summary','',t('section_svg_title')));
-    const preview = el('div','builder-svg-preview');
-    const settings = el('div','builder-svg-controls');
-    const note = el('p','builder-help');
+    const panel=el('details','builder-section-panel builder-svg-generator');
+    panel.open=true;
+    panel.append(el('summary','','SVG background designer'));
+    const preview=el('div','builder-svg-preview');
+    const settings=el('div','builder-svg-controls builder-svg-controls-v2');
+    const note=el('p','builder-help');
     note.setAttribute('role','status');
-    const actions = el('div','builder-actions');
-    const draft = {
-      svg_pattern: block.appearance?.svg_pattern === 'none' ? 'ribbons' : block.appearance?.svg_pattern || 'ribbons',
-      svg_primary: block.appearance?.svg_primary || '#7466ef',
-      svg_secondary: block.appearance?.svg_secondary || '#5ed8ce',
-      svg_opacity: block.appearance?.svg_opacity ?? 100
+    const actions=el('div','builder-actions');
+    const defaults={
+      svg_pattern:'ribbons',svg_primary:config.design?.accent||'#7466ef',
+      svg_secondary:config.design?.secondary||'#5ed8ce',
+      svg_tertiary:'#f2c14e',svg_quaternary:'#a28bdd',
+      svg_colors:2,svg_opacity:100,svg_placement:'full',
+      svg_rotation:0,svg_scale:100,svg_frequency:3,
+      svg_amplitude:45,svg_density:8,svg_stroke:3
     };
-    const redraw = () => {
-      const template = document.getElementById('builder-art-'+draft.svg_pattern);
-      preview.replaceChildren(template.content.firstElementChild.cloneNode(true));
-      preview.style.setProperty('--block-svg-primary',draft.svg_primary);
-      preview.style.setProperty('--block-svg-secondary',draft.svg_secondary);
-      preview.style.setProperty('--block-svg-opacity',draft.svg_opacity + '%');
-      preview.style.backgroundColor = getComputedStyle(body).backgroundColor;
-      note.textContent = block.svg_url && Object.keys(draft).every(key=>block.appearance?.[key] === draft[key])
-        ? t('section_svg_saved') : t('section_svg_preview_help');
-    };
-    const patternField = el('label','builder-select');
-    patternField.append(el('span','',t('svg_pattern')));
-    const pattern = el('select');
-    for (const name of ['ribbons','waves','grid']) pattern.add(new Option(t('option_'+name),name));
-    pattern.value = draft.svg_pattern;
-    pattern.addEventListener('change',()=>{ draft.svg_pattern=pattern.value; redraw(); });
-    patternField.append(pattern); settings.append(patternField);
-    for (const key of ['svg_primary','svg_secondary']) {
-      settings.append(field(t(key),draft[key],value=>{ draft[key]=value; redraw(); },'color'));
-    }
-    const opacityField = el('label','builder-select');
-    opacityField.append(el('span','',t('svg_opacity')));
-    const opacity = el('input');
-    opacity.type='range'; opacity.min='0'; opacity.max='100'; opacity.value=String(draft.svg_opacity);
-    opacity.addEventListener('input',()=>{ draft.svg_opacity=Number(opacity.value); redraw(); });
-    opacityField.append(opacity); settings.append(opacityField);
-
-    const save = button(t('section_svg_save'),async()=>{
-      const payload = new FormData();
-      payload.set('editor_token',config.token);
-      for (const [key,value] of Object.entries(draft)) payload.set(key,String(value));
-      busy++; updateStatus(); note.textContent=t('section_svg_saving');
-      try {
-        const response = await fetch('/admin/section-svg',{method:'POST',body:payload});
-        const result = await responseJSON(response);
-        if (!response.ok || !result.url) throw new Error(result.error || t('section_svg_error'));
-        checkpoint();
-        block.svg_url=result.url;
-        block.appearance={...block.appearance,...draft};
-        applyAppearance(block,body);
-        checkpoint();
-        remove.disabled=false;
-        redraw();
-      } catch (error) {
-        note.textContent=error.message || t('section_svg_error');
-      } finally {
-        busy--; updateStatus();
+    const draft={...defaults,...block.appearance};
+    if(draft.svg_pattern==='none')draft.svg_pattern='ribbons';
+    const keys=Object.keys(defaults);
+    const patternOptions=[
+      ['ribbons','Abstract ribbons'],['waves','Layered waves'],['grid','Geometric grid'],
+      ['dots','Dot field'],['orbits','Orbital geometry'],['topography','Topographic contours'],
+      ['diagonals','Diagonal panels'],['mesh','Flowing mesh']
+    ];
+    let previewTimer=null,requestCounter=0,previousURL=null;
+    const send=async(previewOnly)=>{
+      const data=new FormData();
+      data.set('editor_token',config.token);
+      for(const key of keys)data.set(key,String(draft[key]));
+      if(previewOnly)data.set('preview','1');
+      const response=await fetch('/admin/section-svg',{method:'POST',body:data});
+      if(previewOnly){
+        if(!response.ok)throw Error('Preview unavailable');
+        return URL.createObjectURL(await response.blob());
       }
+      const result=await responseJSON(response);
+      if(!response.ok||!result.url)throw Error(result.error||t('section_svg_error'));
+      return result.url;
+    };
+    const redraw=()=>{
+      const revision=++requestCounter;
+      clearTimeout(previewTimer);
+      note.textContent='Preview updates automatically. Generate & save to publish this design.';
+      previewTimer=setTimeout(async()=>{
+        try{
+          const url=await send(true);
+          if(revision!==requestCounter){URL.revokeObjectURL(url);return;}
+          const img=el('img','builder-svg-preview-image');
+          img.src=url;img.alt='Generated section background preview';
+          preview.replaceChildren(img);
+          if(previousURL)URL.revokeObjectURL(previousURL);
+          previousURL=url;
+        }catch(error){
+          if(revision===requestCounter)note.textContent=error.message||'Preview failed';
+        }
+      },180);
+    };
+    const chooser=(label,key,items)=>{
+      const wrap=el('label','builder-select'),input=el('select');
+      wrap.append(el('span','',label));
+      for(const [value,title] of items)input.add(new Option(title,String(value)));
+      input.value=String(draft[key]);
+      input.addEventListener('change',()=>{draft[key]=typeof defaults[key]==='number'?Number(input.value):input.value;refreshColors();redraw();});
+      wrap.append(input);settings.append(wrap);return input;
+    };
+    const slider=(label,key,min,max,step=1)=>{
+      const wrap=el('label','builder-select builder-svg-range');
+      const title=el('span','',label),value=el('output','',String(draft[key]));
+      const input=el('input');input.type='range';input.min=min;input.max=max;input.step=step;input.value=draft[key];
+      input.addEventListener('input',()=>{draft[key]=Number(input.value);value.textContent=String(draft[key]);redraw();});
+      wrap.append(title,value,input);settings.append(wrap);
+    };
+    chooser('Pattern','svg_pattern',patternOptions);
+    chooser('Number of colors','svg_colors',[[2,'Two colors'],[3,'Three colors'],[4,'Four colors']]);
+    chooser('Placement','svg_placement',[
+      ['full','Full background'],['center','Center'],['left','Left'],['right','Right'],
+      ['top','Top'],['bottom','Bottom'],['top_left','Top left'],['top_right','Top right'],
+      ['bottom_left','Bottom left'],['bottom_right','Bottom right']
+    ]);
+    const colorRow=el('div','builder-svg-colors');
+    const colorInputs=[];
+    for(const [key,label] of [
+      ['svg_primary','Color 1'],['svg_secondary','Color 2'],
+      ['svg_tertiary','Color 3'],['svg_quaternary','Color 4']]){
+      const wrap=el('label','builder-select'),input=el('input');
+      input.type='color';input.value=draft[key];
+      wrap.append(el('span','',label),input);
+      input.addEventListener('input',()=>{draft[key]=input.value;redraw();});
+      colorRow.append(wrap);colorInputs.push(wrap);
+    }
+    settings.append(colorRow);
+    function refreshColors(){colorInputs.forEach((control,index)=>{control.hidden=index>=draft.svg_colors;});}
+    slider('Opacity (%)','svg_opacity',0,100);
+    slider('Scale (%)','svg_scale',25,220);
+    slider('Rotation (degrees)','svg_rotation',-180,180);
+    slider('Wave frequency / repetitions','svg_frequency',1,12);
+    slider('Wave amplitude','svg_amplitude',5,120);
+    slider('Grid / pattern density','svg_density',2,24);
+    slider('Line / dot thickness','svg_stroke',1,12);
+    const save=button(t('section_svg_save'),async()=>{
+      busy++;updateStatus();note.textContent=t('section_svg_saving');
+      try{
+        const url=await send(false);
+        checkpoint();
+        block.svg_url=url;
+        block.appearance={...block.appearance,...Object.fromEntries(keys.map(key=>[key,draft[key]]))};
+        applyAppearance(block,body);checkpoint();
+        remove.disabled=false;
+        note.textContent='SVG saved. Publish the page to make it visible.';
+      }catch(error){note.textContent=error.message||t('section_svg_error');}
+      finally{busy--;updateStatus();}
     },'settings-primary');
-    const remove = button(t('section_svg_remove'),()=>{
-      checkpoint();
-      delete block.svg_url;
+    const remove=button(t('section_svg_remove'),()=>{
+      checkpoint();delete block.svg_url;
       block.appearance={...block.appearance,svg_pattern:'none'};
-      applyAppearance(block,body);
-      checkpoint();
-      remove.disabled=true;
-      redraw();
+      applyAppearance(block,body);checkpoint();remove.disabled=true;redraw();
     },'settings-secondary');
-    remove.disabled = !block.appearance?.svg_pattern || block.appearance.svg_pattern === 'none';
+    remove.disabled=!block.appearance?.svg_pattern||block.appearance.svg_pattern==='none';
     actions.append(save,remove);
     panel.append(preview,settings,actions,note);
-    requestAnimationFrame(redraw);
+    refreshColors();redraw();
     return panel;
   }
 

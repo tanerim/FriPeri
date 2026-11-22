@@ -31,6 +31,7 @@ from language_migration import (backup_before_language_migration, migrate_langua
 from dotenv import load_dotenv
 from fastapi import FastAPI, Request, UploadFile, Form
 from fastapi.responses import HTMLResponse, RedirectResponse, Response, JSONResponse, FileResponse
+from section_svg_design import render_svg
 from custom_home import (validate_document, read_document, render_blocks, clean_html,
                          validate_appearance, SECTION_SVG_FIELDS, SECTION_SVG_FILENAME)
 from navigation import menu_mapping, validate_parents, menu_tree
@@ -2691,17 +2692,26 @@ async def save_section_svg(request: Request) -> Response:
     form = await request.form()
     if not custom_home_authorized(request, form):
         return JSONResponse({'error': t(pick_lang(request), 'builder.session_error')}, status_code=403)
+    defaults = {
+        'svg_pattern': 'ribbons', 'svg_primary': '#7466ef',
+        'svg_secondary': '#5ed8ce', 'svg_tertiary': '#f2c14e',
+        'svg_quaternary': '#a28bdd', 'svg_colors': 2, 'svg_opacity': 100,
+        'svg_placement': 'full', 'svg_rotation': 0, 'svg_scale': 100,
+        'svg_frequency': 3, 'svg_amplitude': 45,
+        'svg_density': 8, 'svg_stroke': 3,
+    }
+    raw = {key: form.get(key, default) for key, default in defaults.items()}
     try:
-        options = validate_appearance({
-            'svg_pattern': form.get('svg_pattern', 'ribbons'),
-            'svg_primary': form.get('svg_primary', '#7466ef'),
-            'svg_secondary': form.get('svg_secondary', '#5ed8ce'),
-            'svg_opacity': int(str(form.get('svg_opacity', '100'))),
-        }, SECTION_SVG_FIELDS)
-    except ValueError:
+        for key, default in defaults.items():
+            if type(default) is int:
+                raw[key] = int(str(raw[key]))
+        options = validate_appearance(raw, SECTION_SVG_FIELDS)
+    except (ValueError, TypeError):
         return JSONResponse({'error': t(pick_lang(request), 'builder.invalid')}, status_code=400)
-    art = templates.env.get_template('partials/section_art.html').module.section_art
-    svg = art(options['svg_pattern'], options).strip().encode('utf-8')
+    svg = render_svg(options).encode('utf-8')
+    if str(form.get('preview', '')) == '1':
+        return Response(svg, media_type='image/svg+xml',
+                        headers={'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff'})
     digest = hashlib.sha256(svg).hexdigest()[:32]
     filename = f'friperi-section-{digest}.svg'
     asset = STATIC_DIR / 'images' / filename

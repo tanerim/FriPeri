@@ -621,3 +621,15 @@
 .hyperui-admin .builder-team-preview .custom-team-member{box-sizing:border-box}
 .hyperui-admin .builder-team-preview .custom-team-photo-frame{max-height:360px}
 .hyperui-admin .builder-team-grid .builder-team-member{max-width:100%;box-sizing:border-box}
+
+/* SVG designer v2 — grid controls and genuine server-rendered preview. */
+.hyperui-admin .builder-svg-controls-v2{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.hyperui-admin .builder-svg-colors{grid-column:1/-1;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.hyperui-admin .builder-svg-colors [hidden]{display:none!important}
+.hyperui-admin .builder-svg-range{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:7px}
+.hyperui-admin .builder-svg-range input{grid-column:1/-1;width:100%}
+.hyperui-admin .builder-svg-range output{font-variant-numeric:tabular-nums;color:#536780}
+.hyperui-admin .builder-svg-preview{position:relative;min-height:110px;overflow:hidden}
+.hyperui-admin .builder-svg-preview-image{display:block;width:100%;height:100%;min-height:110px;object-fit:cover}
+@media(max-width:800px){.hyperui-admin .builder-svg-controls-v2{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:510px){.hyperui-admin .builder-svg-controls-v2{grid-template-columns:1fr}.hyperui-admin .builder-svg-colors{grid-template-columns:repeat(2,minmax(0,1fr))}}
