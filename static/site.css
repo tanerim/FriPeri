@@ -2442,3 +2442,32 @@ textarea { min-height: 180px; resize: vertical; }
   .nav-submenu > a,.nav-submenu > .nav-group > summary { min-height:44px; }
 }
 @media(prefers-reduced-motion:reduce) { .nav-group > summary,.nav-chevron { transition:none; } }
+
+
+/* On phones, retain social links between two centered footer text lines. */
+@media (max-width: 680px) {
+  .public-site .site-footer { padding: 26px 16px 30px; }
+  .public-site .footer-inner {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    text-align: center;
+  }
+  .public-site .footer-left,
+  .public-site .footer-right {
+    justify-self: center;
+    white-space: normal;
+    max-width: 100%;
+    text-align: center;
+    overflow-wrap: anywhere;
+  }
+  .public-site .footer-center { justify-self: center; }
+  .public-site .footer-social-links { justify-content: center; }
+  .public-site .footer-center:has(.footer-social-links) { order: 1; margin: 6px 0; }
+  .public-site .footer-left { order: 0; }
+  .public-site .footer-right { order: 2; }
+  .public-site .footer-powered { display: inline-block; line-height: 1.6; }
+}
