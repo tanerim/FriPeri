@@ -14,6 +14,7 @@ Sign in at `/login`, then open `/admin`. Available screens depend on your accoun
 | Website | Homepage | Choose the homepage mode and edit its settings or blocks. |
 | Website | About | Edit the public About page with the block editor. |
 | Website | Design | Configure public website colors and the footer. |
+| Website | CMS Design | Independently style each category archive (columns, card surface and color palette). |
 | Website | Menu | Configure category navigation and custom links. |
 | Configuration | Settings | Edit site identity, welcome text, built-in link visibility, and category card options. |
 | Configuration | Social Links | Configure social profile URLs and visibility. |
@@ -22,7 +23,7 @@ Sign in at `/login`, then open `/admin`. Available screens depend on your accoun
 | Configuration | Backup | Create, download, upload, and restore ZIP backups. |
 | Configuration | Users | Create accounts, assign content roles and grant creators access to categories. |
 
-The navigation collapses on small screens. The admin interface uses its own colors; changing public website colors does not change the admin theme. Interface labels follow the selected language.
+**Global Design vs CMS Design.** **Website → Design** controls site-wide colors: page backgrounds, navigation states, feature colors, primary/secondary accents, separators, and footer. Every color control now includes a short description of the parts it affects. Changes to Accent apply only to components using the corresponding theme variable; they do not necessarily recolor every element on the site. **Website → CMS Design** is scoped to the selected **category listing page** (`/category/<slug>`). You can choose 1, 2 or 3 desktop columns; Raised, Outlined or Flat cards; and separate accent, page background, card background and card text colors. An empty category color inherits the site's existing colors. Changes do not alter the category's posts, global navigation, footer, or other categories. Mobile category listings continue to use one column. Administrators can also use **Content → Categories → Design** beside the selected category to open the same editor directly. Existing per-category card display settings (show title/date/excerpt) remain available in Settings.\n\nThe navigation collapses on small screens. The admin interface uses its own colors; changing public website colors does not change the admin theme. Interface labels follow the selected language.
 
 ### Creating and Publishing Content
 
