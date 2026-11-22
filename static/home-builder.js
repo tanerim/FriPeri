@@ -111,7 +111,7 @@
       list:{items:[t('item')],ordered:false}, table:{rows:[[t('heading'),t('heading')],[t('item'),t('item')]],caption:''},
       image:{url:'',alt:'',caption:''},video:{url:'',alt:'',caption:''},button:{text:t('starter_button'),url:''},divider:{},
       quote:{text:t('quote_hint'),attribution:''},callout:{title:t('callout'),text:t('text_hint')},
-      stats:{items:[{value:'100+',label:t('stat_label')}]},team:{width:'wide',items:[{photo:'',name:'',title:'',shape:'rectangle',fit:'cover',zoom:1,focal_x:50,focal_y:50}]},faq:{items:[{question:t('question'),answer:t('answer')}]},legacy_html:{html:''}
+      stats:{items:[{value:'100+',label:t('stat_label')}]},team:{width:'wide',items:[{photo:'',name:'',title:'',shape:'rectangle',orientation:'landscape',fit:'cover',zoom:1,focal_x:50,focal_y:50}]},faq:{items:[{question:t('question'),answer:t('answer')}]},legacy_html:{html:''}
     }[type]);
   }
   function add(type) {
@@ -1025,6 +1025,7 @@
           const row=el('div','builder-repeat-item builder-team-member');
           const portrait=el('div','builder-team-portrait');
           portrait.dataset.shape=item.shape || 'rectangle';
+          portrait.dataset.orientation=item.orientation || 'landscape';
           portrait.setAttribute('aria-label',t('team_drag_help'));
           const image=el('img');
           const cropX=()=>Number.isFinite(item.focal_x)?item.focal_x:50;
@@ -1033,9 +1034,15 @@
           const updateCrop=()=>{
             if(!image.parentElement)return;
             image.style.objectFit=item.fit||'cover';
+            // Keep the frame fixed while the photo moves inside it.
+            // The object-position moves the fitted source image; the transform
+            // adds predictable, bounded panning when zoomed in.
+            const zoom=cropZoom();
+            const offsetX=(50-cropX())*(zoom-1)/zoom;
+            const offsetY=(50-cropY())*(zoom-1)/zoom;
             image.style.objectPosition=`${cropX()}% ${cropY()}%`;
-            image.style.transformOrigin=`${cropX()}% ${cropY()}%`;
-            image.style.transform=`scale(${cropZoom()})`;
+            image.style.transformOrigin='center center';
+            image.style.transform=`translate(${offsetX}%, ${offsetY}%) scale(${zoom})`;
           };
           if(safeURL(item.photo||'',true)){
             image.src=item.photo;image.alt='';
@@ -1058,6 +1065,9 @@
           controls.append(select(t('team_shape'),item.shape||'rectangle',[
             ['rectangle',t('team_rectangle')],['circle',t('team_circle')]
           ],value=>{item.shape=value;}));
+          controls.append(select(t('team_orientation'),item.orientation||'landscape',[
+            ['landscape',t('team_landscape')],['portrait',t('team_portrait')]
+          ],value=>{item.orientation=value;}));
 
           const cropControls=el('div','builder-team-crop-controls');
           cropControls.append(select(t('team_fit'),item.fit||'cover',[
@@ -1092,8 +1102,12 @@
             portrait.addEventListener('pointermove',event=>{
               if(!pointer||event.pointerId!==pointer.id)return;
               const width=portrait.clientWidth||1,height=portrait.clientHeight||1;
-              item.focal_x=Math.max(0,Math.min(100,Math.round((pointer.originX-(event.clientX-pointer.x)/width*100)*100)/100));
-              item.focal_y=Math.max(0,Math.min(100,Math.round((pointer.originY-(event.clientY-pointer.y)/height*100)*100)/100));
+              const zoom=cropZoom();
+              // Dragging right/down should move the image right/down.
+              // A zoomed image needs a larger focal change per pixel.
+              const factor=Math.max(1,zoom/(Math.max(zoom-1,0.15)));
+              item.focal_x=Math.max(0,Math.min(100,Math.round((pointer.originX-(event.clientX-pointer.x)/width*100*factor)*100)/100));
+              item.focal_y=Math.max(0,Math.min(100,Math.round((pointer.originY-(event.clientY-pointer.y)/height*100*factor)*100)/100));
               updateCrop();change();
             });
             const stop=event=>{if(pointer&&pointer.id===event.pointerId){pointer=null;checkpoint();}};
@@ -1115,7 +1129,7 @@
           group.append(row);
         });
         body.append(group,button(t('add_item'),()=>{
-          if(block.items.length<8)mutate(()=>block.items.push({photo:'',name:'',title:'',shape:'rectangle',fit:'cover',zoom:1,focal_x:50,focal_y:50}));
+          if(block.items.length<8)mutate(()=>block.items.push({photo:'',name:'',title:'',shape:'rectangle',orientation:'landscape',fit:'cover',zoom:1,focal_x:50,focal_y:50}));
         }));
       }
       if(['stats','faq'].includes(block.type)) {
