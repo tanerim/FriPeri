@@ -652,5 +652,14 @@
   "builder.team_fit_contain": "Full photo (no crop)",
   "builder.team_orientation": "Frame orientation",
   "builder.team_landscape": "Landscape (wide)",
-  "builder.team_portrait": "Portrait (tall)"
+  "builder.team_portrait": "Portrait (tall)",
+  "builder.divider_line_width": "Line Width (px)",
+  "builder.divider_line_style": "Line Style",
+  "builder.divider_line_color": "Line Color",
+  "builder.divider_single": "Single",
+  "builder.divider_dashed": "Dashed",
+  "builder.divider_dotted": "Dotted",
+  "builder.divider_wave": "Smooth wave",
+  "builder.divider_wave_tight": "Tight wave",
+  "builder.divider_zigzag": "Zigzag"
 }
