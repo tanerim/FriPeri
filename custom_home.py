@@ -9,7 +9,17 @@ MAX_DOCUMENT_BYTES = 500_000
 SECTION_SVG_FILENAME = r'friperi-section-[0-9a-f]{32}\.svg'
 SECTION_SVG_FIELDS = {'svg_pattern': ('ribbons', 'waves', 'grid'), 'svg_primary': 'color',
                       'svg_secondary': 'color', 'svg_opacity': (0, 100)}
-BLOCK_TYPES = {'section', 'heading', 'text', 'list', 'table', 'image', 'video', 'button', 'divider', 'category', 'quote', 'callout', 'stats', 'team', 'faq', 'legacy_html'}
+# Bootstrap Icons (MIT); allowlisted icon names are safe in CSS classes.
+ICON_BUTTON_NAMES = (
+    'house', 'arrow-right', 'arrow-left', 'arrow-up-right', 'envelope',
+    'telephone', 'search', 'download', 'share', 'link-45deg', 'github',
+    'linkedin', 'instagram', 'youtube', 'heart', 'star', 'plus-lg',
+    'chevron-right', 'geo-alt', 'calendar', 'file-earmark-text', 'book',
+    'chat-dots', 'globe', 'people', 'graph-up', 'gear', 'play-fill',
+    'camera', 'image', 'info-circle', 'question-circle',
+)
+
+BLOCK_TYPES = {'section', 'heading', 'text', 'list', 'table', 'image', 'video', 'button', 'icon_button', 'divider', 'category', 'quote', 'callout', 'stats', 'team', 'faq', 'legacy_html'}
 
 # Optional presentation settings keep existing documents on their theme defaults.
 APPEARANCE_FIELDS = {
@@ -33,6 +43,14 @@ APPEARANCE_FIELDS = {
                'icon': ('external', 'arrow', 'none'), 'border_width': (0, 8),
                'border_color': 'color', 'padding_x': (0, 96), 'padding_y': (0, 48),
                'target': ('same_tab', 'new_tab')},
+    'icon_button': {'button_background': 'color', 'button_hover': 'color',
+                    'button_text': 'color', 'button_hover_text': 'color',
+                    'font_size': (10, 48), 'width_mode': ('auto', 'full', 'custom'),
+                    'width_px': (40, 1200), 'height': (24, 240), 'radius': (0, 120),
+                    'variant': ('solid', 'outline', 'ghost', 'text_link', 'underlined'),
+                    'border_width': (0, 8), 'border_color': 'color',
+                    'padding_x': (0, 96), 'padding_y': (0, 48),
+                    'target': ('same_tab', 'new_tab')},
     'quote': {'font_size': (12, 72), 'attribution_size': (10, 36), 'quote_color': 'color',
               'attribution_color': 'color', 'border_color': 'color', 'border_width': (0, 12),
               'font_style': ('normal', 'italic')},
@@ -323,7 +341,7 @@ def _validate_blocks(data, depth, remaining, anchors):
             if type(count) is not int or not 1 <= count <= 16:
                 raise ValueError('Use between 1 and 16 items')
             block['count'] = count
-        if kind in {'heading', 'button'}:
+        if kind in {'heading', 'button', 'icon_button'}:
             block['text'] = text(item.get('text', ''), 500)
         if kind == 'heading':
             block['level'] = item.get('level') if item.get('level') in ('h1', 'h2', 'h3') else 'h2'
@@ -423,7 +441,14 @@ def _validate_blocks(data, depth, remaining, anchors):
                 raise ValueError('Invalid media URL')
             block['caption'] = text(item.get('caption', ''), 500)
             block['alt'] = text(item.get('alt', ''), 500)
-        elif kind == 'button':
+        elif kind in {'button', 'icon_button'}:
+            if kind == 'icon_button':
+                icon_name = item.get('icon_name', 'house')
+                if icon_name not in ICON_BUTTON_NAMES:
+                    raise ValueError('Invalid icon button symbol')
+                block['icon_name'] = icon_name
+                if not block['text'].strip():
+                    raise ValueError('Icon button requires an accessible label')
             url = text(item.get('url', ''), 2048)
             block['url'] = url if re.fullmatch(r'#[A-Za-z][A-Za-z0-9_-]{0,79}', url) else safe_url(url)
             if url and not block['url']:
