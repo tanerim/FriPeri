@@ -35,6 +35,7 @@ from custom_home import (validate_document, read_document, render_blocks, clean_
                          validate_appearance, SECTION_SVG_FIELDS, SECTION_SVG_FILENAME)
 from navigation import menu_mapping, validate_parents, menu_tree
 from category_design import parse_archive_design, validate_archive_design, archive_inline_styles
+from color_templates import list_templates
 from backup_security import (BackupError, MAX_UPLOAD_BYTES, create_backup as write_secure_backup,
                              restore_backup as restore_secure_backup, validate_backup, safe_backup_path)
 from login_security import blocked as login_blocked, failed as login_failed, succeeded as login_succeeded
@@ -2296,6 +2297,7 @@ async def admin_design(request: Request) -> Response:
             "settings": settings,
             "saved": request.query_params.get("saved") == "1",
             "active_admin": "design",
+            "color_templates": list_templates(),
         },
         user,
     )
