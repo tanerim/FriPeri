@@ -1,4 +1,6 @@
 {% extends "admin/base.html" %}
+{% from "admin/partials/color_control.html" import color_control %}
+{% block extra_head %}<script src="{{ static_url('appearance-controls.js') }}" defer></script>{% endblock %}
 {% block content %}
 <main id="admin-content" class="admin-settings-page admin-compact-page cms-design-page" tabindex="-1">
   <div class="admin-settings-container">
@@ -11,13 +13,17 @@
     {% if saved %}<p class="notice settings-notice">{{ t(lang, 'common.saved') }}</p>{% endif %}
     {% if categories %}
       <section class="admin-card" style="margin-bottom:20px">
-        <label for="cms-category-selector"><strong>{{ t(lang, 'cms_design.category') }}</strong></label>
-        <select id="cms-category-selector" class="modern-select" style="margin-top:8px;max-width:500px"
-                onchange="location.href='/admin/cms-design?category='+encodeURIComponent(this.value)">
-          {% for cat in categories %}
-          <option value="{{ cat.id }}" {% if selected.id == cat.id %}selected{% endif %}>{{ cat.name }}</option>
-          {% endfor %}
-        </select>
+        <form action="/admin/cms-design" method="get" style="display:flex;gap:12px;align-items:end;flex-wrap:wrap">
+          <label for="cms-category-selector" style="flex:1 1 260px">
+            <strong>{{ t(lang, 'cms_design.category') }}</strong>
+            <select id="cms-category-selector" name="category" class="modern-select" style="margin-top:8px;width:100%">
+              {% for cat in categories %}
+              <option value="{{ cat.id }}" {% if selected.id == cat.id %}selected{% endif %}>{{ cat.name }}</option>
+              {% endfor %}
+            </select>
+          </label>
+          <button type="submit" class="settings-secondary">{{ t(lang, 'cms_design.open') }}</button>
+        </form>
         <p class="builder-help">{{ t(lang, 'cms_design.category_help') }}</p>
       </section>
       <form class="admin-card settings-form-v3" method="post" action="/admin/cms-design">
@@ -49,17 +55,7 @@
         <p>{{ t(lang, 'cms_design.palette_help') }}</p>
         <div class="settings-grid-v3">
           {% for key in ['accent','background','card_background','text_color'] %}
-          <label class="cms-color-field">
-            <span>{{ t(lang, 'cms_design.' ~ key) }}</span>
-            <div style="display:flex;gap:8px;align-items:center">
-              <input type="color" value="{{ design[key] or ('#ffffff' if key in ['background','card_background'] else '#347f80') }}"
-                     aria-label="{{ t(lang, 'cms_design.' ~ key) }}"
-                     oninput="this.nextElementSibling.value=this.value" style="height:42px;width:55px;cursor:pointer">
-              <input type="text" name="{{ key }}" value="{{ design[key] }}" pattern="#[0-9a-fA-F]{6}"
-                     maxlength="7" placeholder="{{ t(lang, 'cms_design.inherit') }}" style="max-width:150px">
-            </div>
-            <small>{{ t(lang, 'cms_design.' ~ key ~ '_help') }}</small>
-          </label>
+          {{ color_control(key, t(lang, 'cms_design.' ~ key), design[key], fallback=('#ffffff' if key in ['background','card_background'] else '#347f80'), help_text=t(lang, 'cms_design.' ~ key ~ '_help')) }}
           {% endfor %}
         </div>
         <div class="page-actions" style="margin-top:24px">
