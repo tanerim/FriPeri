@@ -529,5 +529,8 @@
   "builder.team_circle": "Rund",
   "builder.two_column_hero": "Two Column Hero",
   "builder.two_column_first_heading": "Überschrift der ersten Spalte",
-  "builder.two_column_second_heading": "Überschrift der zweiten Spalte"
+  "builder.two_column_second_heading": "Überschrift der zweiten Spalte",
+  "builder.team_zoom": "Zoom",
+  "builder.team_reset_crop": "Bildausschnitt zurücksetzen",
+  "builder.team_drag_help": "Foto ziehen, um den sichtbaren Ausschnitt zu wählen. Mit dem Regler zoomen."
 }
