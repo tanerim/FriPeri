@@ -52,3 +52,12 @@
 @media(max-width:1150px){.hyperui-admin .page-layout-gallery{grid-template-columns:repeat(2,minmax(0,1fr))}.hyperui-admin .page-builder-refresh .builder-layout{grid-template-columns:180px minmax(0,1fr)}}
 @media(max-width:800px){.hyperui-admin .page-builder-refresh{padding:12px 12px 110px}.hyperui-admin .page-builder-refresh .builder-layout{grid-template-columns:1fr}.hyperui-admin .page-builder-refresh .builder-palette{position:static;max-height:none}.hyperui-admin .page-builder-refresh #builder-add-blocks{grid-template-columns:repeat(4,minmax(0,1fr))}}
 @media(max-width:580px){.hyperui-admin .page-builder-refresh #page-details .settings-grid-v3{grid-template-columns:1fr}.hyperui-admin .page-layout-gallery{grid-template-columns:1fr 1fr;gap:7px}.hyperui-admin .page-builder-refresh .page-layout-library{padding:12px}.hyperui-admin .page-library-count{display:none}.hyperui-admin .page-builder-refresh #builder-add-blocks{grid-template-columns:repeat(3,minmax(0,1fr))}.hyperui-admin .page-builder-refresh .settings-page-header>.builder-actions{padding:10px 14px}}
+
+/* Bulk block visibility: leftmost action of the fixed publishing toolbar. */
+.hyperui-admin .page-builder-refresh #builder-collapse-all{margin-right:auto;white-space:nowrap}
+.hyperui-admin .page-builder-refresh #builder-collapse-all:disabled{opacity:.5;cursor:not-allowed}
+.hyperui-admin .page-builder-refresh .sketch-8 i:first-child{grid-column:span 2}
+.hyperui-admin .page-builder-refresh .sketch-9 i:first-child{grid-column:span 2}
+.hyperui-admin .page-builder-refresh .sketch-10 i:nth-child(2){grid-row:span 2}
+.hyperui-admin .page-builder-refresh .sketch-11 i:last-child{grid-column:span 2}
+@media(max-width:420px){.hyperui-admin .page-builder-refresh .settings-page-header>.builder-actions{gap:6px}.hyperui-admin .page-builder-refresh #builder-collapse-all{padding:8px 9px;font-size:12px}}
