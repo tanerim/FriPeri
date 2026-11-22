@@ -700,11 +700,35 @@
     };
     definitions.forEach(([key,kind,max,fallback]) => {
       const label=el('label','builder-select');
-      label.append(el('span','', (key==='landing_style'?'Landing appearance':t(key))+(typeof kind === 'number' && key !== 'columns' ? (key.endsWith('_opacity') ? ' (%)' : ' (px)') : '')));
+      const imageLabels={
+        ratio:'Aspect ratio',fit:'Image fitting',position:'Focal position',
+        width_mode:'Image width',width_px:'Custom width',height_px:'Fixed height (0 = auto)',
+        radius:'Corner radius',border_width:'Border width',border_color:'Border color',
+        frame_background:'Frame background',padding:'Frame padding',shadow:'Shadow',
+        hover:'Hover effect',image_action:'Click action',caption_align:'Caption alignment',
+        caption_size:'Caption font size',loading:'Loading mode',decoding:'Decoding',
+        fetch_priority:'Fetch priority'
+      };
+      const labelText=block.type==='image'?(imageLabels[key]||key):(key==='landing_style'?'Landing appearance':t(key));
+      label.append(el('span','',labelText+(typeof kind === 'number' && key !== 'columns' ? (key.endsWith('_opacity') ? ' (%)' : ' (px)') : '')));
       let input;
       if(Array.isArray(kind)) {
         input=el('select'); input.add(new Option(t('theme_default'),''));
-        kind.forEach(value=>input.add(new Option(key==='landing_style'?({'none':'Standard','hero':'Branded Hero','intro':'Editorial Intro','features':'Feature Cards','showcase':'Product Showcase','steps':'Step Cards','contrast':'Highlight','closing':'Closing CTA'}[value]||value):t('option_'+value),value)));
+        const imageOptionLabels={
+          original:'Original proportions',square:'Square (1:1)',four_three:'Landscape (4:3)',
+          three_two:'Photo (3:2)',wide:'Widescreen (16:9)',portrait:'Portrait (3:4)',
+          cinema:'Cinematic (21:9)',scale_down:'Scale down',top_left:'Top left',
+          top_right:'Top right',bottom_left:'Bottom left',bottom_right:'Bottom right',
+          auto:'Automatic',custom:'Custom pixels',link:'Open URL',
+          lightbox:'Open image lightbox',eager:'Eager (above the fold)',
+          lazy:'Lazy (recommended)',high:'High',low:'Low'
+        };
+        kind.forEach(value=>input.add(new Option(
+          block.type==='image'
+            ? (imageOptionLabels[value] || value.replaceAll('_',' ').replace(/^./,c=>c.toUpperCase()))
+            : key==='landing_style'
+              ? ({none:'Standard',hero:'Branded Hero',intro:'Editorial Intro',features:'Feature Cards',showcase:'Product Showcase',steps:'Step Cards',contrast:'Highlight',closing:'Closing CTA'}[value]||value)
+              : t('option_'+value),value)));
         input.value=block.appearance?.[key] ?? '';
         input.addEventListener('change',()=>set(key,input.value || undefined));
       } else {
@@ -728,6 +752,7 @@
     })));
     return panel;
   }
+  const imagePanelOpen=new WeakMap();
   function imageAppearanceControls(block,body) {
     const groups=[
       ['Size & crop', ['ratio','fit','position','width_mode','width_px','height_px']],
@@ -735,8 +760,15 @@
       ['Interaction & performance', ['image_action','caption_align','caption_size','loading','decoding','fetch_priority']]
     ];
     const wrapper=el('div','builder-image-appearance');
+    const opened=imagePanelOpen.get(block) || new Set(['Size & crop']);
     for(const [title,names] of groups){
       const details=el('details','builder-image-panel');
+      details.open=opened.has(title);
+      details.addEventListener('toggle',()=>{
+        const next=new Set(imagePanelOpen.get(block) || opened);
+        if(details.open)next.add(title);else next.delete(title);
+        imagePanelOpen.set(block,next);
+      });
       const heading=el('summary','',title);
       const controls=appearanceControls(block,body,appearanceFields.image.filter(([name])=>names.includes(name)));
       details.append(heading,controls);wrapper.append(details);
