@@ -114,7 +114,7 @@
                 <article class="category-publication-card">
                   {% if post.image_path %}<div class="category-publication-image"><img src="{{ post.image_path }}" alt="" loading="lazy"></div>{% else %}<div class="category-publication-image cms-preview-placeholder" aria-hidden="true"></div>{% endif %}
                   <div class="category-publication-card-content">
-                    <div class="category-publication-meta"><time>{{ post.created_at[:10] }}</time><span class="category-publication-meta-type">{{ selected.name }}</span><span class="cms-preview-author">Author</span></div>
+                    <div class="category-publication-meta"><time>{{ post.created_at[:10] }}</time><span class="category-publication-meta-type">{{ selected.name }}</span><span class="cms-preview-author">{{ post.author_username or '' }}</span></div>
                     <h4 class="category-publication-card-title">{{ post.title }}</h4>
                     <p class="category-publication-card-excerpt">{{ post.excerpt or 'Explore this story and discover more details.' }}</p>
                     <div class="cms-preview-engagement"><span class="cms-preview-likes">♡ Likes</span><span class="cms-preview-comments">▢ Comments</span></div>
