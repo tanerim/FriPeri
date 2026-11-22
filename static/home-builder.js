@@ -109,7 +109,7 @@
       category:{category:config.categories[0]?.slug || '',count:4},
       heading:{text:t('heading_hint'),level:'h2'}, text:{html:'',foreground:''},
       list:{items:[t('item')],ordered:false}, table:{rows:[[t('heading'),t('heading')],[t('item'),t('item')]],caption:''},
-      image:{url:'',alt:'',caption:''},video:{url:'',alt:'',caption:''},button:{text:t('starter_button'),url:''},divider:{},
+      image:{url:'',alt:'',caption:''},video:{url:'',alt:'',caption:''},button:{text:t('starter_button'),url:''},divider:{line_width:2,line_style:'single',line_color:'#a5b3be'},
       quote:{text:t('quote_hint'),attribution:''},callout:{title:t('callout'),text:t('text_hint')},
       stats:{items:[{value:'100+',label:t('stat_label')}]},team:{width:'wide',items:[{photo:'',name:'',title:'',shape:'rectangle',orientation:'landscape',fit:'cover',zoom:1,focal_x:50,focal_y:50}]},faq:{items:[{question:t('question'),answer:t('answer')}]},legacy_html:{html:''}
     }[type]);
@@ -1145,7 +1145,78 @@
           if(block.items.length<limit)mutate(()=>block.items.push(Object.fromEntries(keys.map(key=>[key,'']))));
         }));
       }
-      if(block.type==='divider')body.append(el('hr'));
+      if(block.type==='divider') {
+        const settings=el('div','builder-divider-controls');
+        const visual=el('div','builder-divider-line');
+        const styleName=()=>block.line_style||'single';
+        const draw=()=>{
+          visual.replaceChildren();
+          visual.style.setProperty('--divider-width',(block.line_width||2)+'px');
+          visual.style.setProperty('--divider-color',block.line_color||'#a5b3be');
+          visual.className='builder-divider-line style-'+styleName();
+          if(['wave','wave-tight','zigzag'].includes(styleName())) {
+            const svg=document.createElementNS('http://www.w3.org/2000/svg','svg');
+            svg.setAttribute('viewBox','0 0 1200 48');
+            svg.setAttribute('preserveAspectRatio','none');
+            svg.setAttribute('aria-hidden','true');
+            const path=document.createElementNS('http://www.w3.org/2000/svg','path');
+            const pieces=['M 0 24'];
+            if(styleName()==='wave'){
+              for(let x=0;x<1200;x+=80)
+                pieces.push(`C ${x+20} 2 ${x+20} 2 ${x+40} 24 S ${x+60} 46 ${x+80} 24`);
+            } else if(styleName()==='wave-tight'){
+              for(let x=0;x<1200;x+=40)
+                pieces.push(`Q ${x+10} 4 ${x+20} 24 T ${x+40} 24`);
+            } else {
+              for(let x=0;x<1200;x+=48)
+                pieces.push(`L ${x+24} 5 L ${x+48} 24`);
+            }
+            path.setAttribute('d',pieces.join(' '));
+            path.setAttribute('fill','none');
+            path.setAttribute('stroke','var(--divider-color)');
+            path.setAttribute('stroke-width','var(--divider-width)');
+            path.setAttribute('vector-effect','non-scaling-stroke');
+            path.setAttribute('stroke-linecap','round');
+            path.setAttribute('stroke-linejoin','round');
+            svg.append(path); visual.append(svg);
+          } else visual.append(el('hr'));
+        };
+        const widthLabel=el('label','builder-field');
+        widthLabel.append(el('span','',t('divider_line_width')));
+        const widthInput=el('input');
+        widthInput.type='number';widthInput.min='2';widthInput.max='20';widthInput.step='1';
+        widthInput.value=String(block.line_width||2);
+        widthInput.addEventListener('change',()=>{
+          block.line_width=Math.max(2,Math.min(20,Math.round(Number(widthInput.value)||2)));
+          widthInput.value=String(block.line_width);
+          draw();change();
+        });
+        widthLabel.append(widthInput);
+        const styleLabel=el('label','builder-select');
+        styleLabel.append(el('span','',t('divider_line_style')));
+        const styleInput=el('select');
+        for(const [key,label] of [
+          ['single','divider_single'],['dashed','divider_dashed'],
+          ['dotted','divider_dotted'],['wave','divider_wave'],
+          ['wave-tight','divider_wave_tight'],['zigzag','divider_zigzag']
+        ]){const option=new Option(t(label),key);styleInput.add(option);}
+        styleInput.value=styleName();
+        styleInput.addEventListener('change',()=>{
+          block.line_style=styleInput.value;draw();change();
+        });
+        styleLabel.append(styleInput);
+        const colorLabel=el('label','builder-field');
+        colorLabel.append(el('span','',t('divider_line_color')));
+        const colorInput=el('input');colorInput.type='color';
+        colorInput.value=block.line_color||'#a5b3be';
+        colorInput.addEventListener('input',()=>{
+          block.line_color=colorInput.value;draw();change();
+        });
+        colorLabel.append(colorInput);
+        settings.append(widthLabel,styleLabel,colorLabel);
+        body.append(settings,visual);
+        draw();
+      }
       applyAppearance(block,body);
       card.append(body); if(imageControls) card.append(imageControls); container.append(card);
     });
