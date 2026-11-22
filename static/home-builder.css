@@ -554,3 +554,18 @@
 .hyperui-admin .builder-preset[data-theme="two-image-text"] .builder-preset-visual{background:repeating-linear-gradient(to bottom,#7e9eb2 0 2px,transparent 2px 6px);border:0}
 .hyperui-admin .builder-preset[data-theme="two-text-image"] .builder-preset-visual{background:#83bac7;border:0}
 @media(max-width:800px){.hyperui-admin .builder-preset{grid-template-columns:54px minmax(0,1fr) auto}}
+
+
+/* Image editor: grouped controls instead of a single wall of inputs. */
+.hyperui-admin .builder-image-appearance{display:grid;gap:8px;margin:0 0 10px}
+.hyperui-admin .builder-image-panel{border:1px solid #dce4ed;border-radius:9px;background:#f9fbfd;overflow:hidden}
+.hyperui-admin .builder-image-panel>summary{cursor:pointer;padding:12px 15px;font-size:12px;font-weight:700;color:#2b4160;list-style-position:inside}
+.hyperui-admin .builder-image-panel[open]>summary{border-bottom:1px solid #e2e8f1;background:#f2f6fb}
+.hyperui-admin .builder-image-panel .builder-appearance-controls{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:12px;padding:15px}
+.hyperui-admin .builder-image-panel .builder-appearance-controls .builder-select{width:100%;min-width:0;max-width:none}
+.hyperui-admin .builder-image-panel .builder-appearance-controls .builder-tool{align-self:end}
+.hyperui-admin .builder-image-link-settings{grid-column:1/-1;display:grid;grid-template-columns:minmax(0,2fr) minmax(150px,1fr);gap:12px;align-items:end;padding:9px 0;border-top:1px solid #e0e6ef}
+.hyperui-admin .builder-image-link-settings>.builder-field{margin-top:0}
+.hyperui-admin .builder-image-link-settings>.builder-select{min-width:0}
+.hyperui-admin .custom-image .friperi-image-figure{max-width:100%;margin-inline:auto}
+@media(max-width:650px){.hyperui-admin .builder-image-link-settings{grid-template-columns:1fr}}
