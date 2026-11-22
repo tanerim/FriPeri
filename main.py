@@ -105,6 +105,22 @@ async def section_svg(digest: str, request: Request) -> Response:
     return Response(svg if request.method == "GET" else b"", media_type="image/svg+xml", headers=headers)
 
 
+@app.middleware("http")
+async def branded_public_not_found(request: Request, call_next):
+    """Replace browser-facing public 404 responses without changing their status."""
+    response = await call_next(request)
+    path = request.url.path
+    accepts_html = "text/html" in request.headers.get("accept", "")
+    if (response.status_code == 404 and request.method in {"GET", "HEAD"}
+            and accepts_html
+            and not path.startswith(("/admin", "/static", "/api", "/docs", "/redoc", "/openapi.json"))
+            and path not in {"/sitemap.xml", "/app-ads.txt", "/robots.txt"}
+            and response.headers.get("content-type", "").split(";")[0] != "application/json"):
+        return FileResponse(TEMPLATES_DIR / "404.html", status_code=404,
+                            media_type="text/html", headers={"Cache-Control": "no-store"})
+    return response
+
+
 app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 
 @app.api_route("/sitemap.xml", methods=["GET", "HEAD"], include_in_schema=False)
