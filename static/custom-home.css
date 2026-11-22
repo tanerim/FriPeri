@@ -802,3 +802,36 @@
  .custom-team-grid[data-team-direction=horizontal] .custom-team-photo-frame,
  .custom-team[data-team-direction=horizontal] .custom-team-photo-frame{width:min(100%,var(--team-photo-limit,180px))}
 }
+
+/* Team profile social links and independently adjustable title typography. */
+.custom-team .custom-team-title,
+.builder-team-preview .custom-team-title{
+  font-size:var(--block-title-size,14px);
+  color:var(--block-title-color,inherit);
+  font-style:var(--team-title-style,normal);
+  font-weight:var(--team-title-weight,400);
+  font-family:var(--team-title-font,inherit);
+}
+.custom-team[data-title-weight=normal],.builder-team-preview[data-title-weight=normal]{--team-title-weight:400}
+.custom-team[data-title-weight=medium],.builder-team-preview[data-title-weight=medium]{--team-title-weight:500}
+.custom-team[data-title-weight=semibold],.builder-team-preview[data-title-weight=semibold]{--team-title-weight:600}
+.custom-team[data-title-weight=bold],.builder-team-preview[data-title-weight=bold]{--team-title-weight:700}
+.custom-team[data-title-weight=heavy],.builder-team-preview[data-title-weight=heavy]{--team-title-weight:800}
+.custom-team[data-title-style=italic],.builder-team-preview[data-title-style=italic]{--team-title-style:italic}
+.custom-team[data-title-font=sans],.builder-team-preview[data-title-font=sans]{--team-title-font:system-ui,sans-serif}
+.custom-team[data-title-font=serif],.builder-team-preview[data-title-font=serif]{--team-title-font:Georgia,serif}
+.custom-team[data-title-font=monospace],.builder-team-preview[data-title-font=monospace]{--team-title-font:ui-monospace,monospace}
+.custom-team-links{display:flex;flex-wrap:wrap;gap:7px;align-items:center;margin-top:12px}
+.custom-team[data-team-direction=vertical] .custom-team-links,
+.builder-team-preview[data-team-direction=vertical] .custom-team-links{justify-content:center}
+.custom-team-social-link{
+  display:inline-flex;align-items:center;justify-content:center;
+  width:34px;height:34px;min-width:34px;
+  border:1px solid color-mix(in srgb,var(--block-accent-color,#286e7a) 28%,transparent);
+  border-radius:50%;color:var(--block-accent-color,#286e7a);
+  background:transparent;text-decoration:none;font-size:15px;
+  transition:background-color .15s,color .15s;
+}
+.custom-team-social-link:hover{background:var(--block-accent-color,#286e7a);color:#fff}
+.custom-team-social-link:focus-visible{outline:3px solid var(--block-accent-color,#286e7a);outline-offset:2px}
+@media(prefers-reduced-motion:reduce){.custom-team-social-link{transition:none}}

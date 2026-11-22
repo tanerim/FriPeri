@@ -11,7 +11,7 @@
     {% elif block.type == 'image' %}
     data-image-ratio="{{ appearance.get('ratio', 'original') }}" data-image-fit="{{ appearance.get('fit', 'cover') }}" data-image-position="{{ appearance.get('position', 'center') }}" data-image-width="{{ appearance.get('width_mode', 'auto') }}" data-image-shadow="{{ appearance.get('shadow', 'none') }}" data-image-hover="{{ appearance.get('hover', 'none') }}" data-caption-align="{{ appearance.get('caption_align', 'left') }}" {% if appearance.get('height_px', 0) > 0 %}data-image-height="custom"{% endif %}
     {% elif block.type == 'team' %}
-    data-team-direction="{{ appearance.get('direction', 'vertical') }}" data-team-style="{{ appearance.get('style', 'classic') }}" data-team-columns="{{ appearance.get('columns', 3) }}"
+    data-team-direction="{{ appearance.get('direction', 'vertical') }}" data-team-style="{{ appearance.get('style', 'classic') }}" data-team-columns="{{ appearance.get('columns', 3) }}" data-title-weight="{{ appearance.get('title_weight', 'normal') }}" data-title-style="{{ appearance.get('title_style', 'normal') }}" data-title-font="{{ appearance.get('title_font', 'inherit') }}"
     {% elif block.type == 'callout' %}
     data-accent-side="{{ appearance.get('accent_side', 'left') }}"
     {% elif block.type == 'heading' %}
@@ -101,6 +101,14 @@
             <h3 class="custom-team-name">{{ member.name }}</h3>
             <p class="custom-team-title">{{ member.title }}</p>
             {% if member.bio %}<p class="custom-team-bio">{{ member.bio }}</p>{% endif %}
+            {% if member.twitter or member.linkedin or member.website or member.email %}
+            <nav class="custom-team-links" aria-label="{{ member.name or 'Team member' }} profile links">
+              {% if member.twitter %}<a class="custom-team-social-link" href="{{ member.twitter }}" target="_blank" rel="noopener noreferrer" aria-label="Twitter / X" title="Twitter / X"><i class="bi bi-twitter-x" aria-hidden="true"></i></a>{% endif %}
+              {% if member.linkedin %}<a class="custom-team-social-link" href="{{ member.linkedin }}" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn" title="LinkedIn"><i class="bi bi-linkedin" aria-hidden="true"></i></a>{% endif %}
+              {% if member.website %}<a class="custom-team-social-link" href="{{ member.website }}" target="_blank" rel="noopener noreferrer" aria-label="Personal website" title="Personal website"><i class="bi bi-globe" aria-hidden="true"></i></a>{% endif %}
+              {% if member.email %}<a class="custom-team-social-link" href="mailto:{{ member.email }}" aria-label="Email" title="Email"><i class="bi bi-envelope" aria-hidden="true"></i></a>{% endif %}
+            </nav>
+            {% endif %}
           </div>
         </div>
         {% endfor %}

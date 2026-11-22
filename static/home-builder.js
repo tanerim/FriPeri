@@ -770,7 +770,11 @@
       ['card_padding',0,64,20],['radius',0,60,16],
       ['accent_color','color',config.design?.accent || '#286e7a'],
       ['card_background','color','#ffffff'],
-      ['shadow',['none','soft','medium']]
+      ['shadow',['none','soft','medium']],
+      ['title_size',11,36,14],['title_color','color','#65738a'],
+      ['title_weight',['normal','medium','semibold','bold','heavy']],
+      ['title_style',['normal','italic']],
+      ['title_font',['inherit','sans','serif','monospace']]
     ],
     quote: [['font_size',12,72,28],['attribution_size',10,36,14],['quote_color','color','#17243b'],['attribution_color','color','#65738a'],['border_color','color','#65738a'],['border_width',0,12,3],['font_style',['normal','italic']]],
     stats: [['value_color','color','#17243b'],['label_color','color','#65738a'],['card_background','color','#ffffff'],['value_size',16,120,48],['label_size',10,48,14],['columns',1,4,3],['gap',0,64,24],['padding',0,64,0]]
@@ -829,7 +833,12 @@
           teamStyle:settings.style||'classic',
           teamColumns:settings.columns||3
         });
+        preview.dataset.titleWeight=settings.title_weight||'normal';
+        preview.dataset.titleStyle=settings.title_style||'normal';
+        preview.dataset.titleFont=settings.title_font||'inherit';
         for(const [key,value,unit] of [
+          ['title-size',settings.title_size||14,'px'],
+          ['title-color',settings.title_color||'#65738a',''],
           ['photo-width',settings.photo_width||180,'px'],
           ['gap',settings.gap||24,'px'],
           ['card-padding',settings.card_padding??20,'px'],
@@ -1450,6 +1459,11 @@
           preview.style.setProperty('--block-radius',(settings.radius??16)+'px');
           preview.style.setProperty('--block-card-background',settings.card_background||'#ffffff');
           preview.style.setProperty('--block-accent-color',settings.accent_color||'#286e7a');
+          preview.style.setProperty('--block-title-size',(settings.title_size||14)+'px');
+          preview.style.setProperty('--block-title-color',settings.title_color||'#65738a');
+          preview.dataset.titleWeight=settings.title_weight||'normal';
+          preview.dataset.titleStyle=settings.title_style||'normal';
+          preview.dataset.titleFont=settings.title_font||'inherit';
           block.items.forEach(item=>{
             const member=el('div','custom-team-member');
             const frame=el('div','custom-team-photo-frame shape-'+(item.shape||'rectangle')+' orientation-'+(item.orientation||'portrait'));
@@ -1463,6 +1477,25 @@
             info.append(el('h3','custom-team-name',item.name||'Team member'),
               el('p','custom-team-title',item.title||'Role or specialization'));
             if(item.bio)info.append(el('p','custom-team-bio',item.bio));
+            const links=el('div','custom-team-links');
+            const accounts=[
+              ['twitter','twitter-x','Twitter / X'],
+              ['linkedin','linkedin','LinkedIn'],
+              ['website','globe','Personal website'],
+              ['email','envelope','Email']
+            ];
+            for(const [key,iconName,label] of accounts){
+              const value=(item[key]||'').trim();
+              if(!value)continue;
+              const href=key==='email'?'mailto:'+value:value;
+              const link=el('a','custom-team-social-link');
+              link.href=href;link.title=label;link.setAttribute('aria-label',label);
+              link.target=key==='email'?'_self':'_blank';
+              if(key!=='email')link.rel='noopener noreferrer';
+              const symbol=el('i','bi bi-'+iconName);
+              symbol.setAttribute('aria-hidden','true');link.append(symbol);links.append(link);
+            }
+            if(links.childElementCount)info.append(links);
             member.append(frame,info);preview.append(member);
           });
         };
@@ -1502,6 +1535,10 @@
             field(t('team_name'),item.name||'',value=>{item.name=value;updateTeamPreview();}),
             field(t('team_title'),item.title||'',value=>{item.title=value;updateTeamPreview();}),
             field('Short biography',item.bio||'',value=>{item.bio=value.slice(0,1500);updateTeamPreview();}),
+            field('Twitter / X URL',item.twitter||'',value=>{item.twitter=value.trim();updateTeamPreview();}),
+            field('LinkedIn URL',item.linkedin||'',value=>{item.linkedin=value.trim();updateTeamPreview();}),
+            field('Personal website URL',item.website||'',value=>{item.website=value.trim();updateTeamPreview();}),
+            field('Email address',item.email||'',value=>{item.email=value.trim();updateTeamPreview();}),
             field(t('team_photo'),item.photo||'',value=>{item.photo=value.trim();updateTeamPreview();})
           );
           const uploader=el('label','builder-field');
@@ -1578,7 +1615,7 @@
           group.append(row);
         });
         body.append(group,button(t('add_item'),()=>{
-          if(block.items.length<8)mutate(()=>block.items.push({photo:'',name:'',title:'',bio:'',shape:'rectangle',orientation:'portrait',fit:'cover',zoom:1,focal_x:50,focal_y:50}));
+          if(block.items.length<8)mutate(()=>block.items.push({photo:'',name:'',title:'',bio:'',twitter:'',linkedin:'',website:'',email:'',shape:'rectangle',orientation:'portrait',fit:'cover',zoom:1,focal_x:50,focal_y:50}));
         }));
       }
       if(['stats','faq'].includes(block.type)) {

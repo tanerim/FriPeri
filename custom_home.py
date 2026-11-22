@@ -104,6 +104,10 @@ APPEARANCE_FIELDS = {
         'radius': (0, 60), 'accent_color': 'color',
         'card_background': 'color',
         'shadow': ('none', 'soft', 'medium'),
+        'title_size': (11, 36), 'title_color': 'color',
+        'title_weight': ('normal', 'medium', 'semibold', 'bold', 'heavy'),
+        'title_style': ('normal', 'italic'),
+        'title_font': ('inherit', 'sans', 'serif', 'monospace'),
     },
     'quote': {'font_size': (12, 72), 'attribution_size': (10, 36), 'quote_color': 'color',
               'attribution_color': 'color', 'border_color': 'color', 'border_width': (0, 12),
@@ -488,6 +492,24 @@ def _validate_blocks(data, depth, remaining, anchors):
                     if raw_photo and not member['photo']:
                         raise ValueError('Invalid team member photo')
                     member['bio'] = text(entry.get('bio', ''), 1500)
+                    # Optional public profile links; empty values are deliberately omitted.
+                    for link_key in ('twitter', 'linkedin', 'website'):
+                        raw_link = text(entry.get(link_key, ''), 2048).strip()
+                        link = safe_url(raw_link) if raw_link else ''
+                        if raw_link and (not link or not link.startswith(('http://', 'https://'))):
+                            raise ValueError(f'Invalid team {link_key} URL')
+                        if link and link_key in ('twitter', 'linkedin'):
+                            hostname = (urlsplit(link).hostname or '').lower()
+                            permitted = ({'twitter.com', 'www.twitter.com', 'x.com', 'www.x.com'}
+                                         if link_key == 'twitter'
+                                         else {'linkedin.com', 'www.linkedin.com', 'lnkd.in'})
+                            if hostname not in permitted:
+                                raise ValueError(f'Invalid team {link_key} URL')
+                        member[link_key] = link
+                    email_address = text(entry.get('email', ''), 254).strip()
+                    if email_address and not re.fullmatch(r'[A-Za-z0-9.!#$%&\'*+/=?^_`{|}~-]+@[A-Za-z0-9](?:[A-Za-z0-9-]*[A-Za-z0-9])?(?:\.[A-Za-z0-9](?:[A-Za-z0-9-]*[A-Za-z0-9])?)+', email_address):
+                        raise ValueError('Invalid team email address')
+                    member['email'] = email_address
                     member['shape'] = entry.get('shape') if entry.get('shape') in ('circle', 'rectangle') else 'rectangle'
                     member['fit'] = entry.get('fit') if entry.get('fit') in ('cover', 'contain') else 'cover'
                     member['orientation'] = entry.get('orientation') if entry.get('orientation') in ('landscape', 'portrait') else 'landscape'
