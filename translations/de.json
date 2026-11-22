@@ -582,5 +582,20 @@
   "design.scope_feature": "Hintergrund, Text und Rahmen von Feature-Bereichen.",
   "design.scope_accent": "Primäre und sekundäre Themenakzente für passende Schaltflächen, Links und Dekorationen. Kategorieakzente lassen sich separat einstellen.",
   "design.scope_separator": "Farben dekorativer Trenner und Abschnittsübergänge.",
-  "design.scope_footer": "Hintergrund, Text und oberer Rahmen der Fußzeile auf allen Seiten."
+  "design.scope_footer": "Hintergrund, Text und oberer Rahmen der Fußzeile auf allen Seiten.",
+  "design.help_color_page_bg": "Öffentlicher Seitenhintergrund; Kategorien können ihn überschreiben.",
+  "design.help_color_nav": "Hauptfarbe der Navigation und davon abhängige Menüelemente.",
+  "design.help_color_nav_hover": "Hover-Farbe der Navigation.",
+  "design.help_color_nav_active": "Akzent aktiver Navigationselemente.",
+  "design.help_color_feature_bg": "Hintergrund hervorgehobener Bereiche.",
+  "design.help_color_feature_text": "Textfarbe hervorgehobener Bereiche.",
+  "design.help_color_feature_border": "Rahmenfarbe hervorgehobener Bereiche.",
+  "design.help_color_accent_primary": "Primärer Akzent für unterstützte Links, Buttons und Dekorationen.",
+  "design.help_color_accent_secondary": "Sekundärer Akzent für alternative und dekorative Elemente.",
+  "design.help_color_separator_1": "Erste Farbe dekorativer Trenner.",
+  "design.help_color_separator_2": "Zweite Farbe dekorativer Trenner.",
+  "design.help_color_separator_3": "Dritte Farbe dekorativer Trenner.",
+  "design.help_color_footer_bg": "Fußzeilenhintergrund auf allen Seiten.",
+  "design.help_color_footer_text": "Text- und Linkfarbe der Fußzeile.",
+  "design.help_color_footer_border": "Oberer Rand der Fußzeile."
 }
