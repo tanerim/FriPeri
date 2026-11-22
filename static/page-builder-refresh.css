@@ -61,3 +61,12 @@
 .hyperui-admin .page-builder-refresh .sketch-10 i:nth-child(2){grid-row:span 2}
 .hyperui-admin .page-builder-refresh .sketch-11 i:last-child{grid-column:span 2}
 @media(max-width:420px){.hyperui-admin .page-builder-refresh .settings-page-header>.builder-actions{gap:6px}.hyperui-admin .page-builder-refresh #builder-collapse-all{padding:8px 9px;font-size:12px}}
+
+/* Palette-forward layout gallery: the card depicts its actual curated palette. */
+.hyperui-admin .page-layout-tile .page-layout-sketch{min-height:77px;overflow:hidden;position:relative}
+.hyperui-admin .page-layout-palette{display:inline-flex;align-items:center;gap:6px;
+  width:fit-content;max-width:100%;margin-top:5px;padding:4px 8px;
+  border-radius:20px;background:#f2f4f8;border:1px solid #e0e5ee;
+  color:#536780;font-size:10px;font-weight:650;line-height:1.2}
+.hyperui-admin .page-layout-tile:hover .page-layout-palette{background:#fff}
+.hyperui-admin .page-layout-tile strong{font-size:12px}

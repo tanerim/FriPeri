@@ -1742,18 +1742,270 @@
         action('Ask us','/contact')
       ]]
     ];
-    layouts.forEach(([name,description,build],i)=>{
+
+    // Palette-aware page layouts. Palette colors are local to the new blocks,
+    // never changes the site's global Design settings.
+    const paletteLibrary={
+      'friperi-world':{name:'FriPeri World',dark:'#16263f',deep:'#20435b',primary:'#286e7a',accent:'#68b6b9',highlight:'#f2c14e',light:'#e5f2ee',paper:'#f8fbf8',warm:'#a5d9d5'},
+      'scholarly-grove':{name:'Scholarly Grove',dark:'#172c2a',deep:'#294b46',primary:'#416d62',accent:'#729a88',highlight:'#b87657',light:'#e0e9db',paper:'#f8f7f0',warm:'#d6bc93'},
+      'tidal-ember':{name:'Tidal Ember',dark:'#001219',deep:'#005f73',primary:'#0a9396',accent:'#94d2bd',highlight:'#ee9b00',light:'#e9d8a6',paper:'#f8faf7',warm:'#ca6702'},
+      'ember-after-dark':{name:'Ember After Dark',dark:'#03071e',deep:'#370617',primary:'#9d0208',accent:'#e85d04',highlight:'#ffba08',light:'#fff2df',paper:'#fff9f3',warm:'#f48c06'},
+      'sunlit-horizon':{name:'Sunlit Horizon',dark:'#092b49',deep:'#0d3b66',primary:'#0d3b66',accent:'#ee964b',highlight:'#f4d35e',light:'#faf0ca',paper:'#fffaf0',warm:'#f95738'},
+      'electric-orchid':{name:'Electric Orchid',dark:'#240d49',deep:'#3a0ca3',primary:'#4361ee',accent:'#b5179e',highlight:'#4cc9f0',light:'#eae7ff',paper:'#f8f7ff',warm:'#f72585'}
+    };
+    const pagePalettes=[
+      'tidal-ember','electric-orchid','scholarly-grove','tidal-ember',
+      'sunlit-horizon','scholarly-grove','electric-orchid','sunlit-horizon',
+      'friperi-world','ember-after-dark','tidal-ember','scholarly-grove'
+    ];
+    const decorated=(children,palette,options={})=>{
+      const dark=options.dark??false;
+      const bg=options.background||(dark?palette.dark:palette.paper);
+      const textColor=options.text||(dark?'#ffffff':palette.dark);
+      return {
+        ...newBlock('section'),tone:'custom',background:bg,foreground:textColor,
+        width:'wide',align:options.align||'left',children,
+        appearance:{
+          layout:options.layout||'stack',surface:'full',
+          height_mode:options.hero?'viewport':'auto',
+          vertical_align:options.vertical||'center',
+          content_width:options.contentWidth||1240,
+          padding_y:options.paddingY??(options.hero?98:82),padding_x:32,
+          gap:options.gap??30,edge:options.edge||'flat',
+          edge_color:options.edgeColor||(dark?palette.light:palette.paper),
+          svg_pattern:options.art||'none',
+          svg_primary:options.primary||palette.primary,
+          svg_secondary:options.secondary||palette.accent,
+          svg_opacity:options.opacity??70
+        }
+      };
+    };
+    const slogan=(title,level='h2',size=46,color)=>({
+      ...h(title,level),width:'wide',
+      ...(color?{foreground:color}:{}),
+      appearance:{font_size:size,font_weight:'heavy'}
+    });
+    const copy=(value)=>p(value);
+    const themedButton=(text,url,palette,outline=false)=>({
+      ...action(text,url),appearance:{
+        icon:'none',variant:outline?'outline':'solid',font_size:16,
+        button_background:outline?palette.light:palette.primary,
+        button_hover:palette.accent,button_text:outline?palette.dark:'#ffffff',
+        button_hover_text:palette.dark,radius:11,padding_x:28,padding_y:15,
+        border_color:palette.accent,border_width:outline?2:0
+      }
+    });
+    const actions=(palette,primary='Explore more',url='/about')=>({
+      ...newBlock('section'),tone:'plain',width:'wide',
+      appearance:{layout:'actions',surface:'standard',padding_y:0,padding_x:0,gap:15},
+      children:[themedButton(primary,url,palette),themedButton('Get in touch','/contact',palette,true)]
+    });
+    const textStack=(heading,description,palette,cta)=>decorated([
+      slogan(heading,'h2',36),copy(description),...(cta?[themedButton(cta,'/about',palette)]:[])
+    ],palette,{background:palette.light,paddingY:34});
+    const tile=(heading,description,palette)=>decorated([
+      slogan(heading,'h3',24),copy(description)
+    ],palette,{background:'#ffffff',paddingY:32,gap:14});
+    const threeCards=(title,intro,items,palette)=>decorated([
+      slogan(title,'h2',48),copy(intro),
+      { ...newBlock('section'),width:'wide',tone:'plain',
+        appearance:{layout:'three',surface:'standard',gap:20,padding_y:12,padding_x:0},
+        children:items.map(([a,b])=>tile(a,b,palette))}
+    ],palette,{background:palette.light,paddingY:90,edge:'wave',edgeColor:palette.paper});
+    const twoColumns=(title,left,right,palette,flip=false)=>decorated([
+      decorated([slogan(title,'h2',46),copy(left)],palette,{background:palette.paper,paddingY:24}),
+      decorated([slogan('A closer look','h3',29),copy(right)],palette,{background:palette.light,paddingY:30})
+    ],palette,{layout:flip?'reverse_split':'two',background:palette.paper,paddingY:90,gap:40});
+    const closing=(title,subtitle,palette)=>decorated([
+      slogan(title,'h2',60),copy(subtitle),actions(palette,'Start a conversation','/contact')
+    ],palette,{dark:true,align:'center',paddingY:100,edge:'wave',edgeColor:palette.paper,
+      art:'waves',primary:palette.primary,secondary:palette.accent});
+    const hero=(title,tagline,palette,other=null,variant='two')=>decorated([
+      decorated([
+        {...slogan(title,'h1',82),accent:tagline,appearance:{
+          font_size:82,font_weight:'heavy',accent_style:'color_only',accent_color:palette.highlight,accent_new_line:'yes'}},
+        copy('Explore a distinctive approach to ideas, research and creative work.'),
+        actions(palette)
+      ],palette,{background:palette.dark,text:'#ffffff',paddingY:18,gap:24}),
+      other||decorated([slogan('01 / Discover','h2',40),copy(tagline)],palette,{
+        background:palette.deep,text:'#ffffff',paddingY:38})
+    ],palette,{hero:true,dark:true,layout:variant,art:'ribbons',
+      primary:palette.primary,secondary:palette.accent,edge:'wave',edgeColor:palette.paper,gap:55});
+    const story=(name,palette)=>{
+      const pattern=(title,tagline,mid,third,closingTitle)=>[
+        hero(title,tagline,palette),
+        twoColumns('A different perspective',mid,third,palette),
+        threeCards('Explore the possibilities','A selection of thoughtful, editable content panels.',[
+          ['Discover','Introduce a key idea or research question.'],
+          ['Connect','Show relationships across your work.'],
+          ['Create','Present findings in a compelling way.']
+        ],palette),
+        closing(closingTitle,'Bring your ideas together, and make the next step your own.',palette)
+      ];
+      switch(name){
+        case 'Editorial Story': return [
+          hero('Stories worth sharing.','Editorial Story',palette,decorated([
+            slogan('Thoughtful writing.','h2',44),copy('A visual introduction for a feature article, long read or opinion piece.')
+          ],palette,{background:palette.deep,text:'#ffffff',paddingY:45})),
+          twoColumns('Context & perspective','Set the scene with a clear lead paragraph and an engaging introduction.',
+            'Use the second column for complementary evidence, a pull quote or a featured illustration.',palette),
+          threeCards('The story unfolds','Give every part of your story room to breathe.',[
+            ['Background','Build the necessary context.'],['Insights','Highlight your most important observations.'],['Further reading','Offer a path for curious readers.']
+          ],palette),closing('Every story matters.','Bring your editorial project to life.',palette)
+        ];
+        case 'Research Project': return [
+          hero('Research that connects.','Project Overview',palette),
+          twoColumns('Research questions','Describe your research objectives, hypothesis and context.',
+            'Outline the methodology, data sources and analytical workflow.',palette,true),
+          threeCards('Research framework','Three ways to present your project stages.',[
+            ['01 / Collect','Document your sources and research material.'],
+            ['02 / Analyze','Show the methods and instruments used.'],
+            ['03 / Interpret','Translate findings into broader insights.']
+          ],palette),closing('Discover the findings.','Share your research with the community.',palette)
+        ];
+        case 'Academic Profile': return [
+          hero('Ideas shaped by inquiry.','Researcher Profile',palette,
+            decorated([slogan('Research • Teaching • Collaboration','h2',34),copy('A space to introduce your academic journey.')],palette,
+              {background:palette.deep,text:'#ffffff',paddingY:38})),
+          twoColumns('About the researcher','Introduce your academic background, interests and affiliations.',
+            'Describe the questions that guide your work and the collaborations that matter.',palette),
+          threeCards('Areas of expertise','Use these cards for your main research domains.',[
+            ['Research','Present ongoing and completed studies.'],['Publications','Highlight selected academic contributions.'],['Teaching','Introduce your courses and educational work.']
+          ],palette),closing('Let us collaborate.','Connect through shared academic interests.',palette)
+        ];
+        case 'Project Showcase': return [
+          hero('Work made visible.','Selected Projects',palette),
+          threeCards('Featured work','Three fully editable project cards ready for your content.',[
+            ['Project 01','Goals, methods and key outcomes.'],['Project 02','Research collaborations and impact.'],['Project 03','Creative explorations and experiments.']
+          ],palette),
+          twoColumns('Behind the process','Explain the choices and challenges that shaped your projects.',
+            'Share data, visuals or a compelling result in this flexible second column.',palette,true),
+          closing('Explore what comes next.','Your portfolio can grow with every new project.',palette)
+        ];
+        case 'Landing Page': return [
+          hero('Build something remarkable.','Your Next Big Idea',palette),
+          threeCards('Why choose us?','Explain three benefits clearly and confidently.',[
+            ['Clarity','A message your visitors can understand.'],['Flexibility','Design that adapts to your goals.'],['Impact','A purposeful next step for your audience.']
+          ],palette),
+          twoColumns('Designed to make a difference','Tell people who you are, what you offer and why it matters.',
+            'Place a supporting image or a customer story alongside your message.',palette),
+          decorated([slogan('Questions, answered.','h2',44),{...newBlock('faq'),items:[
+            {question:'How does this work?',answer:'Describe the process here.'},
+            {question:'Where should I begin?',answer:'Explain the next step here.'}
+          ]}],palette,{background:palette.paper,paddingY:84}),
+          closing('Ready for the next step?','Invite visitors to explore, subscribe or get in touch.',palette)
+        ];
+        case 'Publication': return [
+          hero('Knowledge deserves a voice.','Scholarly Publication',palette,
+            decorated([slogan('Research article','h2',40),copy('Authors · Year · Journal or Publisher'),copy('DOI / Publication details')],palette,
+              {background:palette.deep,text:'#ffffff',paddingY:44})),
+          twoColumns('Abstract','Summarize the study, research objective and central argument.',
+            'Keywords, context and an introduction to the theoretical contribution.',palette),
+          threeCards('Key contributions','A visual summary for quick reading.',[
+            ['Research question','Define what the study investigates.'],
+            ['Methodology','Describe data and analytical procedures.'],
+            ['Principal findings','Explain the main contribution.']
+          ],palette),
+          twoColumns('Methods & results','Present the sample, materials and procedures.',
+            'Discuss evidence, limitations and the implications of the findings.',palette,true),
+          decorated([slogan('References and further reading','h2',40),
+            copy('Add the bibliography, research materials, supplementary files and related publications.')],
+            palette,{background:palette.light,paddingY:85}),
+          closing('Make research accessible.','Share your publication with a wider audience.',palette)
+        ];
+        case 'Team & Lab': return [
+          hero('Curiosity is collaborative.','Our Research Team',palette),
+          threeCards('Meet the disciplines','Introduce the people and expertise behind your research group.',[
+            ['Communication','Understand social and cultural interaction.'],
+            ['Computational methods','Explore evidence with transparent analytical tools.'],
+            ['Humanities','Interpret the wider meaning of research findings.']
+          ],palette),
+          twoColumns('Our approach','Tell the story of how your team works across disciplines.',
+            'Describe the collaborations, facilities and research directions you are building.',palette),
+          closing('Work with our team.','New ideas grow through collaboration.',palette)
+        ];
+        case 'Minimal Portfolio': return [
+          hero('A collection of ideas.','Selected Work',palette),
+          twoColumns('Selected projects','Create a focused introduction to your strongest work.',
+            'Use the second column for your process, services or a visual gallery.',palette,true),
+          threeCards('What I create','Highlight your strengths with a distinctive visual rhythm.',[
+            ['Design','Explain your visual approach.'],['Research','Show the questions you investigate.'],['Development','Share what you have built.']
+          ],palette),
+          closing('Let us make something.','Get in touch about your next collaboration.',palette)
+        ];
+        case 'Event & Workshop': return [
+          hero('Gather. Learn. Connect.','Event & Workshop',palette),
+          twoColumns('What to expect','Describe the theme, audience and key event information.',
+            'Present schedule, location, admission and accessibility details.',palette),
+          threeCards('The program','A clear and editable three-part event agenda.',[
+            ['01 / Welcome','Introductions and an opening presentation.'],
+            ['02 / Workshop','Hands-on exploration and discussion.'],
+            ['03 / Connect','Questions, networking and next steps.']
+          ],palette),
+          closing('Join the conversation.','Invite visitors to register or ask a question.',palette)
+        ];
+        case 'Services & Solutions': return [
+          hero('Better questions. Better solutions.','What We Offer',palette),
+          threeCards('Expertise in action','Present your services as three clear solutions.',[
+            ['Consulting','Define needs and identify opportunities.'],['Analysis','Explore data and draw meaningful conclusions.'],['Training','Build skills through hands-on learning.']
+          ],palette),
+          twoColumns('How we work','We begin by understanding the people and questions involved.',
+            'Then we develop a tailored methodology, communicate progress and deliver outcomes.',palette,true),
+          closing('Let us work together.','Turn your next challenge into a clear plan.',palette)
+        ];
+        case 'Resources & Knowledge Hub': return [
+          hero('Discover. Learn. Apply.','Knowledge Hub',palette),
+          threeCards('Browse the library','Help visitors find the right resource.',[
+            ['Guides','A clear path for beginners.'],['Methods','Transparent research and analysis techniques.'],['Tools','Practical resources to support the work.']
+          ],palette),
+          twoColumns('Featured resource','Introduce a useful publication, dataset or tutorial.',
+            'Provide background, prerequisites and suggestions for further study.',palette),
+          closing('Keep exploring.','Knowledge grows when it is shared.',palette)
+        ];
+      }
+      return pattern('Explore your ideas.','Welcome','Describe the context.','Develop your perspective.','Stay connected.');
+    };
+    const originalLayouts=layouts.map(item=>item.slice());
+    const themedLayouts=originalLayouts.map(([name,description,build],index)=>{
+      const key=pagePalettes[index],palette=paletteLibrary[key];
+      if(name==='FriPeri — Full Landing'){
+        return [name,description,()=>{
+          const result=build();
+          // FriPeri World belongs to these SECTION blocks, not global Design.
+          const accents=[palette.deep,palette.paper,palette.light,palette.dark,
+            palette.paper,palette.accent,palette.deep];
+          result.forEach((block,i)=>{
+            block.tone='custom';block.background=accents[i];
+            block.foreground=[0,3,6].includes(i)?'#ffffff':palette.dark;
+            block.width='wide';
+            block.appearance={...block.appearance,
+              surface:'full',height_mode:i===0?'viewport':'auto',
+              svg_primary:palette.primary,svg_secondary:palette.accent,
+              edge_color:i===6?palette.paper:(accents[i+1]||palette.paper)};
+          });
+          return result;
+        },key];
+      }
+      return [name,description,()=>story(name,palette),key];
+    });
+
+    themedLayouts.forEach(([name,description,build,paletteId],i)=>{
       const item=button('',()=>{},'page-layout-tile');
       item.dataset.layoutIndex=String(i);
       const sketch=el('span','page-layout-sketch sketch-'+i);
-      for(let k=0;k<4;k++)sketch.append(el('i'));
+      const palette=paletteLibrary[paletteId];
+      item.dataset.palette=paletteId;
+      sketch.style.background='linear-gradient(135deg,'+palette.dark+','+palette.deep+')';
+      for(let k=0;k<4;k++){const piece=el('i');piece.style.background=[palette.accent,palette.light,palette.highlight,palette.paper][k];sketch.append(piece);}
       item.append(sketch,el('strong','',name),el('small','',description));
+      const paletteTag=el('span','page-layout-palette',palette.name);
+      item.append(paletteTag);
       item.addEventListener('click',()=>{
         if(blocks().length && !window.confirm('Replace the current page blocks with '+name+'? You can undo this change.'))return;
         const next=build();
         if(blockCount(next)>80)return message(t('limit'),true);
         mutate(()=>{blocks().splice(0,blocks().length,...next);selected=-1;});
-        document.getElementById('page-layout-notice').textContent=name+' is ready. Edit the blocks below or select Preview.';
+        document.getElementById('page-layout-notice').textContent=name+' ('+palette.name+') is ready. All colors belong to page sections; your global Design settings were not changed. Edit blocks below or select Preview.';
         document.querySelector('.builder-workspace')?.scrollIntoView({block:'start',behavior:'smooth'});
       });
       gallery.append(item);
