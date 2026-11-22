@@ -369,3 +369,38 @@
   .hyperui-admin .builder-section-add-label { flex-basis: auto; width: 100%; }
   .hyperui-admin .builder-section-add-button { width: 100%; }
 }
+
+
+/* Team member editor — same repeatable-row model as Statistics. */
+.hyperui-admin .builder-team-grid { display:grid; grid-template-columns:1fr; gap:14px; }
+.hyperui-admin .builder-team-grid .builder-team-member {
+  display:grid; grid-template-columns:minmax(95px,140px) minmax(0,1fr) auto;
+  gap:16px; align-items:start; margin:0; padding:16px;
+  border:1px solid #dce4f0; border-radius:12px; background:#fff;
+}
+.hyperui-admin .builder-team-portrait {
+  width:100%; aspect-ratio:4/3; border-radius:10px; background:#edf3f5;
+  overflow:hidden; display:grid; place-items:center; color:#6d8291;
+}
+.hyperui-admin .builder-team-portrait[data-shape=circle] {
+  aspect-ratio:1; border-radius:50%; width:min(100%,130px);
+}
+.hyperui-admin .builder-team-portrait img {width:100%;height:100%;object-fit:cover;border-radius:inherit;}
+.hyperui-admin .builder-team-controls {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;min-width:0;}
+.hyperui-admin .builder-team-controls :is(.builder-field,.builder-select) {min-width:0;margin:0;}
+.hyperui-admin .builder-team-controls input {min-width:0;}
+.hyperui-admin .builder-team-photo-placeholder {font-size:32px;line-height:1;}
+.hyperui-admin .builder-preset[data-theme=two-column] .builder-preset-thumbnail {
+  background:linear-gradient(135deg,#dcf0ec,#e7e7ff);
+  color:#284955; display:grid; grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;
+}
+.hyperui-admin .builder-preset[data-theme=two-column] .builder-preset-copy,
+.hyperui-admin .builder-preset[data-theme=two-column] .builder-preset-visual {
+  display:block;height:22px;border:1px solid #7ea2a7;border-radius:3px;
+  background:repeating-linear-gradient(to bottom,#789da2 0 2px,transparent 2px 6px);
+}
+@media(max-width:720px) {
+  .hyperui-admin .builder-team-grid .builder-team-member {grid-template-columns:minmax(70px,105px) minmax(0,1fr);gap:10px;}
+  .hyperui-admin .builder-team-member > .builder-tool {grid-column:2;justify-self:start;}
+  .hyperui-admin .builder-team-controls {grid-template-columns:1fr;}
+}
