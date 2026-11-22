@@ -740,7 +740,8 @@
 }
 .custom-team-grid .custom-team-info{width:100%;min-width:0}
 .custom-team-grid .custom-team-bio{margin:7px 0 0;font-size:14px;line-height:1.6;opacity:.82;overflow-wrap:anywhere}
-.custom-team-grid .custom-team-member:only-child{
+ .custom-team-grid .custom-team-member:only-child{
+  grid-column:1/-1;
   width:min(100%,var(--team-single-limit,340px));
   justify-self:center;
 }
