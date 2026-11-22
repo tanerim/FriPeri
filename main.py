@@ -534,9 +534,10 @@ def fetch_posts(conn: sqlite3.Connection, category_slug: str | None = None, limi
         params = (category_slug,)
     return conn.execute(
         f"""
-        SELECT p.*, c.name AS category_name, c.slug AS category_slug, c.menu_label_en AS category_label_en, c.menu_label_secondary AS category_label_secondary
+        SELECT p.*, c.name AS category_name, c.slug AS category_slug, c.menu_label_en AS category_label_en, c.menu_label_secondary AS category_label_secondary, u.username AS author_username
         FROM posts p
         LEFT JOIN categories c ON c.id = p.category_id
+        LEFT JOIN users u ON u.id = p.author_id
         {where}
         ORDER BY datetime(p.created_at) DESC, p.id DESC
         LIMIT ?
