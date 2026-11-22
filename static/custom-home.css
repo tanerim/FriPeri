@@ -721,3 +721,83 @@
 .custom-rich-text img.rich-image[data-rich-caption]:not([data-rich-caption=""]){margin-bottom:12px}
 @media(prefers-reduced-motion:reduce){.custom-rich-text img.rich-image{transition:none}
 .custom-rich-text img.rich-image[data-rich-hover]:hover{transform:none}}
+
+/* Team v2 — individual profiles never stretch to fill an entire row. */
+.custom-block.custom-team{--team-photo-limit:var(--block-photo-width,180px)}
+.custom-team-grid{
+  grid-template-columns:repeat(var(--block-columns,3),minmax(0,1fr));
+  gap:var(--block-gap,24px);
+  align-items:start;
+}
+.custom-team-grid>.custom-team-member{
+  min-width:0;max-width:100%;width:100%;
+  align-items:center;text-align:center;
+}
+.custom-team-grid .custom-team-photo-frame{
+  width:min(100%,var(--team-photo-limit,180px));
+  max-width:var(--team-photo-limit,180px);
+  margin-inline:auto;flex-shrink:0;
+}
+.custom-team-grid .custom-team-info{width:100%;min-width:0}
+.custom-team-grid .custom-team-bio{margin:7px 0 0;font-size:14px;line-height:1.6;opacity:.82;overflow-wrap:anywhere}
+.custom-team-grid .custom-team-member:only-child{
+  width:min(100%,var(--team-single-limit,340px));
+  justify-self:center;
+}
+.custom-team-grid[data-team-direction=horizontal],
+.custom-team[data-team-direction=horizontal]>.custom-team-grid{
+  grid-template-columns:minmax(0,1fr);
+  max-width:980px;margin-inline:auto;
+}
+.custom-team-grid[data-team-direction=horizontal]>.custom-team-member,
+.custom-team[data-team-direction=horizontal]>.custom-team-grid>.custom-team-member{
+  display:grid;grid-template-columns:minmax(90px,var(--team-photo-limit,180px)) minmax(0,1fr);
+  gap:clamp(15px,3vw,36px);align-items:center;text-align:left;
+  width:100%;max-width:none;
+}
+.custom-team-grid[data-team-direction=horizontal] .custom-team-photo-frame,
+.custom-team[data-team-direction=horizontal] .custom-team-photo-frame{
+  width:100%;max-width:var(--team-photo-limit,180px);
+}
+.custom-team-grid[data-team-direction=horizontal]>.custom-team-member:only-child,
+.custom-team[data-team-direction=horizontal]>.custom-team-grid>.custom-team-member:only-child{
+  width:100%;max-width:760px;justify-self:center;
+}
+.custom-team-grid[data-team-style=cards]>.custom-team-member,
+.custom-team[data-team-style=cards]>.custom-team-grid>.custom-team-member{
+  padding:var(--block-card-padding,20px);
+  background:var(--block-card-background,#fff);
+  border-radius:var(--block-radius,16px);
+  border:1px solid color-mix(in srgb,var(--block-accent-color,#286e7a) 17%,#fff);
+}
+.custom-team-grid[data-team-style=alternating]>.custom-team-member:nth-child(even),
+.custom-team[data-team-style=alternating]>.custom-team-grid>.custom-team-member:nth-child(even){direction:rtl}
+.custom-team-grid[data-team-style=alternating]>.custom-team-member:nth-child(even)>*,
+.custom-team[data-team-style=alternating]>.custom-team-grid>.custom-team-member:nth-child(even)>*{direction:ltr}
+.custom-team-grid[data-team-style=alternating]>.custom-team-member,
+.custom-team[data-team-style=alternating]>.custom-team-grid>.custom-team-member{
+  border-bottom:1px solid var(--block-accent-color,#286e7a);
+  padding:clamp(12px,2vw,24px) 0;
+}
+.custom-team-grid[data-team-style=checkerboard]>.custom-team-member:nth-child(4n+2),
+.custom-team-grid[data-team-style=checkerboard]>.custom-team-member:nth-child(4n+3),
+.custom-team[data-team-style=checkerboard]>.custom-team-grid>.custom-team-member:nth-child(4n+2),
+.custom-team[data-team-style=checkerboard]>.custom-team-grid>.custom-team-member:nth-child(4n+3){
+  background:var(--block-card-background,#fff);
+  padding:var(--block-card-padding,20px);
+  border-radius:var(--block-radius,16px);
+}
+.custom-team[data-team-style=cards][style*="--block-shadow: soft"] .custom-team-member{box-shadow:0 8px 22px #14253a14}
+.custom-team[data-team-style=cards][style*="--block-shadow: medium"] .custom-team-member{box-shadow:0 15px 35px #14253a25}
+@media(max-width:900px){
+ .custom-team-grid{grid-template-columns:repeat(min(2,var(--block-columns,3)),minmax(0,1fr))}
+}
+@media(max-width:600px){
+ .custom-team-grid{grid-template-columns:minmax(0,1fr)}
+ .custom-team-grid[data-team-direction=horizontal]>.custom-team-member,
+ .custom-team[data-team-direction=horizontal]>.custom-team-grid>.custom-team-member{
+   grid-template-columns:minmax(0,1fr);text-align:center;justify-items:center;
+ }
+ .custom-team-grid[data-team-direction=horizontal] .custom-team-photo-frame,
+ .custom-team[data-team-direction=horizontal] .custom-team-photo-frame{width:min(100%,var(--team-photo-limit,180px))}
+}

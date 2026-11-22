@@ -96,6 +96,15 @@ APPEARANCE_FIELDS = {
         'image_radius': (0, 60),
         'gap': (0, 80),
     },
+    'team': {
+        'direction': ('vertical', 'horizontal'),
+        'style': ('classic', 'cards', 'alternating', 'checkerboard'),
+        'columns': (1, 4), 'photo_width': (72, 360),
+        'gap': (8, 80), 'card_padding': (0, 64),
+        'radius': (0, 60), 'accent_color': 'color',
+        'card_background': 'color',
+        'shadow': ('none', 'soft', 'medium'),
+    },
     'quote': {'font_size': (12, 72), 'attribution_size': (10, 36), 'quote_color': 'color',
               'attribution_color': 'color', 'border_color': 'color', 'border_width': (0, 12),
               'font_style': ('normal', 'italic')},
@@ -478,6 +487,7 @@ def _validate_blocks(data, depth, remaining, anchors):
                     member['photo'] = safe_url(raw_photo, media=True)
                     if raw_photo and not member['photo']:
                         raise ValueError('Invalid team member photo')
+                    member['bio'] = text(entry.get('bio', ''), 1500)
                     member['shape'] = entry.get('shape') if entry.get('shape') in ('circle', 'rectangle') else 'rectangle'
                     member['fit'] = entry.get('fit') if entry.get('fit') in ('cover', 'contain') else 'cover'
                     member['orientation'] = entry.get('orientation') if entry.get('orientation') in ('landscape', 'portrait') else 'landscape'

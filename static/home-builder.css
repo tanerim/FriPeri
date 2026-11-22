@@ -605,3 +605,19 @@
 .hyperui-admin .builder-inline-image-advanced>summary{cursor:pointer;font-size:13px;font-weight:700;color:#293c59}
 .hyperui-admin .builder-inline-image-advanced-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:9px 14px;margin-top:12px}
 .hyperui-admin .builder-inline-image-advanced-grid .builder-field{margin:0}
+
+/* Separate published Team preview from form rows. */
+.hyperui-admin .builder-team-preview{
+  margin:12px 0 22px;padding:20px;border-radius:12px;
+  background:#f0f5f8;border:1px solid #dce4ed;
+  --team-photo-limit:var(--block-photo-width,180px);
+  grid-template-columns:repeat(var(--block-columns,3),minmax(0,1fr));
+}
+.hyperui-admin .builder-team-preview[data-team-columns="1"]{--block-columns:1}
+.hyperui-admin .builder-team-preview[data-team-columns="2"]{--block-columns:2}
+.hyperui-admin .builder-team-preview[data-team-columns="3"]{--block-columns:3}
+.hyperui-admin .builder-team-preview[data-team-columns="4"]{--block-columns:4}
+.hyperui-admin .builder-team-preview[data-team-direction=horizontal]{grid-template-columns:1fr}
+.hyperui-admin .builder-team-preview .custom-team-member{box-sizing:border-box}
+.hyperui-admin .builder-team-preview .custom-team-photo-frame{max-height:360px}
+.hyperui-admin .builder-team-grid .builder-team-member{max-width:100%;box-sizing:border-box}
