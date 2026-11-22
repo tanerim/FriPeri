@@ -621,5 +621,20 @@
   "design.scope_feature": "Öne çıkan alanların ve tema paletini kullanan vurgulu bölümlerin arka plan, metin ve kenarlık renklerini belirler.",
   "design.scope_accent": "Tema vurgu değişkenlerini kullanan buton, bağlantı, etiket ve dekoratif öğelerin ana ve ikincil renklerini belirler. Kategori kartı vurguları CMS Design ile ayrı ayarlanabilir.",
   "design.scope_separator": "Tema ayraçlarını kullanan dekoratif çizgiler ve bölüm geçişlerinin renk paletini belirler.",
-  "design.scope_footer": "Altbilginin arka planını, metnini ve üst kenarlığını belirler. Tüm siteye uygulanır; kategoriye özel değildir."
+  "design.scope_footer": "Altbilginin arka planını, metnini ve üst kenarlığını belirler. Tüm siteye uygulanır; kategoriye özel değildir.",
+  "design.help_color_page_bg": "Genel sayfaların arka planı; kategoriler CMS Design ile bunu değiştirebilir.",
+  "design.help_color_nav": "Üst menünün ana arka planı ve bu rengi kullanan menü öğeleri.",
+  "design.help_color_nav_hover": "Menü bağlantılarının üzerine gelindiğinde kullanılan renk.",
+  "design.help_color_nav_active": "Etkin menü öğesi ve seçili durum vurgusu.",
+  "design.help_color_feature_bg": "Öne çıkan içerik kutuları ve vurgulu bölümlerin arka planı.",
+  "design.help_color_feature_text": "Öne çıkan içerik alanlarındaki metin rengi.",
+  "design.help_color_feature_border": "Öne çıkan alanların kenarlık rengi.",
+  "design.help_color_accent_primary": "Bu renk değişkenini kullanan bağlantı, buton, küçük vurgu ve dekoratif öğeler.",
+  "design.help_color_accent_secondary": "İkincil vurgu rengini kullanan alternatif ve dekoratif öğeler.",
+  "design.help_color_separator_1": "Dekoratif bölüm ayraçlarının birinci rengi.",
+  "design.help_color_separator_2": "Dekoratif bölüm ayraçlarının ikinci rengi.",
+  "design.help_color_separator_3": "Dekoratif bölüm ayraçlarının üçüncü rengi.",
+  "design.help_color_footer_bg": "Tüm sayfalarda footer arka planı.",
+  "design.help_color_footer_text": "Footer yazıları ve bağlantılarının renk tonu.",
+  "design.help_color_footer_border": "Footer üst kenarlık/ayraç rengi."
 }
