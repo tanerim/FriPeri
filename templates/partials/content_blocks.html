@@ -46,10 +46,14 @@
           {% endfor %}</tr>{% endfor %}
       </table></div>
     {% elif block.type == 'image' and block.url %}
+      {% set image_action = appearance.get('image_action', 'auto') %}
+      {% set image_link = (image_action == 'link' or (image_action == 'auto' and block.link_url)) and block.link_url %}
       <figure class="friperi-image-figure">
-        {% if block.link_url %}<a class="friperi-image-link" href="{{ block.link_url }}" aria-label="{{ block.alt or block.caption or 'View image' }}"{% if block.link_target == 'new_tab' %} target="_blank" rel="noopener noreferrer"{% endif %}>{% endif %}
+        {% if image_link %}<a class="friperi-image-link" href="{{ block.link_url }}" aria-label="{{ block.alt or block.caption or 'View image' }}"{% if block.link_target == 'new_tab' %} target="_blank" rel="noopener noreferrer"{% endif %}>
+        {% elif image_action == 'lightbox' %}<button type="button" class="friperi-image-link friperi-image-lightbox-trigger" aria-label="{{ block.alt or block.caption or 'Enlarge image' }}">
+        {% endif %}
           <span class="friperi-image-frame"><img src="{{ block.url }}" alt="{{ block.alt }}" loading="{{ appearance.get('loading', 'lazy') }}" decoding="{{ appearance.get('decoding', 'async') }}" fetchpriority="{{ appearance.get('fetch_priority', 'auto') }}" /></span>
-        {% if block.link_url %}</a>{% endif %}
+        {% if image_link %}</a>{% elif image_action == 'lightbox' %}</button>{% endif %}
         {% if block.caption %}<figcaption>{{ block.caption }}</figcaption>{% endif %}
       </figure>
     {% elif block.type == 'video' and block.video %}
