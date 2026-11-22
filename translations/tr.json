@@ -577,5 +577,14 @@
   "builder.team_fit_contain": "Fotoğrafın tamamını göster",
   "builder.team_orientation": "Çerçeve yönü",
   "builder.team_landscape": "Yatay (geniş)",
-  "builder.team_portrait": "Dikey (uzun)"
+  "builder.team_portrait": "Dikey (uzun)",
+  "builder.divider_line_width": "Çizgi Kalınlığı (px)",
+  "builder.divider_line_style": "Çizgi Stili",
+  "builder.divider_line_color": "Çizgi Rengi",
+  "builder.divider_single": "Düz",
+  "builder.divider_dashed": "Kesikli",
+  "builder.divider_dotted": "Noktalı",
+  "builder.divider_wave": "Yumuşak dalga",
+  "builder.divider_wave_tight": "Sık dalga",
+  "builder.divider_zigzag": "Zikzak"
 }
