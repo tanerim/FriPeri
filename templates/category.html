@@ -4,7 +4,7 @@
 {% endblock %}
 
 {% block content %}
-<main class="page category-page category-{{ category['slug'] }} category-publication">
+<main class="page category-page category-{{ category['slug'] }} category-publication" data-archive-columns="{{ archive_design.columns }}" data-archive-card-style="{{ archive_design.card_style }}" {% if archive_style %}style="{{ archive_style }}"{% endif %}>
   <section class="category-archive" aria-labelledby="category-title">
     <div class="wide-container category-publication-inner">
       <header class="category-publication-header">
