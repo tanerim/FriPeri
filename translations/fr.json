@@ -529,5 +529,8 @@
   "builder.team_circle": "Ronde",
   "builder.two_column_hero": "Two Column Hero",
   "builder.two_column_first_heading": "Titre de la première colonne",
-  "builder.two_column_second_heading": "Titre de la deuxième colonne"
+  "builder.two_column_second_heading": "Titre de la deuxième colonne",
+  "builder.team_zoom": "Zoom",
+  "builder.team_reset_crop": "Réinitialiser le cadrage",
+  "builder.team_drag_help": "Faites glisser la photo pour choisir la zone visible. Réglez le zoom avec le curseur."
 }
