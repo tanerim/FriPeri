@@ -590,3 +590,16 @@
 .custom-image[data-image-hover=zoom] .friperi-image-figure:hover img,
 .custom-image[data-image-hover=lift] .friperi-image-figure:hover .friperi-image-frame{transform:none}
 }
+
+/* Native image lightbox: keyboard accessible (Escape), no external JS dependency. */
+.custom-image button.friperi-image-link{width:100%;margin:0;padding:0;border:0;background:none;cursor:zoom-in;text-align:inherit;color:inherit;font:inherit}
+.friperi-image-lightbox{
+  max-width:min(96vw,1500px);max-height:94dvh;width:max-content;
+  padding:52px 16px 16px;border:1px solid #e2e8f0;border-radius:14px;
+  background:#fff;color:#1b2f43;box-shadow:0 25px 90px #0b152c66;
+}
+.friperi-image-lightbox::backdrop{background:#07192ddd;backdrop-filter:blur(5px)}
+.friperi-image-lightbox img{display:block;max-width:calc(96vw - 32px);max-height:calc(94dvh - 130px);width:auto;height:auto;margin:auto;object-fit:contain;border-radius:7px}
+.friperi-image-lightbox-close{position:absolute;top:10px;right:12px;padding:7px 13px;border:1px solid #cbd5df;border-radius:8px;background:#f8fafc;color:#172536;cursor:pointer;font:inherit;font-size:13px}
+.friperi-image-lightbox-close:focus-visible{outline:3px solid #347f80;outline-offset:2px}
+.friperi-image-lightbox-caption{font-size:13px;line-height:1.5;text-align:center;color:#566677;max-width:85ch;margin:12px auto 0}
