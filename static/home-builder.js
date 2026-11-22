@@ -121,37 +121,98 @@
     canvas.children[selected]?.scrollIntoView({block:'nearest',behavior:'smooth'});
     canvas.children[selected]?.querySelector('[contenteditable],input')?.focus({preventScroll:true});
   }
-  function addSectionPreset(dark) {
-    const section = {
-      ...newBlock('section'),
-      tone: dark ? 'dark' : 'soft',
-      appearance:{
-        layout:'split', surface:'full', min_height:560, content_width:1440, padding_y:88,
-        gap:48, svg_pattern:dark ? 'ribbons' : 'grid', svg_opacity:dark ? 78 : 32, edge:'wave'
-      },
-      children:[
-        {...newBlock('section'), children:[
-          {...newBlock('heading'), level:blocks().length ? 'h2' : 'h1', text:t('starter_title'),
-            appearance:{font_size:96,font_weight:'heavy'}},
-          {...newBlock('text'), html:el('p','',t('starter_text')).outerHTML},
-          {...newBlock('section'), appearance:{layout:'actions',gap:14}, children:[
-            {...newBlock('button'), url:'/contact', appearance:{
-              variant:'solid',radius:12,icon:'none'
-            }},
-            {...newBlock('button'), text:t('section_secondary_action'), url:'/about',
-              appearance:{variant:'outline',radius:12,icon:'none'}}
-          ]}
-        ]},
-        newBlock('image')
-      ]
-    };
-    if (blockCount(blocks()) + blockCount([section]) > 80) return message(t('limit'),true);
+  // Ready-to-edit section presets; all use the regular, validated block schema.
+  const presetHeading=(title,level='h2')=>({
+    ...newBlock('heading'),level,text:title,appearance:{font_weight:'heavy'}
+  });
+  const presetText=value=>({...newBlock('text'),html:el('p','',value).outerHTML});
+  const presetButton=(text,url,variant='solid')=>({
+    ...newBlock('button'),text,url,
+    appearance:{variant,icon:'none',radius:12}
+  });
+  const presetSection=(children,layout='stack',tone='plain',appearance={})=>({
+    ...newBlock('section'),tone,
+    appearance:{layout,surface:'standard',gap:24,padding_y:20,...appearance},children
+  });
+  const insertSectionPreset=section=>{
+    if(blockCount(blocks())+blockCount([section])>80)return message(t('limit'),true);
     mutate(()=>{
-      selected=selected < 0 ? blocks().length : selected+1;
+      selected=selected<0?blocks().length:selected+1;
       blocks().splice(selected,0,section);
     });
     canvas.children[selected]?.scrollIntoView({block:'nearest',behavior:'smooth'});
-    canvas.children[selected]?.querySelector('.builder-hero-editor input')?.focus({preventScroll:true});
+  };
+  function makeHeroPreset(kind) {
+    if(kind==='friperi') {
+      const introduction=presetSection([
+        {...presetHeading('Make space for your next idea.','h1'),
+          accent:'Built with FriPeri.',
+          appearance:{font_size:88,font_weight:'heavy',accent_color:'#6dd2d0',accent_style:'color_only'}},
+        presetText('A beautiful home for your writing, projects and stories. Create, personalize and publish with FriPeri.'),
+        presetSection([presetButton('Discover FriPeri','/about'),presetButton('Get in touch','/contact','outline')],'actions')
+      ]);
+      return {
+        ...presetSection([introduction,newBlock('brand_logo')],'two','custom',{
+          surface:'full',content_width:1280,padding_y:110,padding_x:30,gap:38,
+          min_height:640,edge:'wave',edge_color:'#ffffff',
+          landing_style:'hero',svg_pattern:'ribbons',svg_primary:'#7161bd',
+          svg_secondary:'#6dd2d0',svg_opacity:72
+        }),background:'#142e52',foreground:'#ffffff'
+      };
+    }
+    if(kind==='designed') {
+      const feature=(title,copy)=>presetSection([
+        presetHeading(title,'h3'),presetText(copy)
+      ],'stack','white',{padding_y:28,padding_x:24,gap:12,radius:22});
+      return {
+        ...presetSection([
+          presetHeading('Designed for the way you create.'),
+          presetText('Everything you need to turn a great idea into a distinctive website.'),
+          presetSection([
+            feature('Visual Page Builder','Bring your ideas to life with flexible sections and content blocks.'),
+            feature('Color Templates','Build a consistent visual identity with curated palettes.'),
+            feature('Organized Publishing','Keep pages, categories and posts organized in one place.'),
+            feature('Media First','Make your content memorable with images and visual storytelling.'),
+            feature('Flexible Layouts','Begin with a layout and adapt it to your project.'),
+            feature('Publish Confidently','Preview your page and publish when it looks right.')
+          ],'three','plain',{gap:20,padding_y:22})
+        ],'stack','custom',{
+          surface:'full',content_width:1280,padding_y:90,padding_x:30,
+          gap:30,edge:'wave',edge_color:'#ffffff',landing_style:'features'
+        }),background:'#f7f5ff',foreground:'#142e52'
+      };
+    }
+    return {
+      ...presetSection([
+        presetHeading('For the curious. For the creative.'),
+        presetText('Publish articles, research updates, portfolios, project pages and personal stories. Your content should shape the site — not the other way around.'),
+        presetSection([presetButton('Start with an idea','/contact')],'actions')
+      ],'stack','custom',{
+        surface:'full',content_width:1100,padding_y:115,padding_x:30,
+        gap:30,edge:'wave',edge_color:'#ffffff',
+        landing_style:'contrast',svg_pattern:'waves',svg_primary:'#b5ecdd',
+        svg_secondary:'#ffffff',svg_opacity:58
+      }),background:'#6dd2d0',foreground:'#142e52'
+    };
+  }
+  function makeTwoColumnPreset(kind) {
+    const content=presetSection([
+      presetHeading('Your story starts here'),
+      presetText('Introduce your project, research or publication with a focused, readable paragraph.'),
+      presetButton('Explore more','/about')
+    ],'stack','plain',{padding_y:20,padding_x:20,gap:18});
+    const secondary=presetSection([
+      presetHeading('A second perspective'),
+      presetText('Add another idea, a complementary description or useful background information.'),
+      presetButton('Get in touch','/contact','outline')
+    ],'stack','plain',{padding_y:20,padding_x:20,gap:18});
+    const image={...newBlock('image'),alt:'Add a descriptive image'};
+    const children=kind==='text-text'?[content,secondary]:
+      kind==='image-text'?[image,content]:[content,image];
+    return presetSection(children,'two','soft',{
+      surface:'full',content_width:1280,padding_y:76,padding_x:30,
+      gap:44,vertical_align:'center',edge:'flat'
+    });
   }
   const symbols = {brand_logo:'✦',icon_button:'◎',section:'▥',heading:'H',text:'¶',list:'☷',table:'▦',image:'▧',video:'▷',button:'↗',quote:'❝',callout:'!',stats:'№',team:'♙',faq:'?',divider:'―',category:'▤',legacy_html:'<>'};
   Object.keys(symbols).forEach(type => {
@@ -160,40 +221,25 @@
     node.append(el('span','builder-block-symbol',symbols[type]),el('span','',type==='brand_logo'?'FriPeri Logo':type==='icon_button'?'Icon Button':t(type)));
     document.getElementById('builder-add-blocks').append(node);
   });
-  function addTwoColumnHero() {
-    const makeColumn = (heading, text, url) => ({
-      ...newBlock('section'),
-      appearance:{layout:'stack', surface:'standard', gap:22, padding_y:12, padding_x:12},
-      children:[
-        {...newBlock('heading'), level:blocks().length ? 'h2' : 'h1', text:heading},
-        {...newBlock('text'), html:el('p','',text).outerHTML},
-        {...newBlock('button'), text:t('starter_button'), url}
-      ]
-    });
-    const section = {
-      ...newBlock('section'),
-      tone:'soft',
-      appearance:{layout:'two',surface:'full',content_width:1440,padding_y:72,gap:40,edge:'flat'},
-      children:[
-        makeColumn(t('two_column_first_heading'),t('starter_text'),'/contact'),
-        makeColumn(t('two_column_second_heading'),t('starter_text'),'/about')
-      ]
-    };
-    if (blockCount(blocks()) + blockCount([section]) > 80) return message(t('limit'),true);
-    mutate(()=>{
-      selected=selected<0 ? blocks().length : selected+1;
-      blocks().splice(selected,0,section);
-    });
-    canvas.children[selected]?.scrollIntoView({block:'nearest',behavior:'smooth'});
-  }
   const presets = document.getElementById('builder-section-presets');
-  for (const [theme,key] of [['dark','section_split_preset'],['two-column','two_column_hero'],['light','section_light_preset']]) {
-    const preset=button('',()=>theme === 'two-column' ? addTwoColumnHero() : addSectionPreset(theme === 'dark'),'builder-preset');
-    preset.dataset.theme=theme;
+  const sectionPresetOptions = [
+    {id:'hero-friperi',title:'FriPeri Hero',hint:'Branded split hero with logo',create:()=>makeHeroPreset('friperi')},
+    {id:'hero-features',title:'Feature Cards Hero',hint:'Designed for the way you create',create:()=>makeHeroPreset('designed')},
+    {id:'hero-creative',title:'Creative Hero',hint:'For the curious. For the creative',create:()=>makeHeroPreset('curious')},
+    {id:'two-text',title:'Two Column Text',hint:'Two balanced text columns',create:()=>makeTwoColumnPreset('text-text')},
+    {id:'two-image-text',title:'Two Column Image + Text',hint:'Image on left, copy on right',create:()=>makeTwoColumnPreset('image-text')},
+    {id:'two-text-image',title:'Two Column Text + Image',hint:'Copy on left, image on right',create:()=>makeTwoColumnPreset('text-image')}
+  ];
+  for(const option of sectionPresetOptions){
+    const preset=button('',()=>insertSectionPreset(option.create()),'builder-preset');
+    preset.dataset.theme=option.id;
+    preset.title=option.hint;
     const thumbnail=el('span','builder-preset-thumbnail');
     thumbnail.setAttribute('aria-hidden','true');
     thumbnail.append(el('span','builder-preset-copy'),el('span','builder-preset-visual'));
-    preset.append(thumbnail,el('span','builder-preset-label',t(key)),el('span','builder-preset-add','+'));
+    const copy=el('span','builder-preset-info');
+    copy.append(el('span','builder-preset-label',option.title),el('small','builder-preset-hint',option.hint));
+    preset.append(thumbnail,copy,el('span','builder-preset-add','+'));
     preset.lastChild.setAttribute('aria-hidden','true');
     presets.append(preset);
   }
