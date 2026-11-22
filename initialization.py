@@ -155,6 +155,8 @@ def migrate_database(path: Path, settings=None, username=None, password=None) ->
             created_at TEXT NOT NULL
         )""")
         # Role-based access control: legacy users retain full administrator access.
+        # Per-category archive presentation, independent of site-wide Design colors.
+        add_column(conn, "categories", "archive_design_json", "TEXT NOT NULL DEFAULT '{}'")
         add_column(conn, "users", "role", "TEXT NOT NULL DEFAULT 'admin'")
         add_column(conn, "users", "session_epoch", "INTEGER NOT NULL DEFAULT 0")
         add_column(conn, "posts", "author_id", "INTEGER REFERENCES users(id) ON DELETE SET NULL")
