@@ -52,6 +52,27 @@ APPEARANCE_FIELDS = {
                     'border_width': (0, 8), 'border_color': 'color',
                     'padding_x': (0, 96), 'padding_y': (0, 48),
                     'target': ('same_tab', 'new_tab')},
+    'image': {
+        'fit': ('cover', 'contain', 'fill', 'scale-down'),
+        'ratio': ('original', 'square', 'four_three', 'three_two', 'wide', 'portrait', 'cinema'),
+        'position': ('center', 'top', 'bottom', 'left', 'right',
+                     'top_left', 'top_right', 'bottom_left', 'bottom_right'),
+        'width_mode': ('auto', 'full', 'custom'),
+        'width_px': (100, 1920),
+        'height_px': (0, 1200),
+        'radius': (0, 120),
+        'border_width': (0, 16),
+        'border_color': 'color',
+        'frame_background': 'color',
+        'padding': (0, 80),
+        'shadow': ('none', 'soft', 'medium', 'strong'),
+        'hover': ('none', 'zoom', 'lift'),
+        'caption_align': ('left', 'center', 'right'),
+        'caption_size': (10, 32),
+        'loading': ('lazy', 'eager'),
+        'decoding': ('async', 'auto', 'sync'),
+        'fetch_priority': ('auto', 'high', 'low'),
+    },
     'quote': {'font_size': (12, 72), 'attribution_size': (10, 36), 'quote_color': 'color',
               'attribution_color': 'color', 'border_color': 'color', 'border_width': (0, 12),
               'font_style': ('normal', 'italic')},
@@ -442,6 +463,15 @@ def _validate_blocks(data, depth, remaining, anchors):
                 raise ValueError('Invalid media URL')
             block['caption'] = text(item.get('caption', ''), 500)
             block['alt'] = text(item.get('alt', ''), 500)
+            if kind == 'image':
+                link_url = text(item.get('link_url', ''), 2048)
+                block['link_url'] = (link_url if re.fullmatch(
+                    r'#[A-Za-z][A-Za-z0-9_-]{0,79}', link_url
+                ) else safe_url(link_url))
+                if link_url and not block['link_url']:
+                    raise ValueError('Invalid image link URL')
+                block['link_target'] = ('new_tab' if item.get('link_target') == 'new_tab'
+                                        else 'same_tab')
         elif kind in {'button', 'icon_button'}:
             if kind == 'icon_button':
                 icon_name = item.get('icon_name', 'house')
