@@ -388,6 +388,10 @@
 }
 .custom-divider-line.style-dashed hr { border-top-style:dashed; }
 .custom-divider-line.style-dotted hr { border-top-style:dotted; }
+.custom-divider-wave path {
+  stroke:var(--divider-color);
+  stroke-width:var(--divider-width);
+}
 .custom-divider-wave {
   display:block;
   width:100%;
