@@ -720,3 +720,27 @@
   color: #a9bad5;
   font-size: 11px;
 }
+
+/* Explain which site elements each global Design palette controls. */
+.hyperui-admin .design-scope-help {
+  color:#65748a;
+  font-size:12px;
+  line-height:1.6;
+  font-weight:400;
+  margin:6px 0 10px;
+  max-width:80ch;
+}
+.hyperui-admin .cms-design-page .cms-color-field {
+  display:flex;
+  flex-direction:column;
+  align-items:flex-start;
+  gap:8px;
+  min-width:0;
+}
+.hyperui-admin .cms-design-page .cms-color-field small,
+.hyperui-admin .cms-design-page .settings-grid-v3 label small {
+  display:block;
+  font-size:12px;
+  line-height:1.5;
+  color:#65748a;
+}
