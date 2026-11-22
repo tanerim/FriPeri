@@ -535,5 +535,8 @@
   "builder.team_drag_help": "Foto ziehen, um den sichtbaren Ausschnitt zu wählen. Mit dem Regler zoomen.",
   "builder.team_fit": "Bildanpassung",
   "builder.team_fit_cover": "Rahmen füllen (Zuschnitt)",
-  "builder.team_fit_contain": "Ganzes Foto zeigen"
+  "builder.team_fit_contain": "Ganzes Foto zeigen",
+  "builder.team_orientation": "Rahmenausrichtung",
+  "builder.team_landscape": "Querformat (breit)",
+  "builder.team_portrait": "Hochformat (hoch)"
 }
