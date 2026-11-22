@@ -619,13 +619,17 @@
         input.value=block.appearance?.[key] ?? '';
         input.addEventListener('change',()=>set(key,input.value || undefined));
       } else {
-        input=el('input'); input.type=kind==='color'?'color':'number';
+        input=el('input');
+        input.type=key==='accent_opacity'?'range':kind==='color'?'color':'number';
         if(kind==='color') input.value=block.appearance?.[key] || max;
-        else { input.min=kind;input.max=max;input.step=1;input.placeholder=String(fallback);input.value=block.appearance?.[key] ?? ''; }
+        else { input.min=kind;input.max=max;input.step=1;input.placeholder=String(fallback);input.value=block.appearance?.[key] ?? (key==='accent_opacity'?100:''); }
+        const percentage=key==='accent_opacity' ? el('output','builder-color-opacity-value',String(input.value)+'%') : null;
         input.addEventListener('input',()=>{
           if(input.value==='') set(key,undefined);
           else if(input.checkValidity()) set(key,kind==='color'?input.value:Number(input.value));
+          if(percentage)percentage.textContent=String(input.value)+'%';
         });
+        if(percentage)label.append(percentage);
       }
       label.append(input);panel.append(label);
     });
