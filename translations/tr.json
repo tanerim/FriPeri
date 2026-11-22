@@ -636,5 +636,6 @@
   "design.help_color_separator_3": "Dekoratif bölüm ayraçlarının üçüncü rengi.",
   "design.help_color_footer_bg": "Tüm sayfalarda footer arka planı.",
   "design.help_color_footer_text": "Footer yazıları ve bağlantılarının renk tonu.",
-  "design.help_color_footer_border": "Footer üst kenarlık/ayraç rengi."
+  "design.help_color_footer_border": "Footer üst kenarlık/ayraç rengi.",
+  "cms_design.open": "Kategoriyi aç"
 }
