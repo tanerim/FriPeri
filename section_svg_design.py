@@ -5,7 +5,6 @@ The same renderer is used for the editor preview and persisted public images.
 """
 from __future__ import annotations
 
-import html
 import math
 
 
@@ -42,35 +41,76 @@ def render_svg(o: dict) -> str:
                          f"{i * 12:.1f},{y + math.sin(i / 120 * math.pi * 2 * frequency + phase) * h:.1f}")
                         for i in range(121))
 
-    if pattern == "waves":
-        for j, color in enumerate(colors):
-            y = 380 + (j - (len(colors) - 1) / 2) * (amplitude * 2 + 42)
-            d = wave(y, j * 1.15) + " L1440,760 L0,760 Z"
-            path(d, color, 0.36 + 0.11 * (j % 3))
-    elif pattern == "ribbons":
-        for j, color in enumerate(colors):
-            y = 180 + j * 95
-            high = wave(y, j * 0.75, amplitude * 2.3)
-            low = " ".join(f"L{i*12:.1f},{y+72+math.sin(i/120*math.pi*2*frequency+j*.75)*amplitude*2.3:.1f}"
-                           for i in range(120, -1, -1))
-            path(high + " " + low + " Z", color, .42 + .11 * (j % 3))
+    # Preserve the original FriPeri shapes as the aesthetic foundation.
+    # These are deliberately large, quiet Bézier surfaces rather than
+    # repeated sinusoidal bands competing with foreground content.
+    if pattern == "ribbons":
+        bend = (frequency - 3) * 12
+        lift = (amplitude - 45) * 1.4
+        ribbons = [
+            (f"M870-140h240C{890+bend:.1f} {30+lift:.1f} "
+             f"{1180+bend:.1f} {290+lift:.1f} 1550 290v240"
+             f"C{1100-bend:.1f} {590-lift:.1f} "
+             f"{615-bend:.1f} {175-lift:.1f} 870-140Z", .72),
+            (f"M1060-100h220c45 235 140 345 320 470v280"
+             f"C{1235-bend:.1f} {465+lift:.1f} "
+             f"{1050-bend:.1f} {220+lift:.1f} 1060-100Z", .68),
+            (f"M-130 750C{265+bend:.1f} {620-lift:.1f} "
+             f"{330+bend:.1f} {410-lift:.1f} 474 230"
+             f"C595 80 718 32 910-30h90"
+             f"C756 85 646 157 570 342"
+             f"C470 590 348 741 130 830h-260Z", .30),
+        ]
+        # Third and fourth colors are optional translucent accents, not
+        # additional fully opaque stripes.
+        for j, (d, alpha) in enumerate(ribbons):
+            path(d, colors[j % len(colors)], alpha)
+        if len(colors) >= 3:
+            path("M1110-100h220C1210 160 1350 340 1540 410v200C1300 500 1100 240 1110-100Z",
+                 colors[2], .16)
+        if len(colors) >= 4:
+            path("M-100 755C220 650 370 370 520 180C410 405 280 690 40 820h-140Z",
+                 colors[3], .13)
+    elif pattern == "waves":
+        bend = (frequency - 3) * 15
+        lift = (amplitude - 45) * 1.5
+        path((f"M0 500c{275+bend:.1f} {-140-lift:.1f} "
+              f"{330+bend:.1f} {145+lift:.1f} 645 66 "
+              f"c{303-bend:.1f} {-76-lift:.1f} "
+              f"{420-bend:.1f} {-239-lift:.1f} 795-81v275H0Z"),
+             colors[0], .60)
+        path((f"M0 670c{341+bend:.1f} {79-lift:.1f} "
+              f"{476+bend:.1f} {-126-lift:.1f} 757-96 "
+              f"c{247-bend:.1f} {26+lift:.1f} "
+              f"{415-bend:.1f} {135+lift:.1f} 683 18v168H0Z"),
+             colors[1], .68)
+        if len(colors) >= 3:
+            path("M0 710C300 635 570 735 850 625S1210 655 1440 600v160H0Z",
+                 colors[2], .17)
+        if len(colors) >= 4:
+            path("M0 744C380 690 650 740 990 702S1260 736 1440 690v70H0Z",
+                 colors[3], .14)
     elif pattern in ("grid", "mesh"):
-        step = max(15, round(1440 / (density * 4)))
+        step = max(24, round(640 / density))
         lines = []
-        for x in range(0, 1441, step):
+        for x in range(step, 1441, step):
             lines.append(f"M{x} 0V760")
-        for y in range(0, 761, step):
+        for y in range(step - 20, 761, step):
             lines.append(f"M0 {y}H1440")
-        path(" ".join(lines), colors[0], .54 if pattern == "grid" else .28, False)
+        path(" ".join(lines), colors[0], .28 if pattern == "grid" else .20, False)
         if pattern == "mesh":
-            for j in range(1, density * 2):
-                points = []
-                for i in range(0, 1441, 24):
-                    yy = 180 + j * (400 / (density * 2)) + math.sin(i / 1440 * math.pi * 2 * frequency + j * .5) * amplitude
-                    points.append(("M" if i == 0 else "L") + f"{i},{yy:.1f}")
-                path(" ".join(points), colors[(j % len(colors))], .35, False)
+            # Curved, light meshes should not obscure titles and body text.
+            count = max(2, density // 2)
+            for j in range(count):
+                y = 180 + j * (420 / count)
+                path(wave(y, j * .32, amplitude * .8),
+                     colors[(j + 1) % len(colors)], .22, False)
         else:
-            path("M900 0H1440V540Z", colors[-1], .14)
+            path("M1440 0v540L820 0Z", colors[1], .16)
+            if len(colors) >= 3:
+                path("M1440 0v230L1160 0Z", colors[2], .10)
+            if len(colors) >= 4:
+                path("M0 760v-190L210 760Z", colors[3], .08)
     elif pattern == "dots":
         for row in range(density * 3):
             for col in range(density * 5):
