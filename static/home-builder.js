@@ -903,7 +903,7 @@
         Array.from(canvas.children).forEach((node,i)=>node.classList.toggle('is-selected',i===index));
       });
       const hero=heroContent(block);
-      const label=String(index+1).padStart(2,'0')+' / '+t(hero ? 'hero_section' : block.type);
+      const label=String(index+1).padStart(2,'0')+' / '+(block.type==='icon_button'?'Icon Button':t(hero ? 'hero_section' : block.type));
       const header=el('header','builder-block-header');
       const toggle=button('',()=>{
         if (collapsedBlocks.has(block)) collapsedBlocks.delete(block);
@@ -1262,8 +1262,6 @@
     ];
     layouts.forEach(([name,description,build],i)=>{
       const item=button('',()=>{},'page-layout-tile');
-      // Replace the default handler with a deliberate template action.
-      item.textContent='';
       item.dataset.layoutIndex=String(i);
       const sketch=el('span','page-layout-sketch sketch-'+i);
       for(let k=0;k<4;k++)sketch.append(el('i'));
