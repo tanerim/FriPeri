@@ -132,7 +132,7 @@ Use the **Add a block** palette in the wide left column to insert content after 
 | Block | Purpose |
 | --- | --- |
 | Category list | Show the latest published items from a selected category. |
-| Heading | Add an H1, H2, or H3 heading. |
+| Heading | Add an H1, H2, or H3 heading. The optional highlighted text can stay inline or move to a new line, with separate highlight color and opacity. |
 | Text | Compose rich text with headings, lists, tables, quotations, code, links, colors, and embedded images. |
 | List | Add a bulleted or numbered list. |
 | Table | Edit cells, add or remove rows and columns, and supply a caption. |
@@ -149,7 +149,7 @@ Use the **Add a block** palette in the wide left column to insert content after 
 
 Above the block list, **Split hero section** inserts the existing text-and-image hero. Directly underneath it, **Two Column Hero** inserts two equal-width columns, each with editable heading, text, and button blocks. Both columns stack on small screens; use the section layout controls to change the arrangement. The existing Light split hero remains available.
 
-A **Divider** block provides **Line Width** (2–20 px), **Line Style** (Single, Dashed, Dotted, Smooth wave, Tight wave, Zigzag), and **Line Color** controls. The editor previews changes before saving. Wave variants use generated SVG strokes; no arbitrary SVG markup is accepted. Existing Divider blocks default to a 2 px solid line.
+A **Heading** block has a separate **Highlighted text** field. Use **Highlighted text position → New line** to put the colored phrase beneath the main heading, or **Same line** to retain the existing appearance. **Highlight opacity** (0–100%) is an independent slider alongside the native color picker. This avoids relying on the browser's not-yet-universal `<input type="color" alpha>` support and keeps the saved highlight color as a validated six-digit hexadecimal value. Existing headings retain their normal same-line, opaque highlights.\n\nA **Divider** block provides **Line Width** (2–20 px), **Line Style** (Single, Dashed, Dotted, Smooth wave, Tight wave, Zigzag), and **Line Color** controls. The editor previews changes before saving. Wave variants use generated SVG strokes; no arbitrary SVG markup is accepted. Existing Divider blocks default to a 2 px solid line.
 
 A **Team** block follows the Statistics block's repeatable-item workflow. Each person has three content fields: a photo (upload or secure image URL), full name, and title. Choose **Rectangle** or **Circle** for each portrait. You can add or remove up to eight members, use the **↑ / ↓** buttons beside each member to change their order, and preview the responsive grid. For each rectangle, choose **Landscape (wide, 4:3)** or **Portrait (tall, 3:4)**; the circular photo stays square. The larger editor preview acts as a fixed frame: drag the photograph inside it to adjust the visible area. Choose **Fill frame (crop)** or **Full photo (no crop)**, adjust **Zoom** (100–300%), or use **Reset frame** to restore the center and zoom. The chosen position and zoom are saved with the block; the original uploaded photo is not overwritten, so you can reframe it later.
 
