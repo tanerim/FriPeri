@@ -430,3 +430,65 @@
   .hyperui-admin .builder-team-order { grid-column:1/-1;flex-direction:row; }
   .hyperui-admin .builder-team-order .builder-tool { min-width:45px; }
 }
+
+/* Team photo workspace: large, draggable frame with landscape/portrait choices. */
+.hyperui-admin .builder-canvas .custom-block.custom-team {
+  max-width:none;
+  width:calc(100% - 24px);
+}
+.hyperui-admin .builder-team-grid .builder-team-member {
+  grid-template-columns:minmax(180px,240px) minmax(240px,1fr) minmax(65px,auto);
+  align-items:start;
+}
+.hyperui-admin .builder-team-portrait {
+  position:relative;
+  width:100%;
+  min-width:0;
+  aspect-ratio:4/3;
+  border:1px solid #cbd8e8;
+  border-radius:12px;
+  background:#e9eff3;
+  overflow:hidden;
+  display:grid;
+  place-items:center;
+  touch-action:none;
+  cursor:grab;
+}
+.hyperui-admin .builder-team-portrait[data-shape=rectangle][data-orientation=portrait] {
+  aspect-ratio:3/4;
+}
+.hyperui-admin .builder-team-portrait[data-shape=rectangle][data-orientation=landscape] {
+  aspect-ratio:4/3;
+}
+.hyperui-admin .builder-team-portrait[data-shape=circle] {
+  width:min(100%,220px);
+  aspect-ratio:1;
+  border-radius:50%;
+}
+.hyperui-admin .builder-team-portrait img {
+  display:block;
+  width:100%;
+  height:100%;
+  min-width:100%;
+  min-height:100%;
+  object-fit:cover;
+  border-radius:0;
+  user-select:none;
+  pointer-events:none;
+}
+.hyperui-admin .builder-team-controls { grid-template-columns:repeat(2,minmax(0,1fr)); }
+.hyperui-admin .builder-team-crop-controls .builder-select { flex:1 1 180px; }
+.hyperui-admin .builder-team-order { min-width:66px; }
+@media(max-width:880px) {
+  .hyperui-admin .builder-team-grid .builder-team-member {
+    grid-template-columns:minmax(130px,205px) minmax(0,1fr);
+  }
+  .hyperui-admin .builder-team-order { grid-column:1/-1;flex-direction:row; }
+}
+@media(max-width:540px) {
+  .hyperui-admin .builder-team-grid .builder-team-member {
+    grid-template-columns:1fr;
+  }
+  .hyperui-admin .builder-team-portrait { max-width:260px; justify-self:center; }
+  .hyperui-admin .builder-team-controls { grid-template-columns:1fr; }
+}
