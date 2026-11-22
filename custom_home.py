@@ -347,6 +347,16 @@ def _validate_blocks(data, depth, remaining, anchors):
                     if raw_photo and not member['photo']:
                         raise ValueError('Invalid team member photo')
                     member['shape'] = entry.get('shape') if entry.get('shape') in ('circle', 'rectangle') else 'rectangle'
+                    # Non-destructive crop: zoom and focal point survive editing and publication.
+                    for key, default, minimum, maximum in (
+                        ('zoom', 1.0, 1.0, 3.0),
+                        ('focal_x', 50.0, 0.0, 100.0),
+                        ('focal_y', 50.0, 0.0, 100.0),
+                    ):
+                        value = entry.get(key, default)
+                        if isinstance(value, bool) or not isinstance(value, (int, float)) or not minimum <= value <= maximum:
+                            raise ValueError('Invalid team photo crop')
+                        member[key] = round(float(value), 2)
                 block['items'].append(member)
         elif kind == 'list':
             items = item.get('items', [])
