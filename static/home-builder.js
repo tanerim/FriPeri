@@ -58,6 +58,7 @@
     document.getElementById('builder-undo').disabled ||= busy > 0;
     document.getElementById('builder-redo').disabled ||= busy > 0;
     document.getElementById('builder-starter').disabled = busy > 0;
+    if (collapseAllButton) collapseAllButton.disabled=busy>0 || !blocks().length;
     document.dispatchEvent(new CustomEvent('homepage:builder-busy', {detail: busy > 0}));
   }
   function checkpoint() {
@@ -893,6 +894,7 @@
     if (!blocks().length) { const empty = el('div','builder-empty');empty.append(el('span','builder-block-symbol','＋'),el('h2','',t('empty')),el('p','',t('add_help')));canvas.append(empty); }
     renderBlocks(blocks(),canvas,0);
     updateStatus();
+    updateCollapseAll();
   }
 
   function renderBlocks(items, container, depth) {
@@ -1239,6 +1241,22 @@
       card.append(body); if(imageControls) card.append(imageControls); container.append(card);
     });
   }
+  const collapseAllButton=document.getElementById('builder-collapse-all');
+  const allBlocks=(items)=>items.flatMap(block=>[block,...allBlocks(block.children || [])]);
+  const updateCollapseAll=()=>{
+    if (!collapseAllButton) return;
+    const every=allBlocks(blocks());
+    const collapsed=every.length>0 && every.every(block=>collapsedBlocks.has(block));
+    collapseAllButton.textContent=collapsed?'Expand All':'Collapse All';
+    collapseAllButton.setAttribute('aria-expanded',String(!collapsed));
+    collapseAllButton.disabled=busy>0 || every.length===0;
+  };
+  collapseAllButton?.addEventListener('click',()=>{
+    const every=allBlocks(blocks());
+    const shouldCollapse=!every.every(block=>collapsedBlocks.has(block));
+    every.forEach(block=>shouldCollapse?collapsedBlocks.add(block):collapsedBlocks.delete(block));
+    render();
+  });
   document.getElementById('builder-language').addEventListener('change',event=>{checkpoint();language=event.target.value;selected=-1;document.querySelectorAll('[data-builder-language-fields]').forEach(node=>{node.hidden=node.dataset.builderLanguageFields!==language;});render();});
   document.getElementById('builder-undo').addEventListener('click',()=>{checkpoint();if(cursor>0){documents=JSON.parse(history[--cursor]);selected=-1;render();}});
   document.getElementById('builder-redo').addEventListener('click',()=>{if(cursor<history.length-1){documents=JSON.parse(history[++cursor]);selected=-1;render();}});
@@ -1258,7 +1276,49 @@
       ['Landing Page','Hero, benefits, call to action and FAQ',()=>[section([h('Ideas deserve a home.','h1'),p('Explain the value of your work in one clear sentence.'),action('Get started','/contact')],'stack','soft'),section([h('Why it matters'),p('Describe your goals and intended audience.')],'two'),{...newBlock('faq'),items:[{question:'How does it work?',answer:'Add your answer here.'}]}]],
       ['Publication','Abstract, article sections and references',()=>[h('Publication title','h1'),p('Authors · Year · Publication'),h('Abstract'),p('Summarize the main contribution.'),h('Introduction'),p('Provide context and theoretical background.'),h('Methods'),p('Describe the research design.'),h('Results'),p('Explain the findings.'),h('References'),p('List cited works here.')]],
       ['Team & Lab','Mission, team cards and collaboration',()=>[h('Meet our team','h1'),p('Introduce your research group and its mission.'),{...newBlock('team'),items:[{photo:'',name:'Team member',title:'Researcher',shape:'rectangle',orientation:'portrait',fit:'cover',zoom:1,focal_x:50,focal_y:50}]},h('Our mission'),p('What brings the group together?'),action('Collaborate with us','/contact')]],
-      ['Minimal Portfolio','Simple introduction, gallery and contact',()=>[h('Selected work','h1'),p('A concise introduction to your portfolio.'),section([picture(),picture()],'two'),h('What I do'),p('Describe your work and expertise.'),action('Contact','/contact')]]
+      ['Minimal Portfolio','Simple introduction, gallery and contact',()=>[h('Selected work','h1'),p('A concise introduction to your portfolio.'),section([picture(),picture()],'two'),h('What I do'),p('Describe your work and expertise.'),action('Contact','/contact')]],
+      ['FriPeri — Full Landing','A complete FriPeri introduction, features, workflow and FAQ',()=>[
+        {...section([h('Ideas deserve a home.','h1'),p('Meet FriPeri: a flexible publishing framework for pages, posts and stories. Design, organize and publish content with an approachable visual editor.'),section([action('Discover FriPeri','/about'),action('Get in touch','/contact')],'actions')],'split','soft'),appearance:{layout:'split',surface:'full',gap:36,padding_y:88,content_width:1440,edge:'wave',svg_pattern:'ribbons',svg_opacity:38}},
+        section([h('Build a website that feels like yours'),p('Start with a ready-to-edit page layout, customize individual blocks and create a look that fits your story.')]),
+        section([
+          section([h('Visual page builder','h3'),p('Compose pages from headings, text, images and flexible content sections.')]),
+          section([h('Color templates','h3'),p('Explore coordinated palettes and fine-tune the colors of your website.')]),
+          section([h('Organized publishing','h3'),p('Manage pages, categories and posts from one place.')])
+        ],'three','soft'),
+        section([section([h('Your content, your layout'),p('Mix media and text, tailor the appearance of each section and preview your changes.'),action('Explore more','/about')]),section([picture()])],'two'),
+        section([h('How it works'),section([h('1. Choose a layout','h3'),p('Begin with a page template or a blank canvas.')],'stack'),section([h('2. Make it yours','h3'),p('Adjust the design, add media and edit each block.')],'stack'),section([h('3. Publish','h3'),p('Preview your work, then publish when you are ready.')],'stack')],'stack','soft'),
+        section([h('Made for stories worth sharing'),p('Publish research updates, project pages, personal writing and more.'),picture()]),
+        h('Frequently asked questions'),
+        {...newBlock('faq'),items:[
+          {question:'Can I customize the colors?',answer:'Yes. Choose a color template in Design, then edit individual colors as needed.'},
+          {question:'Can I edit a page after publishing?',answer:'Yes. Return to the visual editor to update blocks and publish your changes.'},
+          {question:'Can I build a page without coding?',answer:'Yes. Arrange the available content blocks directly in the editor.'}
+        ]},
+        section([h('Ready to create?'),p('Bring your ideas, research and stories together in one place.'),action('Contact us','/contact')],'stack','soft')
+      ]],
+      ['Event & Workshop','A workshop announcement, program, speakers and registration',()=>[
+        section([h('Join our upcoming event','h1'),p('Add the date, venue and a brief invitation to your workshop.'),action('Register interest','/contact')],'stack','soft'),
+        h('What to expect'),p('Introduce the event, who it is for and what participants will learn.'),
+        section([section([h('Session 1','h3'),p('Opening talk and introduction.')]),section([h('Session 2','h3'),p('Hands-on activities and discussion.')]),section([h('Session 3','h3'),p('Questions and closing.')])],'three'),
+        h('Speakers'),{...newBlock('team'),items:[{photo:'',name:'Speaker name',title:'Role or affiliation',shape:'rectangle',orientation:'portrait',fit:'cover',zoom:1,focal_x:50,focal_y:50}]},
+        h('Event details'),p('Add time, location, accessibility and participation information.'),action('Ask a question','/contact')
+      ]],
+      ['Services & Solutions','Offerings, benefits, process and a contact call to action',()=>[
+        section([h('Solutions built around your needs','h1'),p('Introduce your expertise and explain the outcomes you help visitors achieve.'),action('Start a conversation','/contact')],'split','soft'),
+        h('What we offer'),
+        section([section([h('Consulting','h3'),p('Explain the problems you help solve.')]),section([h('Analysis','h3'),p('Describe your analytical methods and deliverables.')]),section([h('Training','h3'),p('Outline workshops or knowledge-sharing activities.')])],'three'),
+        h('How we work'),{...newBlock('list'),items:['Understand the question and goals','Choose the right approach','Deliver clear, actionable outcomes']},
+        section([h('Let us talk about your project'),p('Share your goals and find out how we could collaborate.'),action('Contact','/contact')],'stack','soft')
+      ]],
+      ['Resources & Knowledge Hub','Curated guides, learning paths, downloads and FAQs',()=>[
+        section([h('Explore our resources','h1'),p('A home for guides, methods, practical notes and useful materials.')],'stack','soft'),
+        h('Start learning'),
+        section([section([h('Getting started','h3'),p('Add an introductory guide and a link to its full page.'),action('Read guide','/about')]),section([h('Methods','h3'),p('Introduce your methodological resources.'),action('Learn more','/about')]),section([h('Tools','h3'),p('Showcase utilities and reusable materials.'),action('Explore tools','/about')])],'three'),
+        h('Featured resources'),section([picture(),section([h('Resource spotlight','h3'),p('Highlight an especially useful publication, dataset or learning resource.')])],'two'),
+        h('Frequently asked questions'),
+        {...newBlock('faq'),items:[{question:'Where should I begin?',answer:'Choose a topic above and follow its introductory guide.'}]},
+        action('Ask us','/contact')
+      ]]
     ];
     layouts.forEach(([name,description,build],i)=>{
       const item=button('',()=>{},'page-layout-tile');
