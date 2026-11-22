@@ -106,7 +106,7 @@
   function newBlock(type) {
     const common = {type, tone:'plain', align:'left', width:'normal'};
     return Object.assign(common, {
-      section:{width:'wide',children:[],image:'',anchor:'',appearance:{}},
+      section:{width:'wide',children:[],image:'',anchor:'',appearance:{surface:'full',height_mode:'viewport',vertical_align:'center',layout:'stack',content_width:1240}},
       category:{category:config.categories[0]?.slug || '',count:4},
       heading:{text:t('heading_hint'),level:'h2'}, text:{html:'',foreground:''},
       list:{items:[t('item')],ordered:false}, table:{rows:[[t('heading'),t('heading')],[t('item'),t('item')]],caption:''},
@@ -710,6 +710,7 @@
   const sectionControls = [
     ['section_layout', [
       ['layout',['stack','two','split','reverse_split','three','six','actions']],['surface',['standard','full']],
+       ['height_mode',['viewport','auto','custom']],
       ['vertical_align',['start','center','end']],['content_width',360,1920,1240],['min_height',0,1200,0],
       ['padding_y',0,200,68],['padding_x',0,120,42],['gap',0,100,24],['radius',0,120,20]
     ]],
@@ -821,6 +822,7 @@
     if (block.type === 'section') {
       Object.assign(body.dataset, {
         layout:appearance.layout || 'stack', surface:appearance.surface || 'standard',
+        heightMode:appearance.height_mode || 'auto',
         vertical:appearance.vertical_align || 'center', fit:appearance.background_fit || 'cover',
         position:appearance.background_position || 'center', edge:appearance.edge || 'flat', landingStyle:appearance.landing_style || 'none'
       });
@@ -1256,7 +1258,19 @@
       actions.append(up,down,copy,remove);
       header.append(actions); card.append(header);
       const styles=el('div','builder-style-controls');
-      for (const [key,values] of [['tone',['plain','soft','accent','dark','white','custom']],['align',['left','center','right']],['width',['normal','wide']]])styles.append(select(t(key),block[key],values.map(v=>[v,t(v)]),v=>{block[key]=v;}));
+      for (const [key,values] of [['tone',['plain','soft','accent','dark','white','page','navigation','secondary','custom']],['align',['left','center','right']],['width',['normal','wide']]]) {
+          const label=value=>{
+            if(key!=='tone')return t(value);
+            return ({
+              plain:'Transparent',soft:'Theme accent (soft)',accent:'Theme feature color',
+              dark:'Theme navigation (dark)',white:'White',page:'Theme page background',
+              navigation:'Theme navigation color',secondary:'Theme secondary accent',custom:'Custom color'
+            })[value]||t(value);
+          };
+          styles.append(select(t(key),block[key],values.map(v=>[v,label(v)]),v=>{
+            block[key]=v;
+          }));
+        }
       // Text/color picker — always available for any block type
       if(block.type!=='divider'){
         const textColorPicker = field(t('color_selection'),block.foreground||'#17243b',v=>{block.foreground=v;card.querySelector('.custom-block').style.setProperty('--text-color',v);},'color');

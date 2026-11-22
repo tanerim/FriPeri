@@ -574,3 +574,29 @@
 .hyperui-admin .builder-inline-position-button{grid-column:1/-1;justify-self:start;border:1px solid #a9b9d7;border-radius:8px;background:#fff;padding:9px 12px;color:#233f66;cursor:pointer}
 .hyperui-admin .builder-inline-position-button:focus-visible{outline:3px solid #5145d5;outline-offset:3px}
 .hyperui-admin .builder-inline-images .builder-inline-image-controls select{max-width:100%}
+
+/* Make the Builder accurately preview section columns and vertical placement. */
+.hyperui-admin .builder-canvas .custom-section[data-height-mode=viewport]{
+  min-height:min(72svh,720px);
+}
+.hyperui-admin .builder-canvas .custom-section[data-height-mode=auto]{min-height:0}
+.hyperui-admin .builder-canvas .custom-section[data-height-mode=custom]{min-height:var(--block-min-height,0px)}
+.hyperui-admin .builder-canvas .custom-section[data-surface=full]{width:100%;max-width:none;margin-inline:0}
+.hyperui-admin .builder-canvas .custom-section[data-vertical=start]{align-content:start}
+.hyperui-admin .builder-canvas .custom-section[data-vertical=center]{align-content:center}
+.hyperui-admin .builder-canvas .custom-section[data-vertical=end]{align-content:end}
+.hyperui-admin .builder-canvas .custom-section .builder-section-content{align-items:stretch}
+.hyperui-admin .builder-canvas .custom-section[data-layout=actions] > .builder-section-content{
+  display:flex;flex-wrap:wrap;align-items:center;
+}
+.hyperui-admin .builder-canvas .custom-section[data-layout=actions] > .builder-section-content > .builder-block{flex:0 1 auto}
+@container friperi-section (min-width:540px){
+  .hyperui-admin .builder-canvas .custom-section[data-layout=two] > .builder-section-content{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .hyperui-admin .builder-canvas .custom-section[data-layout=split] > .builder-section-content{grid-template-columns:minmax(0,2fr) minmax(0,3fr)}
+  .hyperui-admin .builder-canvas .custom-section[data-layout=reverse_split] > .builder-section-content{grid-template-columns:minmax(0,3fr) minmax(0,2fr)}
+  .hyperui-admin .builder-canvas .custom-section[data-layout=three] > .builder-section-content{grid-template-columns:repeat(3,minmax(0,1fr))}
+}
+@container friperi-section (min-width:1050px){
+  .hyperui-admin .builder-canvas .custom-section[data-layout=six] > .builder-section-content{grid-template-columns:repeat(6,minmax(0,1fr))}
+}
+.hyperui-admin .builder-canvas .custom-section[data-layout=stack] > .builder-section-content{grid-template-columns:minmax(0,1fr)}

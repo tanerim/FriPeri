@@ -681,3 +681,33 @@
 @media(max-width:640px){
   .custom-rich-text img.rich-image{float:none!important;clear:both;display:block;max-width:100%;width:100%;margin:16px 0}
 }
+
+/* Section v2: viewport-height by default for new sections only.
+   Legacy sections without data-height-mode keep their previous sizing. */
+.custom-block.custom-section{box-sizing:border-box;min-height:var(--block-min-height,0px)}
+.custom-section[data-height-mode=viewport]{min-height:100svh}
+.custom-section[data-height-mode=auto]{min-height:var(--block-min-height,0px)}
+.custom-section[data-height-mode=custom]{min-height:var(--block-min-height,0px)}
+.custom-home-page > .custom-section[data-surface=full]{width:calc(100% + 40px);max-width:none;margin-inline:-20px;border-radius:0}
+.custom-home-page > .custom-section[data-surface=full] > .section-content{max-width:var(--block-content-width,1240px)}
+.custom-block.tone-page{background:var(--color-page-bg,#f7f8f5)}
+.custom-block.tone-navigation{background:var(--color-nav,#142536);color:var(--color-footer-text,#fff)}
+.custom-block.tone-secondary{background:var(--color-accent-secondary,#0a9396);color:#fff}
+.custom-block.tone-dark{background:var(--color-nav,#142536)}
+.custom-section[data-vertical=start]{align-content:start}
+.custom-section[data-vertical=center]{align-content:center}
+.custom-section[data-vertical=end]{align-content:end}
+.custom-section[data-vertical=start] > .section-content,
+.custom-section[data-vertical=center] > .section-content,
+.custom-section[data-vertical=end] > .section-content{align-self:auto;align-items:stretch}
+/* Grid layouts work with nested content and preserve the design on small screens. */
+.custom-section[data-layout=stack] > .section-content{grid-template-columns:minmax(0,1fr)}
+@container friperi-section (min-width:540px){
+  .custom-section[data-layout=two] > .section-content{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .custom-section[data-layout=split] > .section-content{grid-template-columns:minmax(0,2fr) minmax(0,3fr)}
+  .custom-section[data-layout=reverse_split] > .section-content{grid-template-columns:minmax(0,3fr) minmax(0,2fr)}
+  .custom-section[data-layout=three] > .section-content{grid-template-columns:repeat(3,minmax(0,1fr))}
+}
+@container friperi-section (min-width:1050px){
+  .custom-section[data-layout=six] > .section-content{grid-template-columns:repeat(6,minmax(0,1fr))}
+}

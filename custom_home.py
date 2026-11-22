@@ -25,6 +25,7 @@ BLOCK_TYPES = {'section', 'heading', 'text', 'list', 'table', 'image', 'video', 
 APPEARANCE_FIELDS = {
     'section': {'layout': ('stack', 'two', 'split', 'reverse_split', 'three', 'six', 'actions'),
                 'surface': ('standard', 'full'), 'vertical_align': ('start', 'center', 'end'),
+                 'height_mode': ('auto', 'viewport', 'custom'),
                 'content_width': (360, 1920), 'min_height': (0, 1200), 'padding_y': (0, 200),
                 'padding_x': (0, 120), 'gap': (0, 100), 'radius': (0, 120),
                 'background_fit': ('cover', 'contain'), 'background_position': ('center', 'left', 'right', 'top', 'bottom'),
@@ -353,7 +354,7 @@ def _validate_blocks(data, depth, remaining, anchors):
             raise ValueError('Invalid block')
         kind = item['type']
         block = {'type': kind,
-                 'tone': item.get('tone') if item.get('tone') in ('plain', 'soft', 'accent', 'dark', 'white', 'custom') else 'plain',
+                 'tone': item.get('tone') if item.get('tone') in ('plain', 'soft', 'accent', 'dark', 'white', 'custom', 'page', 'navigation', 'secondary') else 'plain',
                  'align': item.get('align') if item.get('align') in ('left', 'center', 'right') else 'left',
                  'width': item.get('width') if item.get('width') in ('normal', 'wide') else 'normal'}
         if block['tone'] == 'custom':

@@ -5,7 +5,7 @@
   <section class="custom-block custom-{{ block.type }} tone-{{ block.tone }} align-{{ block.align }} width-{{ block.width }}"
     {% if block.type == 'section' %}
     {% if block.anchor %}id="{{ block.anchor }}"{% endif %}
-    data-layout="{{ appearance.get('layout', 'stack') }}" data-surface="{{ appearance.get('surface', 'standard') }}"
+    data-layout="{{ appearance.get('layout', 'stack') }}" data-surface="{{ appearance.get('surface', 'standard') }}" data-height-mode="{{ appearance.get('height_mode', 'auto') }}"
     data-vertical="{{ appearance.get('vertical_align', 'center') }}" data-fit="{{ appearance.get('background_fit', 'cover') }}"
     data-position="{{ appearance.get('background_position', 'center') }}" data-edge="{{ appearance.get('edge', 'flat') }}" data-landing-style="{{ appearance.get('landing_style', 'none') }}"
     {% elif block.type == 'image' %}
