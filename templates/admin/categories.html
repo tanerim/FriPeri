@@ -34,6 +34,9 @@
                 <a class="settings-secondary" href="/admin/categories/{{ cat['id'] }}/edit">
                   {{ t(lang, 'common.edit') }}
                 </a>
+                {% if account_role == 'admin' %}
+                <a class="settings-secondary" href="/admin/cms-design?category={{ cat.id }}">{{ t(lang, 'cms_design.design_action') }}</a>
+                {% endif %}
                 <form method="post" action="/admin/categories/{{ cat.id }}/delete" data-confirm="{{ t(lang, 'admin.delete_category_confirm') }}">
                   <input type="hidden" name="confirmed" value="1" />
                   <button type="submit" class="settings-danger">{{ t(lang, 'common.delete') }}</button>
