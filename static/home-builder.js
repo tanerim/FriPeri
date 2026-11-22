@@ -111,7 +111,7 @@
       list:{items:[t('item')],ordered:false}, table:{rows:[[t('heading'),t('heading')],[t('item'),t('item')]],caption:''},
       image:{url:'',alt:'',caption:''},video:{url:'',alt:'',caption:''},button:{text:t('starter_button'),url:''},divider:{},
       quote:{text:t('quote_hint'),attribution:''},callout:{title:t('callout'),text:t('text_hint')},
-      stats:{items:[{value:'100+',label:t('stat_label')}]},team:{width:'wide',items:[{photo:'',name:'',title:'',shape:'rectangle'}]},faq:{items:[{question:t('question'),answer:t('answer')}]},legacy_html:{html:''}
+      stats:{items:[{value:'100+',label:t('stat_label')}]},team:{width:'wide',items:[{photo:'',name:'',title:'',shape:'rectangle',zoom:1,focal_x:50,focal_y:50}]},faq:{items:[{question:t('question'),answer:t('answer')}]},legacy_html:{html:''}
     }[type]);
   }
   function add(type) {
@@ -1024,10 +1024,23 @@
         block.items.forEach((item,i)=>{
           const row=el('div','builder-repeat-item builder-team-member');
           const portrait=el('div','builder-team-portrait');
-          const image=el('img');
-          if(safeURL(item.photo||'',true)) {image.src=item.photo;image.alt='';portrait.append(image);}
-          else portrait.append(el('span','builder-team-photo-placeholder','＋'));
           portrait.dataset.shape=item.shape || 'rectangle';
+          portrait.setAttribute('aria-label',t('team_drag_help'));
+          const image=el('img');
+          const cropX=()=>Number.isFinite(item.focal_x)?item.focal_x:50;
+          const cropY=()=>Number.isFinite(item.focal_y)?item.focal_y:50;
+          const cropZoom=()=>Number.isFinite(item.zoom)?item.zoom:1;
+          const updateCrop=()=>{
+            if(!image.parentElement)return;
+            image.style.objectPosition=`${cropX()}% ${cropY()}%`;
+            image.style.transformOrigin=`${cropX()}% ${cropY()}%`;
+            image.style.transform=`scale(${cropZoom()})`;
+          };
+          if(safeURL(item.photo||'',true)){
+            image.src=item.photo;image.alt='';
+            portrait.append(image);
+            updateCrop();
+          } else portrait.append(el('span','builder-team-photo-placeholder','＋'));
           const controls=el('div','builder-team-controls');
           controls.append(
             field(t('team_name'),item.name||'',value=>{item.name=value;}),
@@ -1038,17 +1051,67 @@
           uploader.append(el('span','',t('upload')));
           const file=el('input');file.type='file';file.accept='image/png,image/jpeg,image/webp';
           file.addEventListener('change',()=>upload(file.files[0],{type:'image'},url=>{
-            mutate(()=>{item.photo=url;});
+            mutate(()=>{item.photo=url;item.zoom=1;item.focal_x=50;item.focal_y=50;});
           }));
           uploader.append(file);controls.append(uploader);
           controls.append(select(t('team_shape'),item.shape||'rectangle',[
             ['rectangle',t('team_rectangle')],['circle',t('team_circle')]
           ],value=>{item.shape=value;}));
-          row.append(portrait,controls,button(t('remove'),()=>mutate(()=>block.items.splice(i,1))));
+
+          const cropControls=el('div','builder-team-crop-controls');
+          const zoomLabel=el('label','builder-team-zoom');
+          zoomLabel.append(el('span','',t('team_zoom')));
+          const zoomSlider=el('input');
+          zoomSlider.type='range';zoomSlider.min='1';zoomSlider.max='3';zoomSlider.step='0.05';zoomSlider.value=String(cropZoom());
+          const zoomValue=el('output','',Math.round(cropZoom()*100)+'%');
+          zoomSlider.addEventListener('input',()=>{
+            item.zoom=Number(zoomSlider.value);
+            zoomValue.textContent=Math.round(item.zoom*100)+'%';
+            updateCrop();change();
+          });
+          zoomLabel.append(zoomSlider,zoomValue);
+          const resetCrop=button(t('team_reset_crop'),()=>mutate(()=>{
+            item.zoom=1;item.focal_x=50;item.focal_y=50;
+          }));
+          cropControls.append(zoomLabel,resetCrop,el('p','builder-help',t('team_drag_help')));
+          controls.append(cropControls);
+
+          if(image.parentElement){
+            let pointer=null;
+            portrait.addEventListener('pointerdown',event=>{
+              if(event.button!==0)return;
+              event.preventDefault();
+              pointer={id:event.pointerId,x:event.clientX,y:event.clientY,
+                       originX:cropX(),originY:cropY()};
+              portrait.setPointerCapture(event.pointerId);
+            });
+            portrait.addEventListener('pointermove',event=>{
+              if(!pointer||event.pointerId!==pointer.id)return;
+              const width=portrait.clientWidth||1,height=portrait.clientHeight||1;
+              item.focal_x=Math.max(0,Math.min(100,Math.round((pointer.originX-(event.clientX-pointer.x)/width*100)*100)/100));
+              item.focal_y=Math.max(0,Math.min(100,Math.round((pointer.originY-(event.clientY-pointer.y)/height*100)*100)/100));
+              updateCrop();change();
+            });
+            const stop=event=>{if(pointer&&pointer.id===event.pointerId){pointer=null;checkpoint();}};
+            portrait.addEventListener('pointerup',stop);
+            portrait.addEventListener('pointercancel',stop);
+            portrait.addEventListener('lostpointercapture',()=>{pointer=null;});
+          }
+          const ordering=el('div','builder-team-order');
+          const up=button('↑',()=>mutate(()=>{
+            [block.items[i-1],block.items[i]]=[block.items[i],block.items[i-1]];
+          }));
+          up.disabled=i===0;up.title=t('up');up.setAttribute('aria-label',t('up'));
+          const down=button('↓',()=>mutate(()=>{
+            [block.items[i],block.items[i+1]]=[block.items[i+1],block.items[i]];
+          }));
+          down.disabled=i===block.items.length-1;down.title=t('down');down.setAttribute('aria-label',t('down'));
+          ordering.append(up,down,button(t('remove'),()=>mutate(()=>block.items.splice(i,1))));
+          row.append(portrait,controls,ordering);
           group.append(row);
         });
         body.append(group,button(t('add_item'),()=>{
-          if(block.items.length<8)mutate(()=>block.items.push({photo:'',name:'',title:'',shape:'rectangle'}));
+          if(block.items.length<8)mutate(()=>block.items.push({photo:'',name:'',title:'',shape:'rectangle',zoom:1,focal_x:50,focal_y:50}));
         }));
       }
       if(['stats','faq'].includes(block.type)) {
