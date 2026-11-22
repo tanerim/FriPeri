@@ -41,7 +41,7 @@
 .hyperui-admin .page-builder-refresh .builder-block-header{padding:8px 12px}
 .hyperui-admin .page-builder-refresh .builder-style-controls{gap:8px;padding:9px 12px}
 .hyperui-admin .page-builder-refresh .builder-select{flex:1 1 110px}
-.hyperui-admin .page-builder-refresh .builder-block:not(.is-selected) .builder-appearance-controls{display:none}
+.hyperui-admin .page-builder-refresh #builder-canvas > .builder-block:not(.is-selected) > .builder-appearance-controls{display:none}
 .hyperui-admin .page-builder-refresh .builder-block-header .builder-tool{min-height:27px}
 .hyperui-admin .page-builder-refresh .settings-page-header>.builder-actions{position:fixed;bottom:0;right:0;left:0;z-index:35;justify-content:flex-end;padding:12px max(24px,3vw);background:#fffffff2;backdrop-filter:blur(12px);border-top:1px solid var(--pb-border);box-shadow:0 -7px 24px #1224390f}
 .hyperui-admin .page-builder-refresh .settings-page-header>.builder-actions button{min-height:42px}
