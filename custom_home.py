@@ -23,7 +23,7 @@ APPEARANCE_FIELDS = {
                 'svg_primary': 'color', 'svg_secondary': 'color',
                 'svg_opacity': (0, 100), 'edge': ('flat', 'wave'), 'edge_color': 'color'},
     'heading': {'font_size': (18, 160), 'font_weight': ('normal', 'bold', 'heavy'),
-                'accent_color': 'color', 'accent_style': ('color_only', 'underline')},
+                'accent_color': 'color', 'accent_opacity': (0, 100), 'accent_style': ('color_only', 'underline'), 'accent_new_line': ('yes', 'no')},
     'list': {'font_size': (10, 72), 'item_gap': (0, 48)},
     'table': dict.fromkeys(('cell_background', 'cell_color', 'header_background', 'header_color'), 'color'),
     'button': {'button_background': 'color', 'button_hover': 'color', 'button_text': 'color',
