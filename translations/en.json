@@ -643,5 +643,8 @@
   "builder.team_circle": "Circle",
   "builder.two_column_hero": "Two Column Hero",
   "builder.two_column_first_heading": "First column heading",
-  "builder.two_column_second_heading": "Second column heading"
+  "builder.two_column_second_heading": "Second column heading",
+  "builder.team_zoom": "Zoom",
+  "builder.team_reset_crop": "Reset frame",
+  "builder.team_drag_help": "Drag the photo to choose the visible area. Zoom in or out with the slider."
 }
