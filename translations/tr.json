@@ -558,5 +558,15 @@
   "users.category_access_title": "Kategori yetkileri",
   "users.category_access_help": "İçerik üreticilerine kategori atayın. Hesap rolleri ve şifreler yalnızca yönetici tarafından değiştirilir.",
   "users.grants_only_help": "Bu ekranda yalnızca kategori izinleri değiştirilebilir.",
-  "users.no_creators": "Henüz içerik üreticisi hesabı yok."
+  "users.no_creators": "Henüz içerik üreticisi hesabı yok.",
+  "builder.team": "Ekip",
+  "builder.team_name": "Ad Soyad",
+  "builder.team_title": "Unvan",
+  "builder.team_photo": "Fotoğraf URL'si",
+  "builder.team_shape": "Fotoğraf biçimi",
+  "builder.team_rectangle": "Dikdörtgen",
+  "builder.team_circle": "Yuvarlak",
+  "builder.two_column_hero": "Two Column Hero",
+  "builder.two_column_first_heading": "Birinci sütun başlığı",
+  "builder.two_column_second_heading": "İkinci sütun başlığı"
 }
