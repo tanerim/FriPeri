@@ -1,6 +1,6 @@
 {% extends 'admin/about.html' %}
 {% block content %}
-<main id="admin-content" class="admin-settings-page page-content-builder post-content-builder" tabindex="-1">
+<main id="admin-content" class="admin-settings-page page-content-builder post-content-builder page-builder-refresh" tabindex="-1">
   <div class="admin-settings-container">
     <div class="page-actions"><a class="settings-secondary" href="/admin/pages">← {{ t(lang, 'admin.pages') }}</a><a id="page-public-link" class="settings-secondary" href="/pages/{{ page_record.slug }}" target="_blank" rel="noopener noreferrer" {% if not page_record.published %}hidden{% endif %}>{{ t(lang, 'pages.view') }}</a></div>
     <form id="page-details" class="admin-card">
@@ -11,6 +11,14 @@
       </div>
       <p>{{ t(lang, 'pages.visibility_help') }}</p>
     </form>
+    <section class="page-layout-library" aria-labelledby="page-library-title">
+      <div class="page-library-heading">
+        <div><h2 id="page-library-title">Start with a page layout</h2><p>Pick a complete editable structure. You can preview it immediately and customize every block.</p></div>
+        <span class="page-library-count">8 ready-to-edit layouts</span>
+      </div>
+      <div id="page-layout-gallery" class="page-layout-gallery" role="group" aria-label="Page layout templates"></div>
+      <p id="page-layout-notice" role="status" aria-live="polite"></p>
+    </section>
     <div class="settings-form-v3 homepage-settings-form">{% include 'admin/custom_home.html' %}</div>
   </div>
 </main>
