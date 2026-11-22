@@ -110,7 +110,7 @@
       category:{category:config.categories[0]?.slug || '',count:4},
       heading:{text:t('heading_hint'),level:'h2'}, text:{html:'',foreground:''},
       list:{items:[t('item')],ordered:false}, table:{rows:[[t('heading'),t('heading')],[t('item'),t('item')]],caption:''},
-      image:{url:'',alt:'',caption:''},video:{url:'',alt:'',caption:''},button:{text:t('starter_button'),url:'',appearance:{icon:'none'}},brand_logo:{width:'wide'},icon_button:{text:'Home',url:'/',icon_name:'house',appearance:{variant:'solid'}},divider:{line_width:2,line_style:'single',line_color:'#a5b3be'},
+      image:{url:'',alt:'',caption:'',link_url:'',link_target:'same_tab'},video:{url:'',alt:'',caption:''},button:{text:t('starter_button'),url:'',appearance:{icon:'none'}},brand_logo:{width:'wide'},icon_button:{text:'Home',url:'/',icon_name:'house',appearance:{variant:'solid'}},divider:{line_width:2,line_style:'single',line_color:'#a5b3be'},
       quote:{text:t('quote_hint'),attribution:''},callout:{title:t('callout'),text:t('text_hint')},
       stats:{items:[{value:'100+',label:t('stat_label')}]},team:{width:'wide',items:[{photo:'',name:'',title:'',shape:'rectangle',orientation:'landscape',fit:'cover',zoom:1,focal_x:50,focal_y:50}]},faq:{items:[{question:t('question'),answer:t('answer')}]},legacy_html:{html:''}
     }[type]);
@@ -214,7 +214,7 @@
       gap:44,vertical_align:'center',edge:'flat'
     });
   }
-  const symbols = {brand_logo:'✦',icon_button:'◎',section:'▥',heading:'H',text:'¶',list:'☷',table:'▦',image:'▧',video:'▷',button:'↗',quote:'❝',callout:'!',stats:'№',team:'♙',faq:'?',divider:'―',category:'▤',legacy_html:'<>'};
+  const symbols = {icon_button:'◎',section:'▥',heading:'H',text:'¶',list:'☷',table:'▦',image:'▧',video:'▷',button:'↗',quote:'❝',callout:'!',stats:'№',team:'♙',faq:'?',divider:'―',category:'▤',legacy_html:'<>',brand_logo:'✦'};
   Object.keys(symbols).forEach(type => {
     const node = button('', () => add(type), 'builder-add-button');
     node.dataset.blockType = type;
@@ -557,7 +557,15 @@
   }
   function media(block, body) {
     if (block.type === 'image' && safeURL(block.url,true)) {
-      const image = el('img');image.src = block.url;image.alt = block.alt;body.append(image);
+      const figure=el('figure','friperi-image-figure');
+      const frame=el('span','friperi-image-frame');
+      const image=el('img');image.src=block.url;image.alt=block.alt;
+      image.loading=block.appearance?.loading || 'lazy';
+      image.decoding=block.appearance?.decoding || 'async';
+      image.fetchPriority=block.appearance?.fetch_priority || 'auto';
+      frame.append(image);figure.append(frame);
+      if(block.caption)figure.append(el('figcaption','',block.caption));
+      body.append(figure);
     } else if (block.type === 'video' && videoURL(block.url)) {
       const source = videoURL(block.url); const node = el(source.kind); node.src=source.url;
       if (source.kind === 'video') {node.controls=true;node.preload='metadata';} else {node.title=block.alt || t('video');node.loading='lazy';node.allowFullscreen=true;}
@@ -578,6 +586,14 @@
       finally {busy--;updateStatus();}
     }));uploadField.append(file);controls.append(uploadField);
     controls.append(field(t('alt'),block.alt,value=>{block.alt=value;}),field(t('caption'),block.caption,value=>{block.caption=value;}));
+    if(block.type==='image'){
+      const link=el('div','builder-image-link-settings');
+      link.append(field('Image link (optional)',block.link_url || '',value=>{block.link_url=value.trim();}));
+      link.append(select('Open link',block.link_target || 'same_tab',
+        [['same_tab','Same tab'],['new_tab','New tab']],value=>{block.link_target=value;}));
+      controls.append(link);
+      controls.append(el('p','builder-help','Alternative text describes meaningful images for accessibility. Leave it empty only for purely decorative images. Link URLs are checked on publish.'));
+    }
     body.append(controls);if(block.type==='video')body.append(el('p','builder-help',t('video_help')));
   }
   const sectionControls = [
@@ -603,6 +619,19 @@
     button: [['button_background','color',config.design?.accent || '#286e7a'],['button_hover','color',config.design?.navHover || '#20435b'],['button_text','color','#ffffff'],['button_hover_text','color','#ffffff'],['font_size',10,48,16],['width_mode',['auto','full','custom']],['width_px',40,1200,240],['height',24,240,56],['radius',0,120,100],
       ['variant',['solid','outline','ghost','text_link','underlined']],['icon',['none','arrow','external']],
       ['border_width',0,8,0],['border_color','color','#2563eb'],['padding_x',0,96,24],['padding_y',0,48,16],['target',['same_tab','new_tab']]],
+    image: [
+      ['ratio',['original','square','four_three','three_two','wide','portrait','cinema']],
+      ['fit',['cover','contain','fill','scale-down']],
+      ['position',['center','top','bottom','left','right','top_left','top_right','bottom_left','bottom_right']],
+      ['width_mode',['auto','full','custom']],['width_px',100,1920,640],
+      ['height_px',0,1200,0],['radius',0,120,14],
+      ['border_width',0,16,0],['border_color','color','#dae3ec'],
+      ['frame_background','color','#ffffff'],['padding',0,80,0],
+      ['shadow',['none','soft','medium','strong']],['hover',['none','zoom','lift']],
+      ['caption_align',['left','center','right']],['caption_size',10,32,14],
+      ['loading',['lazy','eager']],['decoding',['async','auto','sync']],
+      ['fetch_priority',['auto','high','low']]
+    ],
     quote: [['font_size',12,72,28],['attribution_size',10,36,14],['quote_color','color','#17243b'],['attribution_color','color','#65738a'],['border_color','color','#65738a'],['border_width',0,12,3],['font_style',['normal','italic']]],
     stats: [['value_color','color','#17243b'],['label_color','color','#65738a'],['card_background','color','#ffffff'],['value_size',16,120,48],['label_size',10,48,14],['columns',1,4,3],['gap',0,64,24],['padding',0,64,0]]
   };
@@ -615,6 +644,17 @@
         const unit = key.endsWith('_opacity') ? '%' : typeof value === 'number' && key !== 'columns' ? 'px' : '';
         body.style.setProperty(variable, value + unit);
       }
+    }
+    if (block.type === 'image') {
+      const a=block.appearance || {};
+      Object.assign(body.dataset, {
+        imageRatio:a.ratio || 'original',imageFit:a.fit || 'cover',
+        imagePosition:a.position || 'center',imageWidth:a.width_mode || 'auto',
+        imageShadow:a.shadow || 'none',imageHover:a.hover || 'none',
+        captionAlign:a.caption_align || 'left'
+      });
+      if (a.height_px > 0) body.dataset.imageHeight='custom';
+      else delete body.dataset.imageHeight;
     }
     body.dataset.buttonWidth = block.appearance?.width_mode || 'auto';
     body.dataset.statsColumns = block.appearance?.columns ?? '';
@@ -687,6 +727,21 @@
       definitions.forEach(([key]) => { delete block.appearance[key]; });
     })));
     return panel;
+  }
+  function imageAppearanceControls(block,body) {
+    const groups=[
+      ['Size & crop', ['ratio','fit','position','width_mode','width_px','height_px']],
+      ['Frame & effects', ['radius','border_width','border_color','frame_background','padding','shadow','hover']],
+      ['Caption & performance', ['caption_align','caption_size','loading','decoding','fetch_priority']]
+    ];
+    const wrapper=el('div','builder-image-appearance');
+    for(const [title,names] of groups){
+      const details=el('details','builder-image-panel');
+      const heading=el('summary','',title);
+      const controls=appearanceControls(block,body,appearanceFields.image.filter(([name])=>names.includes(name)));
+      details.append(heading,controls);wrapper.append(details);
+    }
+    return wrapper;
   }
   function syncCellStyles(block) {
     if(block.cell_styles) block.cell_styles=block.rows.map((row,r)=>row.map((_,c)=>block.cell_styles[r]?.[c] || {}));
@@ -1019,7 +1074,7 @@
       if(block.foreground) body.style.setProperty('--text-color',block.foreground);
       if (block.type === 'section') sectionEditor(block,body,card,depth,hero);
       else {
-        const appearance=appearanceControls(block,body);if(appearance)card.append(appearance);
+        const appearance=block.type==='image'?imageAppearanceControls(block,body):appearanceControls(block,body);if(appearance)card.append(appearance);
       }
       if(block.type==='category') {
         const options = config.categories.map(cat=>[cat.slug,cat.name]);
