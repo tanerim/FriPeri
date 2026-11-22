@@ -368,3 +368,29 @@
   .custom-team-grid { grid-template-columns:repeat(auto-fit,minmax(min(100%,155px),1fr)); gap:18px; }
   .custom-team-photo-frame.shape-circle { width:min(100%,155px); }
 }
+
+/* Divider: independent line controls; legacy blocks remain a 2px solid stroke. */
+.custom-divider-line {
+  width:100%;
+  min-width:0;
+  --divider-width:2px;
+  --divider-color:#a5b3be;
+}
+.custom-divider-line hr {
+  border:0;
+  height:0;
+  width:100%;
+  margin:0;
+  padding:0;
+  border-top:var(--divider-width) solid var(--divider-color);
+  background:transparent;
+  opacity:1;
+}
+.custom-divider-line.style-dashed hr { border-top-style:dashed; }
+.custom-divider-line.style-dotted hr { border-top-style:dotted; }
+.custom-divider-wave {
+  display:block;
+  width:100%;
+  height:clamp(28px,4vw,48px);
+  overflow:visible;
+}
