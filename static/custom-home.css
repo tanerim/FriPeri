@@ -623,9 +623,9 @@
 .custom-block.custom-callout[data-accent-side=top]{border-left:var(--callout-border);border-top:var(--callout-accent-width) solid var(--callout-accent)}
 .custom-block.custom-callout[data-accent-side=bottom]{border-left:var(--callout-border);border-bottom:var(--callout-accent-width) solid var(--callout-accent)}
 .custom-block.custom-callout[data-accent-side=none]{border-left:var(--callout-border)}
-.custom-block.custom-callout[style*="--block-shadow: soft"]{box-shadow:0 9px 22px #14253a16}
-.custom-block.custom-callout[style*="--block-shadow: medium"]{box-shadow:0 16px 36px #14253a28}
-.custom-block.custom-callout[style*="--block-shadow: strong"]{box-shadow:0 24px 55px #14253a3a}
+.custom-block.custom-callout[data-callout-shadow=soft]{box-shadow:0 9px 22px #14253a16}
+.custom-block.custom-callout[data-callout-shadow=medium]{box-shadow:0 16px 36px #14253a28}
+.custom-block.custom-callout[data-callout-shadow=strong]{box-shadow:0 24px 55px #14253a3a}
 .custom-callout .friperi-callout-inner{display:flex;gap:var(--block-gap,20px);align-items:center;min-width:0}
 .custom-callout .friperi-callout-copy{flex:1;min-width:0}
 .custom-block.custom-callout h3{
@@ -644,22 +644,22 @@
   text-decoration:var(--block-body-decoration,none);
   line-height:1.75;margin:0;white-space:pre-line;
 }
-.custom-callout[style*="--block-title-weight: normal"]{--friperi-callout-title-weight:400}
-.custom-callout[style*="--block-title-weight: medium"]{--friperi-callout-title-weight:500}
-.custom-callout[style*="--block-title-weight: semibold"]{--friperi-callout-title-weight:600}
-.custom-callout[style*="--block-title-weight: bold"]{--friperi-callout-title-weight:700}
-.custom-callout[style*="--block-title-weight: heavy"]{--friperi-callout-title-weight:800}
-.custom-callout[style*="--block-body-weight: normal"]{--friperi-callout-body-weight:400}
-.custom-callout[style*="--block-body-weight: medium"]{--friperi-callout-body-weight:500}
-.custom-callout[style*="--block-body-weight: semibold"]{--friperi-callout-body-weight:600}
-.custom-callout[style*="--block-body-weight: bold"]{--friperi-callout-body-weight:700}
+.custom-callout[data-title-weight=normal]{--friperi-callout-title-weight:400}
+.custom-callout[data-title-weight=medium]{--friperi-callout-title-weight:500}
+.custom-callout[data-title-weight=semibold]{--friperi-callout-title-weight:600}
+.custom-callout[data-title-weight=bold]{--friperi-callout-title-weight:700}
+.custom-callout[data-title-weight=heavy]{--friperi-callout-title-weight:800}
+.custom-callout[data-body-weight=normal]{--friperi-callout-body-weight:400}
+.custom-callout[data-body-weight=medium]{--friperi-callout-body-weight:500}
+.custom-callout[data-body-weight=semibold]{--friperi-callout-body-weight:600}
+.custom-callout[data-body-weight=bold]{--friperi-callout-body-weight:700}
 .friperi-callout-media{flex:0 0 var(--block-image-width,35%);width:var(--block-image-width,35%);margin:0;min-width:0;overflow:hidden;border-radius:var(--block-image-radius,12px)}
 .friperi-callout-media img{display:block;width:100%;height:auto;aspect-ratio:var(--friperi-callout-image-ratio,4/3);object-fit:var(--block-image-fit,cover);border-radius:0}
-.custom-callout[style*="--block-image-ratio: square"]{--friperi-callout-image-ratio:1}
-.custom-callout[style*="--block-image-ratio: four_three"]{--friperi-callout-image-ratio:4/3}
-.custom-callout[style*="--block-image-ratio: wide"]{--friperi-callout-image-ratio:16/9}
-.custom-callout[style*="--block-image-ratio: portrait"]{--friperi-callout-image-ratio:3/4}
-.custom-callout[style*="--block-image-ratio: original"] .friperi-callout-media img{aspect-ratio:auto}
+.custom-callout[data-image-ratio=square]{--friperi-callout-image-ratio:1}
+.custom-callout[data-image-ratio=four_three]{--friperi-callout-image-ratio:4/3}
+.custom-callout[data-image-ratio=wide]{--friperi-callout-image-ratio:16/9}
+.custom-callout[data-image-ratio=portrait]{--friperi-callout-image-ratio:3/4}
+.custom-callout[data-image-ratio=original] .friperi-callout-media img{aspect-ratio:auto}
 .friperi-callout-inner[data-image-position=right]{flex-direction:row-reverse}
 .friperi-callout-inner[data-image-position=top]{flex-direction:column;align-items:stretch}
 .friperi-callout-inner[data-image-position=bottom]{flex-direction:column-reverse;align-items:stretch}
