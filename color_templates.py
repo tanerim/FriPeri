@@ -16,6 +16,36 @@ ROLE_KEYS = (
 # A named palette consists of ten swatches; roles may reuse those colors.
 TEMPLATES = (
     {
+        "id": "friperi-world",
+        "name": "FriPeri World",
+        "description": "FriPeri's signature ocean teal, airy aqua, warm gold, and midnight blue.",
+        "colors": (
+            "#16263f", "#20435b", "#286e7a", "#3b929b", "#68b6b9",
+            "#a5d9d5", "#e5f2ee", "#f8fbf8", "#f2c14e", "#ca8e39",
+        ),
+        "roles": (
+            "#f8fbf8", "#20435b", "#286e7a", "#3b929b",
+            "#e5f2ee", "#16263f", "#a5d9d5", "#286e7a",
+            "#ca8e39", "#68b6b9", "#f2c14e", "#3b929b",
+            "#16263f", "#e5f2ee", "#3b929b",
+        ),
+    },
+    {
+        "id": "scholarly-grove",
+        "name": "Scholarly Grove",
+        "description": "An understated editorial palette of forest green, sage, parchment, and clay.",
+        "colors": (
+            "#172c2a", "#294b46", "#416d62", "#729a88", "#aec8b2",
+            "#e0e9db", "#f8f7f0", "#d6bc93", "#b87657", "#824d45",
+        ),
+        "roles": (
+            "#f8f7f0", "#294b46", "#416d62", "#172c2a",
+            "#e0e9db", "#172c2a", "#aec8b2", "#294b46",
+            "#b87657", "#729a88", "#d6bc93", "#824d45",
+            "#172c2a", "#e0e9db", "#729a88",
+        ),
+    },
+    {
         "id": "tidal-ember",
         "name": "Tidal Ember",
         "description": "Deep sea tones, warm sand, and glowing amber.",
