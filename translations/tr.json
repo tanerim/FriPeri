@@ -586,5 +586,9 @@
   "builder.divider_dotted": "Noktalı",
   "builder.divider_wave": "Yumuşak dalga",
   "builder.divider_wave_tight": "Sık dalga",
-  "builder.divider_zigzag": "Zikzak"
+  "builder.divider_zigzag": "Zikzak",
+  "builder.accent_opacity": "Vurgu saydamlığı",
+  "builder.accent_new_line": "Vurgulu metnin konumu",
+  "builder.option_yes": "Alt satır",
+  "builder.option_no": "Aynı satır"
 }
