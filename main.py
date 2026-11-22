@@ -33,6 +33,7 @@ from fastapi.responses import HTMLResponse, RedirectResponse, Response, JSONResp
 from custom_home import (validate_document, read_document, render_blocks, clean_html,
                          validate_appearance, SECTION_SVG_FIELDS, SECTION_SVG_FILENAME)
 from navigation import menu_mapping, validate_parents, menu_tree
+from category_design import parse_archive_design, validate_archive_design, archive_inline_styles
 from backup_security import (BackupError, MAX_UPLOAD_BYTES, create_backup as write_secure_backup,
                              restore_backup as restore_secure_backup, validate_backup, safe_backup_path)
 from login_security import blocked as login_blocked, failed as login_failed, succeeded as login_succeeded
@@ -969,6 +970,7 @@ async def category_page(slug: str, request: Request) -> Response:
     with get_db() as conn:
         category = conn.execute("SELECT * FROM categories WHERE slug = ?", (slug,)).fetchone()
         card_options = category_card_settings(get_site_settings(conn)).get(slug, {})
+        archive_design = parse_archive_design(category["archive_design_json"]) if category else parse_archive_design(None)
         posts = fetch_posts(conn, slug)
         post_tags = tags_by_post_ids(conn, [post["id"] for post in posts])
     if not category:
@@ -977,7 +979,8 @@ async def category_page(slug: str, request: Request) -> Response:
         request,
         "category.html",
         category_label(category, pick_lang(request)),
-        {"category": category, "posts": posts, "post_tags": post_tags, "card_options": card_options},
+        {"category": category, "posts": posts, "post_tags": post_tags, "card_options": card_options,
+         "archive_design": archive_design, "archive_style": archive_inline_styles(archive_design)},
         current_user(request),
     )
 
@@ -2295,6 +2298,49 @@ HOMEPAGE_SETTING_KEYS = (
     "show_empty_placeholders",
     "homepage_categories_json",
 )
+
+
+@app.get("/admin/cms-design", response_class=HTMLResponse)
+async def cms_category_design(request: Request) -> Response:
+    user = require_user(request)
+    if not user:
+        return RedirectResponse("/login", status_code=303)
+    with get_db() as conn:
+        categories = [dict(row) for row in conn.execute(
+            "SELECT id, name, slug, archive_design_json FROM categories ORDER BY name COLLATE NOCASE")]
+    requested = request.query_params.get("category", "")
+    selected = next((cat for cat in categories if str(cat["id"]) == requested), None)
+    if selected is None and categories:
+        selected = categories[0]
+    design = parse_archive_design(selected["archive_design_json"] if selected else None)
+    return render_template(request, "admin/cms_design.html", "CMS Design", {
+        "active_admin": "cms_design", "categories": categories, "selected": selected,
+        "design": design, "editor_token": custom_home_token(user),
+        "saved": request.query_params.get("saved") == "1",
+    }, user)
+
+
+@app.post("/admin/cms-design")
+async def save_cms_category_design(request: Request) -> Response:
+    user = require_user(request)
+    if not user:
+        return RedirectResponse("/login", status_code=303)
+    form = await request.form()
+    if not custom_home_authorized(request, form):
+        return Response("Forbidden", status_code=403)
+    raw_id = str(form.get("category_id", ""))
+    if not re.fullmatch(r"[0-9]{1,18}", raw_id):
+        return Response("Invalid category", status_code=400)
+    try:
+        design = validate_archive_design(form)
+    except ValueError as error:
+        return Response(str(error), status_code=400)
+    with get_db() as conn:
+        updated = conn.execute("UPDATE categories SET archive_design_json=? WHERE id=?",
+                               (json.dumps(design, sort_keys=True), int(raw_id)))
+        if not updated.rowcount:
+            return Response("Category not found", status_code=404)
+    return RedirectResponse(f"/admin/cms-design?category={int(raw_id)}&saved=1", status_code=303)
 
 
 @app.get("/admin/design", response_class=HTMLResponse)
