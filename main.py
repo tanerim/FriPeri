@@ -22,7 +22,7 @@ from typing import Any
 from urllib.parse import quote, urlsplit
 
 from PIL import Image
-from image_uploads import ImageUploadError, MAX_IMAGE_BYTES, store_image_upload
+from image_uploads import ImageUploadError, store_image_upload
 from localization import (LANGUAGES, TRANSLATIONS, LOCALIZED_SETTINGS, content_languages,
                           primary_language, secondary_language, localized_value, translate, detect_locale)
 from language_migration import (backup_before_language_migration, migrate_languages,
@@ -2402,7 +2402,10 @@ async def save_homepage(request: Request) -> Response:
                 for language in content_languages(settings):
                     key = f"feature_{feature}_desc_{language['suffix']}"
                     settings[key] = str(form.get(key, settings.get(key, ''))).strip()
-            hero_image = await save_upload(form.get('hero_background_image'))
+            try:
+                hero_image = await save_upload(form.get('hero_background_image'))
+            except ImageUploadError as exc:
+                return HTMLResponse(exc.message, status_code=exc.status_code)
             if hero_image:
                 settings['hero_background_image_path'] = hero_image
         settings['homepage_mode'] = 'custom' if form.get('homepage_mode') == 'custom' else 'feed'
