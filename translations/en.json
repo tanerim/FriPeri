@@ -633,5 +633,15 @@
   "users.category_access_title": "Category access",
   "users.category_access_help": "Assign categories to content creators. Account roles and passwords remain administrator-only.",
   "users.grants_only_help": "Only category permissions can be changed here.",
-  "users.no_creators": "No content creator accounts yet."
+  "users.no_creators": "No content creator accounts yet.",
+  "builder.team": "Team",
+  "builder.team_name": "Full name",
+  "builder.team_title": "Title",
+  "builder.team_photo": "Photo URL",
+  "builder.team_shape": "Photo shape",
+  "builder.team_rectangle": "Rectangle",
+  "builder.team_circle": "Circle",
+  "builder.two_column_hero": "Two Column Hero",
+  "builder.two_column_first_heading": "First column heading",
+  "builder.two_column_second_heading": "Second column heading"
 }
