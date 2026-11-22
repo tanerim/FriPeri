@@ -547,5 +547,9 @@
   "builder.divider_dotted": "Pointillés",
   "builder.divider_wave": "Vague douce",
   "builder.divider_wave_tight": "Vague serrée",
-  "builder.divider_zigzag": "Zigzag"
+  "builder.divider_zigzag": "Zigzag",
+  "builder.accent_opacity": "Opacité du texte accentué",
+  "builder.accent_new_line": "Position du texte accentué",
+  "builder.option_yes": "Nouvelle ligne",
+  "builder.option_no": "Même ligne"
 }
