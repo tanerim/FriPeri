@@ -214,8 +214,9 @@
   }
   async function upload(file, block, onUploaded = null) {
     if (!file) return;
-    const limit = (block.type === 'image' ? 8 : 40) * 1024 * 1024;
-    if (file.size > limit) return message(t('upload_error'),true);
+    const limit = (block.type === 'image' ? 25 : 40) * 1024 * 1024;
+    if (file.size > limit) return message(block.type === 'image'
+      ? 'Image exceeds the 25 MB upload limit.' : 'Video exceeds the 40 MB upload limit.', true);
     const data = new FormData();data.set('editor_token',config.token);data.set('homepage_mode','custom');data.set('kind',block.type);data.set('file',file);
     busy++;updateStatus();message(t('uploading'));
     try {
