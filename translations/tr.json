@@ -568,5 +568,8 @@
   "builder.team_circle": "Yuvarlak",
   "builder.two_column_hero": "Two Column Hero",
   "builder.two_column_first_heading": "Birinci sütun başlığı",
-  "builder.two_column_second_heading": "İkinci sütun başlığı"
+  "builder.two_column_second_heading": "İkinci sütun başlığı",
+  "builder.team_zoom": "Yakınlaştırma",
+  "builder.team_reset_crop": "Kadrajı sıfırla",
+  "builder.team_drag_help": "Görünecek bölgeyi seçmek için fotoğrafı sürükleyin. Kaydırıcıyla yakınlaştırıp uzaklaştırın."
 }
