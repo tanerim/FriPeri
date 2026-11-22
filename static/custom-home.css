@@ -295,7 +295,15 @@
 .custom-heading[data-heading-weight=normal] > :is(h1,h2,h3) { font-weight: 400; }
 .custom-heading[data-heading-weight=bold] > :is(h1,h2,h3) { font-weight: 700; }
 .custom-heading[data-heading-weight=heavy] > :is(h1,h2,h3) { font-weight: 900; }
-.section-heading-accent { color: var(--block-accent-color, var(--color-accent,#2563eb)); }
+.section-heading-accent {
+  color: color-mix(in srgb, var(--block-accent-color, var(--color-accent,#2563eb)) var(--block-accent-opacity,100%), transparent);
+}
+.custom-heading[data-accent-new-line=yes] .section-heading-accent {
+  display: block;
+}
+.custom-heading[data-accent-new-line=yes] .section-heading-accent-gap {
+  display: none;
+}
 .custom-heading[data-accent=underline] .section-heading-accent { text-decoration: underline .11em; text-underline-offset: .13em; }
 .custom-block.custom-button > .custom-button {
   padding: var(--block-padding-y,16px) var(--block-padding-x,24px);
