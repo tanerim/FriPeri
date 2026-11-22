@@ -28,7 +28,7 @@
           </header>
           <div class="settings-grid-v3 design-color-grid">
             {% for key in fields %}
-              {{ color_control(key, t(lang, 'design.' ~ key), settings[key], alpha=true) }}
+              {{ color_control(key, t(lang, 'design.' ~ key), settings[key], alpha=true, help_text=t(lang, 'design.help_' ~ key)) }}
             {% endfor %}
           </div>
         </section>
@@ -38,7 +38,7 @@
         <header class="settings-item-heading"><div><h2>{{ t(lang, 'design.footer') }}</h2><p class="design-scope-help">{{ t(lang, 'design.scope_footer') }}</p></div><label class="settings-check"><input type="checkbox" name="show_footer" value="1" {{ 'checked' if settings.show_footer == '1' else '' }} /><span>{{ t(lang, 'admin.show_footer') }}</span></label></header>
         <div class="settings-grid-v3 design-color-grid">
           {% for key in ['color_footer_bg', 'color_footer_text', 'color_footer_border'] %}
-          {{ color_control(key, t(lang, 'design.' ~ key), settings[key], alpha=true) }}
+          {{ color_control(key, t(lang, 'design.' ~ key), settings[key], alpha=true, help_text=t(lang, 'design.help_' ~ key)) }}
           {% endfor %}
         </div>
         <div class="settings-grid-v3 footer-copy-grid">
