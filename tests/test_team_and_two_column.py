@@ -27,7 +27,8 @@ def test_team_validation_round_trip_and_shapes():
     assert blocks[0]["width"] == "wide"
     assert blocks[0]["items"][0] == {
         "photo": "/static/uploads/example.png", "name": "Ada Yılmaz",
-        "title": "Researcher", "shape": "circle"
+        "title": "Researcher", "shape": "circle",
+        "zoom": 1.0, "focal_x": 50.0, "focal_y": 50.0,
     }
     assert blocks[0]["items"][1]["shape"] == "rectangle"
     assert render_blocks(blocks) == blocks
@@ -118,3 +119,61 @@ def test_footer_has_social_first_stacked_layout_without_intermediate_breakpoint(
     assert ".public-site .footer-left { order: 1; }" in section
     assert ".public-site .footer-right { order: 2; }" in section
     assert ".public-site .footer-center:not(:has(.footer-social-links)) { display: none; }" in section
+
+
+@pytest.mark.parametrize("key,value", [
+    ("zoom", 0.5), ("zoom", 3.1), ("zoom", "2"), ("zoom", True),
+    ("focal_x", -1), ("focal_x", 101), ("focal_y", -0.1),
+    ("focal_y", float("nan")), ("focal_x", float("inf")),
+])
+def test_team_rejects_invalid_crop_settings(key, value):
+    document = team_doc()
+    document[0]["items"][0][key] = value
+    with pytest.raises(ValueError, match="Invalid team photo crop"):
+        validate_document(json.dumps(document))
+
+
+def test_team_crop_and_member_order_round_trip():
+    document = team_doc()
+    first, second = document[0]["items"]
+    first.update(zoom=2.35, focal_x=12.5, focal_y=76.25)
+    second.update(zoom=1.15, focal_x=68, focal_y=32)
+    document[0]["items"] = [second, first]  # Reordering is persisted in array order.
+    validated = validate_document(json.dumps(document, ensure_ascii=False))
+    assert [x["name"] for x in validated[0]["items"]] == ["Deniz Demir", "Ada Yılmaz"]
+    assert validated[0]["items"][1]["zoom"] == 2.35
+    assert validated[0]["items"][1]["focal_x"] == 12.5
+    assert validated[0]["items"][1]["focal_y"] == 76.25
+
+
+def test_editor_has_team_move_crop_and_zoom_controls():
+    script = (ROOT / "static/home-builder.js").read_text(encoding="utf-8")
+    assert "builder-team-order" in script
+    assert "block.items[i-1]" in script
+    assert "block.items[i+1]" in script
+    assert "setPointerCapture" in script
+    assert "builder-team-zoom" in script
+    assert "team_reset_crop" in script
+    template = (ROOT / "templates/partials/content_blocks.html").read_text(encoding="utf-8")
+    assert "member.focal_x" in template
+    assert "member.focal_y" in template
+    assert "member.zoom" in template
+
+
+def test_team_photo_crop_renders_on_published_page(site):
+    import sqlite3
+    client, db = site
+    document = team_doc()
+    document[0]["items"][0].update(zoom=2.2, focal_x=20.0, focal_y=70.0)
+    blocks = validate_document(json.dumps(document, ensure_ascii=False))
+    with sqlite3.connect(db) as conn:
+        conn.execute("""
+            INSERT INTO posts(title, slug, excerpt, body, body_html, post_blocks_json,
+                              status, created_at, updated_at)
+            VALUES (?, ?, '', '', '', ?, 'published', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+        """, ("Team crop", "team-crop", json.dumps({"en": blocks}, ensure_ascii=False)))
+    response = client.get("/posts/team-crop")
+    assert response.status_code == 200
+    assert "shape-circle" in response.text
+    assert "object-position: 20.0% 70.0%" in response.text
+    assert "transform: scale(2.2)" in response.text
