@@ -7,7 +7,7 @@
     {% if block.anchor %}id="{{ block.anchor }}"{% endif %}
     data-layout="{{ appearance.get('layout', 'stack') }}" data-surface="{{ appearance.get('surface', 'standard') }}"
     data-vertical="{{ appearance.get('vertical_align', 'center') }}" data-fit="{{ appearance.get('background_fit', 'cover') }}"
-    data-position="{{ appearance.get('background_position', 'center') }}" data-edge="{{ appearance.get('edge', 'flat') }}"
+    data-position="{{ appearance.get('background_position', 'center') }}" data-edge="{{ appearance.get('edge', 'flat') }}" data-landing-style="{{ appearance.get('landing_style', 'none') }}"
     {% elif block.type == 'heading' %}
     {% if 'font_size' in appearance %}data-heading-size{% endif %} data-heading-weight="{{ appearance.get('font_weight', '') }}" data-accent="{{ appearance.get('accent_style', '') }}" data-accent-new-line="{{ appearance.get('accent_new_line', 'no') }}"
     {% elif block.type in ['button', 'icon_button'] %}
@@ -28,6 +28,8 @@
       {% if appearance.get('edge') == 'wave' %}
       {{ section_edge() }}
       {% endif %}
+    {% elif block.type == 'brand_logo' %}
+      <div class="friperi-logo-feature"><div class="friperi-logo-mark"><img src="{{ static_url('images/FriPeri_Logo.png') }}" alt="FriPeri logo" loading="eager"></div><div class="friperi-logo-feature-copy"><strong>FriPeri</strong><span>Ideas deserve a home.</span></div><div class="friperi-product-mock" aria-hidden="true"><span class="mock-sidebar"><i></i><i></i><i></i><i></i></span><span class="mock-content"><b></b><i></i><i></i><em></em></span></div></div>
     {% elif block.type == 'heading' %}
       <{{ block.level }}><span class="section-heading-main">{{ block.text }}</span>{% if block.accent %}{% if appearance.get('accent_new_line', 'no') != 'yes' %} <span class="section-heading-accent-gap"></span>{% endif %}<span class="section-heading-accent">{{ block.accent }}</span>{% endif %}</{{ block.level }}>
     {% elif block.type in ['text', 'legacy_html'] %}
