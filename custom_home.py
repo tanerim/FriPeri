@@ -254,6 +254,23 @@ def text(value, limit=20_000):
     return value
 
 
+
+def divider_wave_path(style):
+    """Generate bounded decorative SVG paths, independent of user-supplied markup."""
+    if style not in {'wave', 'wave-tight', 'zigzag'}:
+        return ''
+    points = ['M 0 24']
+    if style == 'wave':
+        for x in range(0, 1200, 80):
+            points.append(f'C {x + 20} 2 {x + 20} 2 {x + 40} 24 S {x + 60} 46 {x + 80} 24')
+    elif style == 'wave-tight':
+        for x in range(0, 1200, 40):
+            points.append(f'Q {x + 10} 4 {x + 20} 24 T {x + 40} 24')
+    else:
+        for x in range(0, 1200, 48):
+            points.append(f'L {x + 24} 5 L {x + 48} 24')
+    return ' '.join(points)
+
 def validate_document(raw):
     if not isinstance(raw, str) or len(raw.encode('utf-8')) > MAX_DOCUMENT_BYTES:
         raise ValueError('Page is too large')
@@ -287,6 +304,19 @@ def _validate_blocks(data, depth, remaining, anchors):
             block['foreground'] = fg.lower()
         if kind in APPEARANCE_FIELDS and 'appearance' in item:
             block['appearance'] = validate_appearance(item['appearance'], APPEARANCE_FIELDS[kind])
+        if kind == 'divider':
+            line_width = item.get('line_width', 2)
+            line_style = item.get('line_style', 'single')
+            line_color = item.get('line_color', '#a5b3be')
+            if type(line_width) is not int or not 2 <= line_width <= 20:
+                raise ValueError('Divider line width must be 2–20 px')
+            if line_style not in ('single', 'dashed', 'dotted', 'wave', 'wave-tight', 'zigzag'):
+                raise ValueError('Invalid divider line style')
+            if not isinstance(line_color, str) or not re.fullmatch(r'#[0-9a-fA-F]{6}', line_color):
+                raise ValueError('Invalid divider line color')
+            block.update(line_width=line_width, line_style=line_style, line_color=line_color.lower())
+            if line_style in ('wave', 'wave-tight', 'zigzag'):
+                block['line_path'] = divider_wave_path(line_style)
         if kind == 'category':
             block['category'] = text(item.get('category', ''), 200)
             count = item.get('count', 4)
