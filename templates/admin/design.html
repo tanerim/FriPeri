@@ -1,6 +1,6 @@
 {% extends "admin/base.html" %}
 {% from "admin/partials/color_control.html" import color_control %}
-{% block extra_head %}<script src="{{ static_url('appearance-controls.js') }}" defer></script>{% endblock %}
+{% block extra_head %}<script src="{{ static_url('appearance-controls.js') }}" defer></script><script src="{{ static_url('color-templates.js') }}" defer></script><link rel="stylesheet" href="{{ static_url('color-templates.css') }}">{% endblock %}
 
 {% block content %}
 <main id="admin-content" class="admin-settings-page admin-compact-page design-settings-page" tabindex="-1">
@@ -12,6 +12,26 @@
         <button class="settings-primary" type="submit">{{ icon('save') }}{{ t(lang, 'common.save_changes') }}</button>
       </header>
       {% if saved %}<p class="notice settings-notice">{{ t(lang, 'common.saved') }}</p>{% endif %}
+
+      <section class="settings-card-v3 design-templates" aria-labelledby="color-templates-title">
+        <header>
+          <h2 id="color-templates-title">Color Templates</h2>
+          <p>Select a template to fill every Design color at once. Review the colors below, then select Save changes to publish.</p>
+        </header>
+        <div class="design-template-grid">
+          {% for preset in color_templates %}
+          <button type="button" class="design-template-choice" data-color-template="{{ preset.id }}" aria-pressed="false">
+            <span class="design-template-swatches" aria-hidden="true">
+              {% for color in preset.colors %}<span style="background-color:{{ color }}"></span>{% endfor %}
+            </span>
+            <strong>{{ preset.name }}</strong>
+            <small>{{ preset.description }}</small>
+          </button>
+          {% endfor %}
+        </div>
+        <p class="design-template-feedback" id="design-template-feedback" role="status" aria-live="polite"></p>
+        <script type="application/json" id="design-color-template-data">{{ color_templates|tojson }}</script>
+      </section>
 
       {% set color_groups = [
         ('design.page', ['color_page_bg']),
