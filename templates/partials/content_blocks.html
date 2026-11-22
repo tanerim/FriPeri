@@ -8,6 +8,8 @@
     data-layout="{{ appearance.get('layout', 'stack') }}" data-surface="{{ appearance.get('surface', 'standard') }}"
     data-vertical="{{ appearance.get('vertical_align', 'center') }}" data-fit="{{ appearance.get('background_fit', 'cover') }}"
     data-position="{{ appearance.get('background_position', 'center') }}" data-edge="{{ appearance.get('edge', 'flat') }}" data-landing-style="{{ appearance.get('landing_style', 'none') }}"
+    {% elif block.type == 'image' %}
+    data-image-ratio="{{ appearance.get('ratio', 'original') }}" data-image-fit="{{ appearance.get('fit', 'cover') }}" data-image-position="{{ appearance.get('position', 'center') }}" data-image-width="{{ appearance.get('width_mode', 'auto') }}" data-image-shadow="{{ appearance.get('shadow', 'none') }}" data-image-hover="{{ appearance.get('hover', 'none') }}" data-caption-align="{{ appearance.get('caption_align', 'left') }}" {% if appearance.get('height_px', 0) > 0 %}data-image-height="custom"{% endif %}
     {% elif block.type == 'heading' %}
     {% if 'font_size' in appearance %}data-heading-size{% endif %} data-heading-weight="{{ appearance.get('font_weight', '') }}" data-accent="{{ appearance.get('accent_style', '') }}" data-accent-new-line="{{ appearance.get('accent_new_line', 'no') }}"
     {% elif block.type in ['button', 'icon_button'] %}
@@ -44,7 +46,12 @@
           {% endfor %}</tr>{% endfor %}
       </table></div>
     {% elif block.type == 'image' and block.url %}
-      <figure><img src="{{ block.url }}" alt="{{ block.alt }}" loading="lazy" />{% if block.caption %}<figcaption>{{ block.caption }}</figcaption>{% endif %}</figure>
+      <figure class="friperi-image-figure">
+        {% if block.link_url %}<a class="friperi-image-link" href="{{ block.link_url }}" aria-label="{{ block.alt or block.caption or 'View image' }}"{% if block.link_target == 'new_tab' %} target="_blank" rel="noopener noreferrer"{% endif %}>{% endif %}
+          <span class="friperi-image-frame"><img src="{{ block.url }}" alt="{{ block.alt }}" loading="{{ appearance.get('loading', 'lazy') }}" decoding="{{ appearance.get('decoding', 'async') }}" fetchpriority="{{ appearance.get('fetch_priority', 'auto') }}" /></span>
+        {% if block.link_url %}</a>{% endif %}
+        {% if block.caption %}<figcaption>{{ block.caption }}</figcaption>{% endif %}
+      </figure>
     {% elif block.type == 'video' and block.video %}
       <figure>{% if block.video.kind == 'embed' %}<iframe src="{{ block.video.url }}" title="{{ block.alt or block.caption or t(lang, 'builder.video') }}" loading="lazy" allow="fullscreen; picture-in-picture" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe>{% else %}<video src="{{ block.video.url }}" controls preload="metadata" aria-label="{{ block.alt or t(lang, 'builder.video') }}"></video>{% endif %}{% if block.caption %}<figcaption>{{ block.caption }}</figcaption>{% endif %}</figure>
     {% elif block.type == 'icon_button' and block.url %}
