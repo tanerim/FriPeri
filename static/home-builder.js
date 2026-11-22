@@ -110,7 +110,7 @@
       category:{category:config.categories[0]?.slug || '',count:4},
       heading:{text:t('heading_hint'),level:'h2'}, text:{html:'',foreground:''},
       list:{items:[t('item')],ordered:false}, table:{rows:[[t('heading'),t('heading')],[t('item'),t('item')]],caption:''},
-      image:{url:'',alt:'',caption:''},video:{url:'',alt:'',caption:''},button:{text:t('starter_button'),url:'',appearance:{icon:'none'}},icon_button:{text:'Home',url:'/',icon_name:'house',appearance:{variant:'solid'}},divider:{line_width:2,line_style:'single',line_color:'#a5b3be'},
+      image:{url:'',alt:'',caption:''},video:{url:'',alt:'',caption:''},button:{text:t('starter_button'),url:'',appearance:{icon:'none'}},brand_logo:{width:'wide'},icon_button:{text:'Home',url:'/',icon_name:'house',appearance:{variant:'solid'}},divider:{line_width:2,line_style:'single',line_color:'#a5b3be'},
       quote:{text:t('quote_hint'),attribution:''},callout:{title:t('callout'),text:t('text_hint')},
       stats:{items:[{value:'100+',label:t('stat_label')}]},team:{width:'wide',items:[{photo:'',name:'',title:'',shape:'rectangle',orientation:'landscape',fit:'cover',zoom:1,focal_x:50,focal_y:50}]},faq:{items:[{question:t('question'),answer:t('answer')}]},legacy_html:{html:''}
     }[type]);
@@ -153,11 +153,11 @@
     canvas.children[selected]?.scrollIntoView({block:'nearest',behavior:'smooth'});
     canvas.children[selected]?.querySelector('.builder-hero-editor input')?.focus({preventScroll:true});
   }
-  const symbols = {icon_button:'◎',section:'▥',heading:'H',text:'¶',list:'☷',table:'▦',image:'▧',video:'▷',button:'↗',quote:'❝',callout:'!',stats:'№',team:'♙',faq:'?',divider:'―',category:'▤',legacy_html:'<>'};
+  const symbols = {brand_logo:'✦',icon_button:'◎',section:'▥',heading:'H',text:'¶',list:'☷',table:'▦',image:'▧',video:'▷',button:'↗',quote:'❝',callout:'!',stats:'№',team:'♙',faq:'?',divider:'―',category:'▤',legacy_html:'<>'};
   Object.keys(symbols).forEach(type => {
     const node = button('', () => add(type), 'builder-add-button');
     node.dataset.blockType = type;
-    node.append(el('span','builder-block-symbol',symbols[type]),el('span','',type==='icon_button'?'Icon Button':t(type)));
+    node.append(el('span','builder-block-symbol',symbols[type]),el('span','',type==='brand_logo'?'FriPeri Logo':type==='icon_button'?'Icon Button':t(type)));
     document.getElementById('builder-add-blocks').append(node);
   });
   function addTwoColumnHero() {
@@ -543,7 +543,7 @@
     ['section_background', [
       ['background_fit',['cover','contain']],['background_position',['center','left','right','top','bottom']],
       ['overlay_color','color','#131c32'],['overlay_opacity',0,100,0],
-      ['edge',['flat','wave']],
+      ['edge',['flat','wave']],['landing_style',['none','hero','intro','features','showcase','steps','contrast','closing']],
       ['edge_color','color','#f7f8f5']
     ]]
   ];
@@ -591,7 +591,7 @@
       Object.assign(body.dataset, {
         layout:appearance.layout || 'stack', surface:appearance.surface || 'standard',
         vertical:appearance.vertical_align || 'center', fit:appearance.background_fit || 'cover',
-        position:appearance.background_position || 'center', edge:appearance.edge || 'flat'
+        position:appearance.background_position || 'center', edge:appearance.edge || 'flat', landingStyle:appearance.landing_style || 'none'
       });
       const currentArt = body.querySelector(':scope > .section-art');
       const pattern = appearance.svg_pattern || 'none';
@@ -905,7 +905,7 @@
         Array.from(canvas.children).forEach((node,i)=>node.classList.toggle('is-selected',i===index));
       });
       const hero=heroContent(block);
-      const label=String(index+1).padStart(2,'0')+' / '+(block.type==='icon_button'?'Icon Button':t(hero ? 'hero_section' : block.type));
+      const label=String(index+1).padStart(2,'0')+' / '+(block.type==='icon_button'?'Icon Button':block.type==='brand_logo'?'FriPeri Logo':t(hero ? 'hero_section' : block.type));
       const header=el('header','builder-block-header');
       const toggle=button('',()=>{
         if (collapsedBlocks.has(block)) collapsedBlocks.delete(block);
@@ -1020,6 +1020,19 @@
         const icon=el('span','builder-button-icon'); icon.setAttribute('aria-hidden','true');
         preview.append(editable('span',block.text,t('button'),v=>{block.text=v;}),icon);
         body.append(preview,field(t('url'),block.url,v=>{block.url=v;}));
+      }
+      if(block.type==='brand_logo') {
+        const feature=el('div','friperi-logo-feature');
+        const brand=el('div','friperi-logo-mark');
+        const image=el('img');image.src='/static/images/FriPeri_Logo.png';image.alt='FriPeri logo';
+        brand.append(image);
+        const words=el('div','friperi-logo-feature-copy');words.append(el('strong','','FriPeri'),el('span','','Ideas deserve a home.'));
+        const mock=el('div','friperi-product-mock');
+        mock.setAttribute('aria-hidden','true');
+        const sidebar=el('span','mock-sidebar');for(let i=0;i<4;i++)sidebar.append(el('i'));
+        const content=el('span','mock-content');content.append(el('b'),el('i'),el('i'),el('em'));
+        mock.append(sidebar,content);
+        feature.append(brand,words,mock);body.append(feature);
       }
       if(block.type==='icon_button') {
         const names=['house','arrow-right','arrow-left','arrow-up-right','envelope','telephone','search','download','share','link-45deg','github','linkedin','instagram','youtube','heart','star','plus-lg','chevron-right','geo-alt','calendar','file-earmark-text','book','chat-dots','globe','people','graph-up','gear','play-fill','camera','image','info-circle','question-circle'];
@@ -1277,25 +1290,84 @@
       ['Publication','Abstract, article sections and references',()=>[h('Publication title','h1'),p('Authors · Year · Publication'),h('Abstract'),p('Summarize the main contribution.'),h('Introduction'),p('Provide context and theoretical background.'),h('Methods'),p('Describe the research design.'),h('Results'),p('Explain the findings.'),h('References'),p('List cited works here.')]],
       ['Team & Lab','Mission, team cards and collaboration',()=>[h('Meet our team','h1'),p('Introduce your research group and its mission.'),{...newBlock('team'),items:[{photo:'',name:'Team member',title:'Researcher',shape:'rectangle',orientation:'portrait',fit:'cover',zoom:1,focal_x:50,focal_y:50}]},h('Our mission'),p('What brings the group together?'),action('Collaborate with us','/contact')]],
       ['Minimal Portfolio','Simple introduction, gallery and contact',()=>[h('Selected work','h1'),p('A concise introduction to your portfolio.'),section([picture(),picture()],'two'),h('What I do'),p('Describe your work and expertise.'),action('Contact','/contact')]],
-      ['FriPeri — Full Landing','A complete FriPeri introduction, features, workflow and FAQ',()=>[
-        {...section([h('Ideas deserve a home.','h1'),p('Meet FriPeri: a flexible publishing framework for pages, posts and stories. Design, organize and publish content with an approachable visual editor.'),section([action('Discover FriPeri','/about'),action('Get in touch','/contact')],'actions')],'split','soft'),appearance:{layout:'split',surface:'full',gap:36,padding_y:88,content_width:1440,edge:'wave',svg_pattern:'ribbons',svg_opacity:38}},
-        section([h('Build a website that feels like yours'),p('Start with a ready-to-edit page layout, customize individual blocks and create a look that fits your story.')]),
-        section([
-          section([h('Visual page builder','h3'),p('Compose pages from headings, text, images and flexible content sections.')]),
-          section([h('Color templates','h3'),p('Explore coordinated palettes and fine-tune the colors of your website.')]),
-          section([h('Organized publishing','h3'),p('Manage pages, categories and posts from one place.')])
-        ],'three','soft'),
-        section([section([h('Your content, your layout'),p('Mix media and text, tailor the appearance of each section and preview your changes.'),action('Explore more','/about')]),section([picture()])],'two'),
-        section([h('How it works'),section([h('1. Choose a layout','h3'),p('Begin with a page template or a blank canvas.')],'stack'),section([h('2. Make it yours','h3'),p('Adjust the design, add media and edit each block.')],'stack'),section([h('3. Publish','h3'),p('Preview your work, then publish when you are ready.')],'stack')],'stack','soft'),
-        section([h('Made for stories worth sharing'),p('Publish research updates, project pages, personal writing and more.'),picture()]),
-        h('Frequently asked questions'),
-        {...newBlock('faq'),items:[
-          {question:'Can I customize the colors?',answer:'Yes. Choose a color template in Design, then edit individual colors as needed.'},
-          {question:'Can I edit a page after publishing?',answer:'Yes. Return to the visual editor to update blocks and publish your changes.'},
-          {question:'Can I build a page without coding?',answer:'Yes. Arrange the available content blocks directly in the editor.'}
-        ]},
-        section([h('Ready to create?'),p('Bring your ideas, research and stories together in one place.'),action('Contact us','/contact')],'stack','soft')
-      ]],
+      ['FriPeri — Full Landing','A branded editorial landing with FriPeri logo, product showcase, rich color and flowing sections',()=>{
+        const d=config.design || {};
+        const navy='#142e52', violet='#50449f', turquoise='#6dd2d0', blush='#f7b1d6', pale='#f7f5ff';
+        const branded=(children,style,background,opts={})=>({
+          ...section(children,opts.layout || 'stack','custom'),
+          background,foreground:opts.foreground || '#ffffff',
+          appearance:{
+            layout:opts.layout || 'stack',surface:'full',padding_y:opts.padding ?? 90,
+            padding_x:30,gap:opts.gap || 32,content_width:1280,
+            min_height:opts.height || 0,edge:opts.edge || 'wave',
+            edge_color:opts.edgeColor || '#ffffff',landing_style:style,
+            svg_pattern:opts.art || 'none',svg_primary:opts.primary || blush,
+            svg_secondary:opts.secondary || turquoise,svg_opacity:opts.opacity || 60
+          }
+        });
+        const intro=()=>({...h('Make space for your next idea.','h1'),
+          appearance:{font_size:90,font_weight:'heavy',accent_color:turquoise,accent_style:'color_only'},
+          accent:'Built with FriPeri.'});
+        const card=(title,copy)=>({...section([h(title,'h3'),p(copy)],'stack','white'),
+          appearance:{layout:'stack',padding_y:27,padding_x:23,gap:12,radius:22}});
+        const logo=()=>({...newBlock('brand_logo'),align:'center',width:'wide'});
+        return [
+          branded([
+            section([
+              h('FRIPERI / VISUAL PUBLISHING','h3'),
+              intro(),
+              p('A beautiful home for your writing, research, projects and the ideas that matter. Build visually. Publish confidently. Make it yours.'),
+              section([action('Explore the possibilities','/about'),action('Get in touch','/contact')],'actions')
+            ]),
+            logo()
+          ],'hero',navy,{layout:'two',height:680,padding:110,art:'ribbons',primary:violet,secondary:turquoise,opacity:78,edgeColor:'#ffffff'}),
+          branded([
+            h('A new way to bring ideas online.','h2'),
+            p('FriPeri brings flexible content blocks, thoughtful design controls and publishing tools into one approachable workspace.')
+          ],'intro','#ffffff',{foreground:navy,edgeColor:pale,padding:110}),
+          branded([
+            h('Designed for the way you create.','h2'),
+            p('Everything you need to move from an empty page to a distinctive website.'),
+            section([
+              card('Visual Page Builder','Create expressive pages by combining text, media, columns and responsive sections.'),
+              card('Color Templates','Choose a harmonious palette and refine every detail to match your identity.'),
+              card('Content Organization','Organize pages, posts and categories without losing control of your site.'),
+              card('Media First','Bring your work to life with images, illustrations and multimedia content.'),
+              card('Flexible Layouts','Start with ready-to-edit designs, then adapt every section to your needs.'),
+              card('Publish with Confidence','Preview your content and adjust it before sharing with the world.')
+            ],'three')
+          ],'features',pale,{foreground:navy,padding:95,edgeColor:'#17243f'}),
+          branded([
+            section([
+              h('One canvas. Endless possibilities.','h2'),
+              p('Begin with a layout. Build your story block by block. Create something that feels unmistakably yours.'),
+              action('See how it works','/about')
+            ]),
+            logo()
+          ],'showcase','#17243f',{layout:'two',padding:95,art:'ribbons',primary:violet,secondary:blush,edgeColor:'#ffffff'}),
+          branded([
+            h('From first thought to published page.','h2'),
+            p('A simple creative workflow.'),
+            section([
+              card('01 — Choose','Pick a starter layout or begin with a blank canvas.'),
+              card('02 — Create','Add content blocks, images, actions and meaningful details.'),
+              card('03 — Customize','Set the colors, typography and visual rhythm of the page.'),
+              card('04 — Publish','Preview on different screens and publish when ready.')
+            ],'two')
+          ],'steps','#ffffff',{foreground:navy,padding:105,edgeColor:turquoise}),
+          branded([
+            h('For the curious. For the creative.','h2'),
+            p('Publish articles, research updates, portfolios, project pages and personal stories. Your content should shape the site — not the other way around.'),
+            section([action('Start with an idea','/contact')],'actions')
+          ],'contrast',turquoise,{foreground:navy,padding:100,edgeColor:navy,art:'waves',primary:'#b5ecdd',secondary:'#ffffff'}),
+          branded([
+            h('Your ideas deserve a home.','h2'),
+            p('Make a space that grows with your work, reflects your personality and welcomes your audience.'),
+            section([action('Discover FriPeri','/about'),action('Contact us','/contact')],'actions'),
+            logo()
+          ],'closing',navy,{padding:105,edge:'wave',edgeColor:d.featureBg || '#f8fbf8',art:'ribbons',primary:violet,secondary:blush})
+        ];
+      }],
       ['Event & Workshop','A workshop announcement, program, speakers and registration',()=>[
         section([h('Join our upcoming event','h1'),p('Add the date, venue and a brief invitation to your workshop.'),action('Register interest','/contact')],'stack','soft'),
         h('What to expect'),p('Introduce the event, who it is for and what participants will learn.'),
