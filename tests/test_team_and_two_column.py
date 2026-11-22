@@ -109,10 +109,12 @@ def test_builder_exposes_both_new_controls(site):
     assert "team_photo" in page.text and "two_column_hero" in page.text
 
 
-def test_mobile_footer_uses_two_centered_text_lines():
+def test_footer_has_social_first_stacked_layout_without_intermediate_breakpoint():
     stylesheet = (ROOT / "static/site.css").read_text(encoding="utf-8")
-    assert "@media (max-width: 680px)" in stylesheet
-    assert ".public-site .footer-inner" in stylesheet
-    assert "flex-direction: column" in stylesheet
-    assert ".public-site .footer-left" in stylesheet
-    assert ".public-site .footer-right" in stylesheet
+    section = stylesheet.split("/* Footer has only two layouts:", 1)[1]
+    assert "@media (max-width: 900px)" in section
+    assert "flex-direction: column" in section
+    assert ".public-site .footer-center { order: 0; }" in section
+    assert ".public-site .footer-left { order: 1; }" in section
+    assert ".public-site .footer-right { order: 2; }" in section
+    assert ".public-site .footer-center:not(:has(.footer-social-links)) { display: none; }" in section
