@@ -900,7 +900,8 @@
         caption_size:'Caption font size',loading:'Loading mode',decoding:'Decoding',
         fetch_priority:'Fetch priority'
       };
-      const labelText=block.type==='image'?(imageLabels[key]||key):(key==='landing_style'?'Landing appearance':t(key));
+      const teamLabels={title_size:'Title font size',title_color:'Title text color',title_weight:'Title font weight',title_style:'Title font style',title_font:'Title font family',direction:'Team direction',style:'Team style',columns:'Team columns',photo_width:'Photo width',gap:'Card gap',card_padding:'Card padding',radius:'Card corner radius',accent_color:'Accent color',card_background:'Card background',shadow:'Card shadow'};
+      const labelText=block.type==='team'?(teamLabels[key]||t(key)):block.type==='image'?(imageLabels[key]||key):(key==='landing_style'?'Landing appearance':t(key));
       label.append(el('span','',labelText+(typeof kind === 'number' && key !== 'columns' ? (key.endsWith('_opacity') ? ' (%)' : ' (px)') : '')));
       let input;
       if(Array.isArray(kind)) {
@@ -1487,6 +1488,8 @@
             for(const [key,iconName,label] of accounts){
               const value=(item[key]||'').trim();
               if(!value)continue;
+              if(key==='email' && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value))continue;
+              if(key!=='email' && !safeURL(value))continue;
               const href=key==='email'?'mailto:'+value:value;
               const link=el('a','custom-team-social-link');
               link.href=href;link.title=label;link.setAttribute('aria-label',label);
