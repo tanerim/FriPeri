@@ -519,5 +519,15 @@
   "users.category_access_title": "Kategoriezugriff",
   "users.category_access_help": "Weisen Sie Inhaltserstellern Kategorien zu. Rollen und Passwörter bleiben Administratoren vorbehalten.",
   "users.grants_only_help": "Hier können nur Kategorieberechtigungen geändert werden.",
-  "users.no_creators": "Noch keine Inhaltsersteller vorhanden."
+  "users.no_creators": "Noch keine Inhaltsersteller vorhanden.",
+  "builder.team": "Team",
+  "builder.team_name": "Vor- und Nachname",
+  "builder.team_title": "Position",
+  "builder.team_photo": "Foto-URL",
+  "builder.team_shape": "Fotoform",
+  "builder.team_rectangle": "Rechteckig",
+  "builder.team_circle": "Rund",
+  "builder.two_column_hero": "Two Column Hero",
+  "builder.two_column_first_heading": "Überschrift der ersten Spalte",
+  "builder.two_column_second_heading": "Überschrift der zweiten Spalte"
 }
