@@ -646,5 +646,8 @@
   "builder.two_column_second_heading": "Second column heading",
   "builder.team_zoom": "Zoom",
   "builder.team_reset_crop": "Reset frame",
-  "builder.team_drag_help": "Drag the photo to choose the visible area. Zoom in or out with the slider."
+  "builder.team_drag_help": "Drag the photo to choose the visible area. Zoom in or out with the slider.",
+  "builder.team_fit": "Image fitting",
+  "builder.team_fit_cover": "Fill frame (crop)",
+  "builder.team_fit_contain": "Full photo (no crop)"
 }
