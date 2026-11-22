@@ -3,6 +3,8 @@
 {% block extra_head %}
 <link rel="stylesheet" href="{{ static_url('custom-home.css') }}" />
 <link rel="stylesheet" href="{{ static_url('home-builder.css') }}" />
+<link rel="stylesheet" href="{{ static_url('page-builder-refresh.css') }}" />
+<script src="{{ static_url('inline-image-design.js') }}" defer></script>
 <script src="{{ static_url('home-builder.js') }}" defer></script>
 <script src="{{ static_url('homepage-settings.js') }}" defer></script>
 {% endblock %}
@@ -206,7 +208,8 @@
       </section>
       <div class="settings-save-bar"><span>{{ t(lang, 'dashboard.save_help') }}</span><button class="settings-primary" type="submit" data-feed-save>{{ icon('save') }}{{ t(lang, 'common.save_changes') }}</button></div>
       </fieldset>
-      <fieldset id="homepage-custom-panel" class="homepage-mode-panel" aria-labelledby="custom-home-title" {{ 'hidden disabled' if selected_mode != 'custom' else '' }}>
+      <fieldset id="homepage-custom-panel" class="homepage-mode-panel page-builder-refresh" aria-labelledby="custom-home-title" {{ 'hidden disabled' if selected_mode != 'custom' else '' }}>
+        {% include 'admin/page_layout_library.html' %}
         {% include 'admin/custom_home.html' %}
       </fieldset>
       <div id="homepage-save-status" role="status" aria-live="polite"></div>

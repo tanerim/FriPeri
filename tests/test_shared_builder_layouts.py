@@ -36,3 +36,15 @@ def test_layouts_never_modify_global_design_settings():
     assert "const themedLayouts=" in builder
     assert "const gallery=document.getElementById('page-layout-gallery')" in builder
     assert "your global Design settings were not changed" in builder
+
+
+def test_homepage_custom_mode_uses_the_same_page_builder_shell():
+    template = read("templates/admin/homepage.html")
+    assert 'id="homepage-custom-panel" class="homepage-mode-panel page-builder-refresh"' in template
+    assert "include 'admin/page_layout_library.html'" in template
+    assert "page-builder-refresh.css" in template
+    assert "inline-image-design.js" in template
+    assert template.index("include 'admin/page_layout_library.html'") < template.index("include 'admin/custom_home.html'")
+    css = read("static/page-builder-refresh.css")
+    assert "#homepage-custom-panel.page-builder-refresh .builder-layout" in css
+    assert "#homepage-custom-panel[hidden] .builder-actions" in css
