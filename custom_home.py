@@ -19,7 +19,7 @@ ICON_BUTTON_NAMES = (
     'camera', 'image', 'info-circle', 'question-circle',
 )
 
-BLOCK_TYPES = {'section', 'heading', 'text', 'list', 'table', 'image', 'video', 'button', 'icon_button', 'divider', 'category', 'quote', 'callout', 'stats', 'team', 'faq', 'legacy_html'}
+BLOCK_TYPES = {'section', 'heading', 'text', 'list', 'table', 'image', 'video', 'button', 'icon_button', 'brand_logo', 'divider', 'category', 'quote', 'callout', 'stats', 'team', 'faq', 'legacy_html'}
 
 # Optional presentation settings keep existing documents on their theme defaults.
 APPEARANCE_FIELDS = {
@@ -31,7 +31,8 @@ APPEARANCE_FIELDS = {
                 'overlay_color': 'color', 'overlay_opacity': (0, 100),
                 'svg_pattern': ('none', 'ribbons', 'waves', 'grid'),
                 'svg_primary': 'color', 'svg_secondary': 'color',
-                'svg_opacity': (0, 100), 'edge': ('flat', 'wave'), 'edge_color': 'color'},
+                'svg_opacity': (0, 100), 'edge': ('flat', 'wave'), 'edge_color': 'color',
+                'landing_style': ('none', 'hero', 'intro', 'features', 'showcase', 'steps', 'contrast', 'closing')},
     'heading': {'font_size': (18, 160), 'font_weight': ('normal', 'bold', 'heavy'),
                 'accent_color': 'color', 'accent_opacity': (0, 100), 'accent_style': ('color_only', 'underline'), 'accent_new_line': ('yes', 'no')},
     'list': {'font_size': (10, 72), 'item_gap': (0, 48)},
