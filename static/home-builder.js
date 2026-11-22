@@ -672,9 +672,23 @@
       else delete body.dataset.imageHeight;
     }
     if(block.type==='callout'){
-      const a=block.appearance||{};body.dataset.accentSide=a.accent_side||'left';
+      const a=block.appearance||{};
+      Object.assign(body.dataset,{
+        accentSide:a.accent_side||'left',calloutShadow:a.shadow||'none',
+        titleWeight:a.title_weight||'bold',bodyWeight:a.body_weight||'normal',
+        imageRatio:a.image_ratio||'four_three'
+      });
       const content=body.querySelector('.friperi-callout-inner');
-      if(content)content.dataset.imagePosition=a.image_position||'none';
+      if(content){
+        content.dataset.imagePosition=a.image_position||'none';
+        const oldFrame=content.querySelector('.friperi-callout-media');
+        if((a.image_position||'none')==='none' || !block.image_url)oldFrame?.remove();
+        else if(!oldFrame){
+          const frame=el('figure','friperi-callout-media');
+          const img=el('img');img.src=block.image_url;img.alt=block.image_alt||'';
+          img.loading='lazy';frame.append(img);content.prepend(frame);
+        }
+      }
     }
     body.dataset.buttonWidth = block.appearance?.width_mode || 'auto';
     body.dataset.statsColumns = block.appearance?.columns ?? '';
