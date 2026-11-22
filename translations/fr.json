@@ -582,5 +582,20 @@
   "design.scope_feature": "Fond, texte et bordures des zones mises en avant.",
   "design.scope_accent": "Accents principaux et secondaires utilisés par les éléments du thème. Les catégories peuvent utiliser leur propre accent.",
   "design.scope_separator": "Couleurs des séparateurs et transitions décoratives.",
-  "design.scope_footer": "Fond, texte et bordure supérieure du pied de page sur tout le site."
+  "design.scope_footer": "Fond, texte et bordure supérieure du pied de page sur tout le site.",
+  "design.help_color_page_bg": "Fond des pages publiques, modifiable par catégorie.",
+  "design.help_color_nav": "Couleur principale de la navigation.",
+  "design.help_color_nav_hover": "Couleur au survol des liens de navigation.",
+  "design.help_color_nav_active": "Couleur de l'élément de navigation actif.",
+  "design.help_color_feature_bg": "Fond des panneaux mis en avant.",
+  "design.help_color_feature_text": "Texte des panneaux mis en avant.",
+  "design.help_color_feature_border": "Bordure des panneaux mis en avant.",
+  "design.help_color_accent_primary": "Accent principal utilisé par les liens, boutons et éléments décoratifs compatibles.",
+  "design.help_color_accent_secondary": "Accent secondaire pour les composants alternatifs et décoratifs.",
+  "design.help_color_separator_1": "Première couleur des séparateurs décoratifs.",
+  "design.help_color_separator_2": "Deuxième couleur des séparateurs décoratifs.",
+  "design.help_color_separator_3": "Troisième couleur des séparateurs décoratifs.",
+  "design.help_color_footer_bg": "Fond du pied de page sur tout le site.",
+  "design.help_color_footer_text": "Texte et liens du pied de page.",
+  "design.help_color_footer_border": "Bordure supérieure du pied de page."
 }
