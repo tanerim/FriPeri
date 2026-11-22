@@ -58,6 +58,22 @@
       <h3>{{ block.title }}</h3><p>{{ block.text }}</p>
     {% elif block.type == 'stats' %}
       <dl class="custom-stats-grid">{% for item in block['items'] %}<div><dt>{{ item.label }}</dt><dd>{{ item.value }}</dd></div>{% endfor %}</dl>
+    {% elif block.type == 'team' %}
+      <div class="custom-team-grid">
+        {% for member in block['items'] %}
+        <div class="custom-team-member">
+          {% if member.photo %}
+          <img class="custom-team-photo shape-{{ member.shape }}" src="{{ member.photo }}" alt="{{ member.name }}" loading="lazy" decoding="async" />
+          {% else %}
+          <div class="custom-team-photo custom-team-photo-empty shape-{{ member.shape }}" aria-hidden="true"></div>
+          {% endif %}
+          <div class="custom-team-info">
+            <h3 class="custom-team-name">{{ member.name }}</h3>
+            <p class="custom-team-title">{{ member.title }}</p>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
     {% elif block.type == 'faq' %}
       <div class="custom-faq-items">{% for item in block['items'] %}<details><summary>{{ item.question }}</summary><p>{{ item.answer }}</p></details>{% endfor %}</div>
     {% elif block.type == 'divider' %}<hr />
