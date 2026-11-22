@@ -571,5 +571,8 @@
   "builder.two_column_second_heading": "İkinci sütun başlığı",
   "builder.team_zoom": "Yakınlaştırma",
   "builder.team_reset_crop": "Kadrajı sıfırla",
-  "builder.team_drag_help": "Görünecek bölgeyi seçmek için fotoğrafı sürükleyin. Kaydırıcıyla yakınlaştırıp uzaklaştırın."
+  "builder.team_drag_help": "Görünecek bölgeyi seçmek için fotoğrafı sürükleyin. Kaydırıcıyla yakınlaştırıp uzaklaştırın.",
+  "builder.team_fit": "Fotoğraf yerleşimi",
+  "builder.team_fit_cover": "Çerçeveyi doldur (kırp)",
+  "builder.team_fit_contain": "Fotoğrafın tamamını göster"
 }
