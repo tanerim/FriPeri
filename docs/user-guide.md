@@ -142,8 +142,13 @@ Use the **Add a block** palette in the wide left column to insert content after 
 | Quote | Add a quotation with attribution. |
 | Callout | Highlight a titled message. |
 | Statistics | Display value-and-label pairs. |
+| Team | Display up to eight people with a photo, full name, and title. Choose a round or rectangular portrait for each member. |
 | FAQ | Add questions and answers. |
 | Divider | Separate parts of the page. |
+
+Above the block list, **Split hero section** inserts the existing text-and-image hero. Directly underneath it, **Two Column Hero** inserts two equal-width columns, each with editable heading, text, and button blocks. Both columns stack on small screens; use the section layout controls to change the arrangement. The existing Light split hero remains available.
+
+A **Team** block follows the Statistics block's repeatable-item workflow. Each person has three content fields: a photo (upload or secure image URL), full name, and title. Choose **Rectangle** or **Circle** for each portrait. You can add up to eight members, change the ordering with the block's editing controls, and preview the resulting responsive grid.
 
 Blocks can be moved up or down, duplicated, and removed. **Undo** and **Redo** restore editor changes within the current editing session.
 
@@ -208,7 +213,7 @@ Blog and Notes archive pages omit the large heading above the cards. Hiding card
 
 ### Customizing Design and Navigation
 
-Under **Website → Design**, configure page, navigation, feature, accent, separator, and footer colors. You can also edit the footer text in each configured content language and control footer visibility.
+Under **Website → Design**, configure page, navigation, feature, accent, separator, and footer colors. On mobile screens, the footer's site name/date and Powered by information are centered on separate lines; social icons remain centered between them when configured. You can also edit the footer text in each configured content language and control footer visibility.
 
 Under **Website → Menu**, configure category labels, sort order, and visibility. Add custom links with a label, URL, order, visibility setting, and optional new-tab behavior. Supply a translated label when using a secondary language.
 
