@@ -532,5 +532,8 @@
   "builder.two_column_second_heading": "Titre de la deuxième colonne",
   "builder.team_zoom": "Zoom",
   "builder.team_reset_crop": "Réinitialiser le cadrage",
-  "builder.team_drag_help": "Faites glisser la photo pour choisir la zone visible. Réglez le zoom avec le curseur."
+  "builder.team_drag_help": "Faites glisser la photo pour choisir la zone visible. Réglez le zoom avec le curseur.",
+  "builder.team_fit": "Ajustement de l'image",
+  "builder.team_fit_cover": "Remplir le cadre (recadrer)",
+  "builder.team_fit_contain": "Afficher toute la photo"
 }
