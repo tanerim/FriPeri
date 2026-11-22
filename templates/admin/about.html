@@ -2,13 +2,14 @@
 {% block extra_head %}
 <link rel="stylesheet" href="{{ static_url('custom-home.css') }}" />
 <link rel="stylesheet" href="{{ static_url('home-builder.css') }}" />
-{% if builder_page|default('home') == 'page' %}<link rel="stylesheet" href="{{ static_url('page-builder-refresh.css') }}" />{% endif %}
+{% if builder_page|default('home') != 'post' %}<link rel="stylesheet" href="{{ static_url('page-builder-refresh.css') }}" />{% endif %}
 <script src="{{ static_url('inline-image-design.js') }}" defer></script>
 <script src="{{ static_url('home-builder.js') }}" defer></script>
 {% endblock %}
 {% block content %}
-<main id="admin-content" class="admin-settings-page full-width-builder" tabindex="-1">
+<main id="admin-content" class="admin-settings-page full-width-builder{% if builder_page|default('home') != 'post' %} page-content-builder page-builder-refresh{% endif %}" tabindex="-1">
   <div class="admin-settings-container">
+    {% if builder_page|default('home') != 'post' %}{% include 'admin/page_layout_library.html' %}{% endif %}
     <div class="settings-form-v3 homepage-settings-form">
       {% include 'admin/custom_home.html' %}
     </div>

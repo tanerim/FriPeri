@@ -57,7 +57,8 @@
     document.getElementById('builder-language').disabled = busy > 0;
     document.getElementById('builder-undo').disabled ||= busy > 0;
     document.getElementById('builder-redo').disabled ||= busy > 0;
-    document.getElementById('builder-starter').disabled = busy > 0;
+    const starterButton=document.getElementById('builder-starter');
+    if(starterButton)starterButton.disabled=busy>0;
     if (collapseAllButton) collapseAllButton.disabled=busy>0 || !blocks().length;
     document.dispatchEvent(new CustomEvent('homepage:builder-busy', {detail: busy > 0}));
   }

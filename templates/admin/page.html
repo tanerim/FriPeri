@@ -11,14 +11,7 @@
       </div>
       <p>{{ t(lang, 'pages.visibility_help') }}</p>
     </form>
-    <section class="page-layout-library" aria-labelledby="page-library-title">
-      <div class="page-library-heading">
-        <div><h2 id="page-library-title">Start with a page layout</h2><p>Pick a complete editable structure. You can preview it immediately and customize every block.</p></div>
-        <span class="page-library-count">12 ready-to-edit layouts</span>
-      </div>
-      <div id="page-layout-gallery" class="page-layout-gallery" role="group" aria-label="Page layout templates"></div>
-      <p id="page-layout-notice" role="status" aria-live="polite"></p>
-    </section>
+    {% include 'admin/page_layout_library.html' %}
     <div class="settings-form-v3 homepage-settings-form">{% include 'admin/custom_home.html' %}</div>
   </div>
 </main>
