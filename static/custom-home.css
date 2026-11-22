@@ -406,3 +406,33 @@
   height:clamp(28px,4vw,48px);
   overflow:visible;
 }
+
+
+/* Standalone accessible icon-only action, built on the same Design theme. */
+.custom-block.custom-icon_button > .custom-icon-button {
+  display:inline-flex;align-items:center;justify-content:center;
+  box-sizing:border-box;min-width:52px;
+  width:var(--block-width-px,auto);
+  min-height:var(--block-height,52px);
+  aspect-ratio:1;
+  padding:var(--block-padding-y,12px) var(--block-padding-x,12px);
+  border-radius:var(--block-radius,12px);
+  border:var(--block-border-width,0px) solid var(--block-border-color,var(--color-accent,#286e7a));
+  background:var(--block-button-background,var(--color-accent,#286e7a));
+  color:var(--block-button-text,#fff);
+  text-decoration:none;
+  font-size:var(--block-font-size,22px);
+  transition:background-color .15s,color .15s;
+}
+.custom-block.custom-icon_button > .custom-icon-button:hover,
+.custom-block.custom-icon_button > .custom-icon-button:focus-visible{
+  background:var(--block-button-hover,var(--color-nav-hover,#20435b));
+  color:var(--block-button-hover-text,var(--block-button-text,#fff));
+}
+.custom-block.custom-icon_button[data-button-width=full] > .custom-icon-button{width:100%;aspect-ratio:auto}
+.custom-block.custom-icon_button[data-variant=outline] > .custom-icon-button{background:transparent;border-width:var(--block-border-width,2px);color:var(--block-button-background,var(--color-accent,#286e7a))}
+.custom-block.custom-icon_button[data-variant=ghost] > .custom-icon-button{background:transparent;color:var(--block-button-background,var(--color-accent,#286e7a))}
+.custom-block.custom-icon_button[data-variant=text_link] > .custom-icon-button,
+.custom-block.custom-icon_button[data-variant=underlined] > .custom-icon-button{background:transparent;box-shadow:none;color:var(--block-button-background,var(--color-accent,#286e7a))}
+.custom-block.custom-icon_button > .custom-icon-button .bi{line-height:1;display:block}
+@media(prefers-reduced-motion:reduce){.custom-block.custom-icon_button > .custom-icon-button{transition:none}}
