@@ -74,6 +74,27 @@ APPEARANCE_FIELDS = {
         'decoding': ('async', 'auto', 'sync'),
         'fetch_priority': ('auto', 'high', 'low'),
     },
+    'callout': {
+        'accent_side': ('left', 'right', 'top', 'bottom', 'none'),
+        'accent_color': 'color', 'accent_width': (0, 24),
+        'shadow': ('none', 'soft', 'medium', 'strong'),
+        'background_color': 'color', 'border_color': 'color',
+        'border_width': (0, 10), 'radius': (0, 80),
+        'padding': (8, 96),
+        'title_color': 'color', 'body_color': 'color',
+        'title_size': (14, 90), 'body_size': (10, 48),
+        'title_weight': ('normal', 'medium', 'semibold', 'bold', 'heavy'),
+        'body_weight': ('normal', 'medium', 'semibold', 'bold'),
+        'title_style': ('normal', 'italic'),
+        'body_style': ('normal', 'italic'),
+        'title_decoration': ('none', 'underline'),
+        'body_decoration': ('none', 'underline'),
+        'image_position': ('none', 'left', 'right', 'top', 'bottom'),
+        'image_width': (15, 65), 'image_fit': ('cover', 'contain'),
+        'image_ratio': ('original', 'square', 'four_three', 'wide', 'portrait'),
+        'image_radius': (0, 60),
+        'gap': (0, 80),
+    },
     'quote': {'font_size': (12, 72), 'attribution_size': (10, 36), 'quote_color': 'color',
               'attribution_color': 'color', 'border_color': 'color', 'border_width': (0, 12),
               'font_style': ('normal', 'italic')},
@@ -400,6 +421,11 @@ def _validate_blocks(data, depth, remaining, anchors):
         elif kind == 'callout':
             block['title'] = text(item.get('title', ''), 500)
             block['text'] = text(item.get('text', ''), 5000)
+            image_url = text(item.get('image_url', ''), 2048)
+            block['image_url'] = safe_url(image_url, media=True)
+            if image_url and not block['image_url']:
+                raise ValueError('Invalid callout image URL')
+            block['image_alt'] = text(item.get('image_alt', ''), 500)
         elif kind in {'stats', 'team', 'faq'}:
             items = item.get('items', [])
             if not isinstance(items, list) or len(items) > (8 if kind in {'stats', 'team'} else 20):
