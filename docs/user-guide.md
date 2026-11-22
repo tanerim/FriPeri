@@ -213,7 +213,7 @@ Blog and Notes archive pages omit the large heading above the cards. Hiding card
 
 ### Customizing Design and Navigation
 
-Under **Website → Design**, configure page, navigation, feature, accent, separator, and footer colors. On mobile screens, the footer's site name/date and Powered by information are centered on separate lines; social icons remain centered between them when configured. You can also edit the footer text in each configured content language and control footer visibility.
+Under **Website → Design**, configure page, navigation, feature, accent, separator, and footer colors. On tablet and mobile screens (900 px wide or narrower), the footer becomes a centered vertical layout: social icons first (if configured), site name/date second, and Powered by third. Wider screens retain a single horizontal row. You can also edit the footer text in each configured content language and control footer visibility.
 
 Under **Website → Menu**, configure category labels, sort order, and visibility. Add custom links with a label, URL, order, visibility setting, and optional new-tab behavior. Supply a translated label when using a secondary language.
 
