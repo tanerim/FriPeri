@@ -696,5 +696,20 @@
   "design.scope_feature": "Background, text and borders of feature panels and highlighted sections that use the site's feature palette.",
   "design.scope_accent": "Primary and secondary accents used by buttons, links, labels and decorative elements where theme accent variables are used. Individual category accents can override archive accents in CMS Design.",
   "design.scope_separator": "Color palette used by decorative separators and section transitions where a theme separator is used.",
-  "design.scope_footer": "Footer background, text and top border. The footer color settings apply site-wide, not to individual categories."
+  "design.scope_footer": "Footer background, text and top border. The footer color settings apply site-wide, not to individual categories.",
+  "design.help_color_page_bg": "Background of public pages, including article and category pages unless overridden.",
+  "design.help_color_nav": "Primary navigation background and theme-dependent navigation elements.",
+  "design.help_color_nav_hover": "Navigation link and button hover treatments where configured.",
+  "design.help_color_nav_active": "Active navigation item and selected-state emphasis.",
+  "design.help_color_feature_bg": "Background of site feature panels and highlighted content sections.",
+  "design.help_color_feature_text": "Text color inside feature panels.",
+  "design.help_color_feature_border": "Border or outline color on feature elements.",
+  "design.help_color_accent_primary": "Primary theme accent for supported links, buttons, labels and decorative markers.",
+  "design.help_color_accent_secondary": "Secondary accent for decorative or alternate-accent components that use it.",
+  "design.help_color_separator_1": "First color in decorative section separator palettes.",
+  "design.help_color_separator_2": "Second color in decorative section separator palettes.",
+  "design.help_color_separator_3": "Third color in decorative section separator palettes.",
+  "design.help_color_footer_bg": "Site-wide footer background.",
+  "design.help_color_footer_text": "Site-wide footer text and link tones.",
+  "design.help_color_footer_border": "Footer upper divider/border."
 }
