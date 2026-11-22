@@ -4,7 +4,7 @@ from color_templates import ROLE_KEYS, TEMPLATES, list_templates, validate_templ
 
 def test_all_presets_have_ten_swatches_and_every_design_role():
     validate_templates()
-    assert len(TEMPLATES) == 4
+    assert len(TEMPLATES) == 6
     for template in list_templates():
         assert len(template["colors"]) == 10
         assert set(template["settings"]) == set(ROLE_KEYS)
@@ -24,3 +24,13 @@ def test_original_user_palettes_are_preserved():
     assert presets["electric-orchid"]["colors"] == [
         "#f72585", "#b5179e", "#7209b7", "#560bad", "#480ca8",
         "#3a0ca3", "#3f37c9", "#4361ee", "#4895ef", "#4cc9f0"]
+
+
+def test_friperi_world_is_first_and_new_palettes_are_complete():
+    presets = list_templates()
+    assert presets[0]["name"] == "FriPeri World"
+    assert presets[0]["id"] == "friperi-world"
+    assert presets[1]["id"] == "scholarly-grove"
+    for preset in presets[:2]:
+        assert len(preset["colors"]) == 10
+        assert len(preset["settings"]) == len(ROLE_KEYS)
