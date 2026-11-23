@@ -1,13 +1,47 @@
 {% extends "base.html" %}
 
 {% block content %}
-<main class="contact-page">
-  <div class="contact-container">
-    <header class="contact-header">
-      <h1>{{ t(lang, "nav.contact") }}</h1>
-      {% if contact_intro %}<p>{{ contact_intro }}</p>{% endif %}
-    </header>
-    <section class="contact-card">
+<main class="contact-page contact-page-designed">
+  <section class="contact-hero">
+    <div class="contact-hero-inner">
+      <div class="contact-hero-copy">
+        <span class="contact-eyebrow">CONNECT · COLLABORATE · CREATE</span>
+        <h1>Let's start a <em>conversation.</em></h1>
+        <p>{{ contact_intro or "Have a research question, an idea for collaboration, or something you would like to share? We would love to hear from you." }}</p>
+        <div class="contact-hero-tags" aria-label="Our interests">
+          <span>Research</span><span>Digital Humanities</span><span>Collaboration</span>
+        </div>
+      </div>
+      <div class="contact-hero-art" aria-hidden="true">
+        <svg viewBox="0 0 520 390" xmlns="http://www.w3.org/2000/svg">
+          <path d="M-20 285C135 310 172 30 305 32s147 167 240 98" fill="none" stroke="#72d7cf" stroke-width="74" opacity=".23"/>
+          <path d="M-20 355C185 355 190 95 337 100s152 210 230 150" fill="none" stroke="#9985e9" stroke-width="55" opacity=".33"/>
+          <g stroke="#91d9dc" stroke-width="1.6" opacity=".72" fill="none">
+            <path d="M100 194L174 125 248 184 332 112 410 179 454 97M174 125L225 74 332 112M248 184L300 252 410 179 465 259M100 194L170 264 300 252"/>
+          </g>
+          <g fill="#9ed9e0"><circle cx="100" cy="194" r="7"/><circle cx="174" cy="125" r="8"/><circle cx="248" cy="184" r="9"/><circle cx="332" cy="112" r="8"/><circle cx="410" cy="179" r="7"/><circle cx="454" cy="97" r="6"/><circle cx="225" cy="74" r="6"/><circle cx="300" cy="252" r="9"/><circle cx="170" cy="264" r="6"/><circle cx="465" cy="259" r="6"/></g>
+          <circle cx="248" cy="184" r="16" fill="none" stroke="#f3c65d" stroke-width="3"/>
+        </svg>
+      </div>
+    </div>
+    <svg class="contact-hero-edge" viewBox="0 0 1440 72" preserveAspectRatio="none" aria-hidden="true"><path d="M0 30C180 6 350 53 540 34S940 5 1120 31s255 10 320-5v46H0Z"/></svg>
+  </section>
+  <section class="contact-content-section">
+    <div class="contact-container">
+      <div class="contact-layout">
+        <div class="contact-side">
+          <span class="contact-section-kicker">GET IN TOUCH</span>
+          <h2>Ideas grow when we connect.</h2>
+          <p>Whether it is a new project, an academic exchange or an unexpected question, meaningful conversations are where collaboration begins.</p>
+          <div class="contact-info-list">
+            <div><span class="contact-info-icon"><i class="bi bi-chat-square-text" aria-hidden="true"></i></span><div><strong>Start a conversation</strong><p>Use the form to share your message with us.</p></div></div>
+            <div><span class="contact-info-icon"><i class="bi bi-people" aria-hidden="true"></i></span><div><strong>Explore collaboration</strong><p>Research, methods, data and ideas across disciplines.</p></div></div>
+          </div>
+          {% if contact_details %}<aside class="contact-details-block">{{ contact_details|e|replace("\n", "<br>")|safe }}</aside>{% endif %}
+        </div>
+        <section class="contact-card" aria-label="{{ t(lang, 'nav.contact') }}">
+          <span class="contact-form-kicker">SEND A MESSAGE</span>
+          <h2>Tell us what's on your mind.</h2>
       {% if success %}<p class="notice">{{ t(lang, 'contact.success') }}</p>{% endif %}
       {% if error %}
         <p class="error">
@@ -26,10 +60,12 @@
         <label><span>{{ t(lang, "contact.message") }}</span><textarea name="message" required maxlength="4000">{{ values.get('message', '') }}</textarea></label>
         <button class="settings-primary" type="submit">{{ t(lang, "contact.send") }}</button>
       </form>
-    </section>
-    {% if contact_details %}
-      <aside class="contact-details-block">{{ contact_details|e|replace("\n", "<br>")|safe }}</aside>
-    {% endif %}
-  </div>
+        </section>
+      </div>
+    </div>
+  </section>
+  <section class="contact-closing">
+    <div><span>Ideas are better together.</span><h2>Let's make room for new perspectives.</h2></div>
+  </section>
 </main>
 {% endblock %}
