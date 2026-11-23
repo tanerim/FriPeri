@@ -806,3 +806,13 @@
   background-position:16px 14px,right 54px top 11px,right 14px top 11px;
   background-size:12px 12px,30px 5px,30px 5px;background-repeat:no-repeat}
 .navbar-style-tile:focus-within{outline:3px solid #8479e7;outline-offset:2px}
+
+/* Message moderation controls */
+.hyperui-admin .message-actions{display:flex;gap:10px;justify-content:flex-end;padding:12px 18px 16px;border-top:1px solid #e3e8f0}
+.hyperui-admin .message-actions form{margin:0}
+.hyperui-admin .message-actions button{min-height:36px}
+.hyperui-admin .message-actions .message-spam{color:#9b2434;border-color:#e0b8bc}
+.hyperui-admin .blocked-senders{margin-top:18px;padding:16px}
+.hyperui-admin .blocked-senders>summary{font-weight:700;cursor:pointer}
+.hyperui-admin .blocked-sender-row{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:10px 0;border-top:1px solid #e3e8f0;overflow-wrap:anywhere}
+.hyperui-admin .blocked-sender-row form{flex-shrink:0}
