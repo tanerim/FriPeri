@@ -1367,7 +1367,7 @@
         const finish=commit=>{
           if(!name.contains(input))return;
           if(commit){
-            const value=input.value.trim().replace(/\\s+/g,' ').slice(0,100);
+            const value=input.value.trim().replace(/\s+/g,' ').slice(0,100);
             if(value!==previous){checkpoint();block.editor_name=value;checkpoint();}
           }
           name.textContent=defaultLabel+(block.editor_name?' — '+block.editor_name:'');
