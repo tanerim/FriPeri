@@ -154,6 +154,10 @@ def migrate_database(path: Path, settings=None, username=None, password=None) ->
             message TEXT NOT NULL,
             created_at TEXT NOT NULL
         )""")
+        conn.execute("""CREATE TABLE IF NOT EXISTS blocked_contact_emails (
+            email TEXT PRIMARY KEY COLLATE NOCASE,
+            blocked_at TEXT NOT NULL
+        )""")
         # Role-based access control: legacy users retain full administrator access.
         # Per-category archive presentation, independent of site-wide Design colors.
         add_column(conn, "categories", "archive_design_json", "TEXT NOT NULL DEFAULT '{}'")

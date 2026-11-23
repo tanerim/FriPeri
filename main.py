@@ -994,6 +994,14 @@ async def send_contact(request: Request) -> Response:
         return render_contact(request, error=error, values=values, status_code=400)
     try:
         with get_db() as conn:
+            # Silently discard submissions from blocked addresses. Do not expose
+            # blocklist membership through the public contact endpoint.
+            blocked = conn.execute(
+                "SELECT 1 FROM blocked_contact_emails WHERE email = ?",
+                (values['email'].casefold(),)
+            ).fetchone()
+            if blocked:
+                return RedirectResponse("/contact?sent=1", status_code=303)
             conn.execute("INSERT INTO contact_messages (name, email, message, created_at) VALUES (?, ?, ?, ?)",
                          (values['name'], values['email'], values['message'], now_iso()))
     except sqlite3.Error:
@@ -1016,11 +1024,72 @@ async def admin_messages(request: Request) -> Response:
         page = min(page, pages)
         messages = conn.execute('SELECT * FROM contact_messages ORDER BY id DESC LIMIT 25 OFFSET ?',
                                 ((page - 1) * 25,)).fetchall()
+        blocked_senders = conn.execute(
+            'SELECT email, blocked_at FROM blocked_contact_emails ORDER BY blocked_at DESC'
+        ).fetchall()
     response = render_template(request, 'admin/messages.html', t(pick_lang(request), 'admin.messages'), {
         'active_admin': 'messages', 'messages': messages, 'total': total, 'page': page, 'pages': pages,
+        'blocked_senders': blocked_senders, 'message_token': custom_home_token(user),
+        'can_manage_messages': (actor(request) or {}).get('role') == 'admin',
     }, user)
     response.headers['Cache-Control'] = 'no-store'
     return response
+
+
+@app.post('/admin/messages/{message_id}/delete', response_class=HTMLResponse)
+async def delete_message(request: Request, message_id: int) -> Response:
+    account = actor(request)
+    if not account:
+        return RedirectResponse('/login', status_code=303)
+    if account['role'] != 'admin':
+        return Response('Forbidden', status_code=403)
+    form = await request.form()
+    if not hmac.compare_digest(str(form.get('editor_token', '')), custom_home_token(account['username'])):
+        return Response('Invalid token', status_code=403)
+    with get_db() as conn:
+        deleted = conn.execute('DELETE FROM contact_messages WHERE id=?', (message_id,))
+        if not deleted.rowcount:
+            return Response('Message not found', status_code=404)
+    return RedirectResponse('/admin/messages?deleted=1', status_code=303)
+
+
+@app.post('/admin/messages/{message_id}/spam', response_class=HTMLResponse)
+async def spam_message(request: Request, message_id: int) -> Response:
+    account = actor(request)
+    if not account:
+        return RedirectResponse('/login', status_code=303)
+    if account['role'] != 'admin':
+        return Response('Forbidden', status_code=403)
+    form = await request.form()
+    if not hmac.compare_digest(str(form.get('editor_token', '')), custom_home_token(account['username'])):
+        return Response('Invalid token', status_code=403)
+    with get_db() as conn:
+        row = conn.execute('SELECT email FROM contact_messages WHERE id=?', (message_id,)).fetchone()
+        if not row:
+            return Response('Message not found', status_code=404)
+        email = row['email'].strip().casefold()
+        conn.execute('INSERT OR IGNORE INTO blocked_contact_emails(email, blocked_at) VALUES(?, ?)',
+                     (email, now_iso()))
+        conn.execute('DELETE FROM contact_messages WHERE lower(email)=?', (email,))
+    return RedirectResponse('/admin/messages?spam=1', status_code=303)
+
+
+@app.post('/admin/messages/unblock', response_class=HTMLResponse)
+async def unblock_contact_sender(request: Request) -> Response:
+    account = actor(request)
+    if not account:
+        return RedirectResponse('/login', status_code=303)
+    if account['role'] != 'admin':
+        return Response('Forbidden', status_code=403)
+    form = await request.form()
+    if not hmac.compare_digest(str(form.get('editor_token', '')), custom_home_token(account['username'])):
+        return Response('Invalid token', status_code=403)
+    email = str(form.get('email', '')).strip().casefold()
+    if not valid_email(email):
+        return Response('Invalid email', status_code=400)
+    with get_db() as conn:
+        conn.execute('DELETE FROM blocked_contact_emails WHERE email=?', (email,))
+    return RedirectResponse('/admin/messages?unblocked=1', status_code=303)
 
 
 # ===========================

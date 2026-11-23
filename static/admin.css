@@ -782,3 +782,13 @@
   .hyperui-admin .cms-design-page .color-control > input[data-color-value] {grid-column:2;grid-row:2}
   .hyperui-admin .cms-design-page .color-control > .color-control-help {grid-row:3}
 }
+
+/* Message moderation */
+.message-actions{display:flex;gap:10px;justify-content:flex-end;padding:12px 18px 16px;border-top:1px solid #e3e8f0}
+.message-actions form{margin:0}
+.message-actions button{min-height:36px}
+.message-actions .message-spam{color:#9b2434;border-color:#e0b8bc}
+.blocked-senders{margin-top:18px;padding:16px}
+.blocked-senders>summary{font-weight:700;cursor:pointer}
+.blocked-sender-row{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:10px 0;border-top:1px solid #e3e8f0;overflow-wrap:anywhere}
+.blocked-sender-row form{flex-shrink:0}

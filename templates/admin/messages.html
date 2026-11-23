@@ -5,6 +5,9 @@
     <header class="settings-page-header">
       <div><h1><span class="page-heading-icon">{{ icon('contact_details') }}</span>{{ t(lang, 'admin.messages') }} <span class="messages-count">{{ total }}</span></h1><p>{{ t(lang, 'messages.intro') }}</p></div>
     </header>
+    {% if request.query_params.get('deleted') %}<p class="notice">Message deleted.</p>{% endif %}
+    {% if request.query_params.get('spam') %}<p class="notice">Sender blocked and matching messages deleted.</p>{% endif %}
+    {% if request.query_params.get('unblocked') %}<p class="notice">Sender unblocked.</p>{% endif %}
     <section class="admin-card messages-inbox" aria-label="{{ t(lang, 'admin.messages') }}">
       {% for message in messages %}
       <details class="inbox-message">
@@ -14,11 +17,38 @@
           <time datetime="{{ message.created_at }}">{{ message.created_at|format_date }}</time>
         </summary>
         <div class="message-body">{{ message.message }}</div>
+        {% if can_manage_messages %}
+        <div class="message-actions">
+          <form action="/admin/messages/{{ message.id }}/delete" method="post" onsubmit="return confirm('Permanently delete this message?')">
+            <input type="hidden" name="editor_token" value="{{ message_token }}">
+            <button class="admin-secondary" type="submit">Delete</button>
+          </form>
+          <form action="/admin/messages/{{ message.id }}/spam" method="post" onsubmit="return confirm('Block this email address and delete all its messages?')">
+            <input type="hidden" name="editor_token" value="{{ message_token }}">
+            <button class="admin-secondary message-spam" type="submit">Mark as spam</button>
+          </form>
+        </div>
+        {% endif %}
       </details>
       {% else %}
       <div class="admin-empty-state"><span class="icon-tile tone-indigo">{{ icon('contact_details') }}</span><h2>{{ t(lang, 'messages.empty') }}</h2><p>{{ t(lang, 'messages.intro') }}</p></div>
       {% endfor %}
     </section>
+    {% if can_manage_messages and blocked_senders %}
+    <details class="settings-card-v3 blocked-senders">
+      <summary>Blocked senders ({{ blocked_senders|length }})</summary>
+      <p>These email addresses cannot submit new messages. Remove an address to allow future submissions.</p>
+      {% for sender in blocked_senders %}
+      <div class="blocked-sender-row"><span>{{ sender.email }}</span>
+        <form method="post" action="/admin/messages/unblock">
+          <input type="hidden" name="editor_token" value="{{ message_token }}">
+          <input type="hidden" name="email" value="{{ sender.email }}">
+          <button type="submit" class="admin-secondary">Unblock</button>
+        </form>
+      </div>
+      {% endfor %}
+    </details>
+    {% endif %}
     {% if pages > 1 %}
     <nav class="messages-pagination" aria-label="{{ t(lang, 'messages.pages') }}">
       {% if page > 1 %}<a class="admin-secondary" href="/admin/messages?page={{ page - 1 }}&amp;lang={{ lang }}">← {{ t(lang, 'messages.previous') }}</a>{% endif %}
