@@ -947,8 +947,17 @@
           lightbox:'Open image lightbox',eager:'Eager (above the fold)',
           lazy:'Lazy (recommended)',high:'High',low:'Low'
         };
+        const arrowLabels={
+          'arrow-up-light':'Up Arrow — Light','arrow-up-heavy':'Up Arrow — Heavy',
+          'arrow-down-light':'Down Arrow — Light','arrow-down-heavy':'Down Arrow — Heavy',
+          'arrow-left-light':'Left Arrow — Light','arrow-left-heavy':'Left Arrow — Heavy',
+          'arrow-right-light':'Right Arrow — Light','arrow-right-heavy':'Right Arrow — Heavy'
+        };
         kind.forEach(value=>input.add(new Option(
-          block.type==='image'
+          key==='icon' && arrowLabels[value] ? arrowLabels[value]
+          : key==='variant' && value==='plain' ? 'Plain / No background'
+          : key==='hover_effect' ? ({none:'None (static)',color:'Color change',lift:'Lift'}[value]||value)
+          : block.type==='image'
             ? (imageOptionLabels[value] || value.replaceAll('_',' ').replace(/^./,c=>c.toUpperCase()))
             : key==='landing_style'
               ? ({none:'Standard',hero:'Branded Hero',intro:'Editorial Intro',features:'Feature Cards',showcase:'Product Showcase',steps:'Step Cards',contrast:'Highlight',closing:'Closing CTA'}[value]||value)
@@ -1477,7 +1486,12 @@
         const glyph=el('i','bi bi-'+(block.icon_name || (standalone?'star':'house')));
         glyph.setAttribute('aria-hidden','true');preview.append(glyph);body.append(preview);
         body.append(select('Icon',block.icon_name || (standalone?'star':'house'),
-          names.map(name=>[name,name.replaceAll('-',' ').replace(/^./,c=>c.toUpperCase())]),
+          names.map(name=>[name,({
+            'arrow-down':'Down Arrow — Light','arrow-down-circle-fill':'Down Arrow — Heavy',
+            'arrow-up':'Up Arrow — Light','arrow-up-circle-fill':'Up Arrow — Heavy',
+            'arrow-left':'Left Arrow — Light','arrow-left-circle-fill':'Left Arrow — Heavy',
+            'arrow-right':'Right Arrow — Light','arrow-right-circle-fill':'Right Arrow — Heavy'
+          })[name]||name.replaceAll('-',' ').replace(/^./,c=>c.toUpperCase())]),
           value=>{block.icon_name=value;glyph.className='bi bi-'+value;}));
         if(standalone){
           body.append(field('Accessible description (optional)',block.icon_label||'',value=>{
