@@ -1338,16 +1338,53 @@
         Array.from(canvas.children).forEach((node,i)=>node.classList.toggle('is-selected',i===index));
       });
       const hero=heroContent(block);
-      const label=String(index+1).padStart(2,'0')+' / '+(block.type==='icon'?'Icon':block.type==='icon_button'?'Icon Button':block.type==='brand_logo'?'FriPeri Logo':t(hero ? 'hero_section' : block.type));
+      const blockType=block.type==='icon'?'Icon':block.type==='icon_button'?'Icon Button':block.type==='brand_logo'?'FriPeri Logo':t(hero?'hero_section':block.type);
+      const blockNumber=String(index+1).padStart(2,'0');
+      const defaultLabel=blockNumber+' / '+blockType;
+      const label=defaultLabel+(block.editor_name?' — '+block.editor_name:'');
       const header=el('header','builder-block-header');
-      const toggle=button('',()=>{
+      const toggle=button('',event=>{
+        // Clicking the name selects it, while double-clicking begins renaming.
+        if(event?.target?.closest('.builder-block-name'))return;
         if (collapsedBlocks.has(block)) collapsedBlocks.delete(block);
         else collapsedBlocks.add(block);
         showBlockState();
       },'builder-block-toggle');
       const chevron=el('span','builder-block-chevron');
       chevron.setAttribute('aria-hidden','true');
-      toggle.append(chevron,el('strong','',label));
+      const name=el('strong','builder-block-name',label);
+      name.title='Double-click to rename this block';
+      name.addEventListener('click',event=>event.stopPropagation());
+      name.addEventListener('dblclick',event=>{
+        event.preventDefault();event.stopPropagation();
+        if(name.querySelector('input'))return;
+        const input=el('input','builder-block-rename-input');
+        input.type='text';input.maxLength=100;
+        input.value=block.editor_name||'';
+        input.placeholder=blockType;
+        input.setAttribute('aria-label','Block name');
+        const previous=block.editor_name||'';
+        const finish=commit=>{
+          if(!name.contains(input))return;
+          if(commit){
+            const value=input.value.trim().replace(/\\s+/g,' ').slice(0,100);
+            if(value!==previous){checkpoint();block.editor_name=value;checkpoint();}
+          }
+          name.textContent=defaultLabel+(block.editor_name?' — '+block.editor_name:'');
+          name.title='Double-click to rename this block';
+        };
+        input.addEventListener('click',e=>e.stopPropagation());
+        input.addEventListener('dblclick',e=>e.stopPropagation());
+        input.addEventListener('keydown',e=>{
+          e.stopPropagation();
+          if(e.key==='Enter'){e.preventDefault();finish(true);}
+          else if(e.key==='Escape'){e.preventDefault();finish(false);}
+        });
+        input.addEventListener('blur',()=>finish(true));
+        name.replaceChildren(el('span','builder-block-rename-prefix',defaultLabel+' — '),input);
+        input.focus();input.select();
+      });
+      toggle.append(chevron,name);
       const showBlockState=()=>{
         const expanded=!collapsedBlocks.has(block);
         toggle.setAttribute('aria-expanded',String(expanded));

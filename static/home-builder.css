@@ -642,3 +642,17 @@
 }
 .hyperui-admin .builder-section-content .custom-callout .friperi-callout-copy h3[contenteditable]{color:var(--block-title-color,#17243b)}
 .hyperui-admin .builder-section-content .custom-callout .friperi-callout-copy p[contenteditable]{color:var(--block-body-color,#17243b)}
+
+/* Inline editor-only block renaming; no changes to public content styles. */
+.hyperui-admin .builder-block-header .builder-block-name{
+  display:inline-flex;align-items:center;gap:4px;min-width:0;
+  max-width:min(100%,460px);cursor:text;overflow-wrap:anywhere;text-transform:none;
+}
+.hyperui-admin .builder-block-name:hover{text-decoration:underline;text-decoration-style:dotted;text-underline-offset:3px}
+.hyperui-admin .builder-block-rename-input{
+  min-width:100px;width:clamp(110px,22vw,320px);max-width:100%;
+  padding:5px 8px;border:1px solid #818cf8;border-radius:6px;
+  background:#fff;color:#17243b;font:inherit;font-size:12px;letter-spacing:normal;text-transform:none;
+}
+.hyperui-admin .builder-block-rename-input:focus-visible{outline:2px solid #818cf8;outline-offset:1px}
+.hyperui-admin .builder-block-rename-prefix{flex-shrink:0}

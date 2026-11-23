@@ -421,6 +421,10 @@ def _validate_blocks(data, depth, remaining, anchors):
                  'tone': item.get('tone') if item.get('tone') in ('plain', 'soft', 'accent', 'dark', 'white', 'custom', 'page', 'navigation', 'secondary') else 'plain',
                  'align': item.get('align') if item.get('align') in ('left', 'center', 'right') else 'left',
                  'width': item.get('width') if item.get('width') in ('normal', 'wide') else 'normal'}
+        # Private editor-only label; never rendered by the public block template.
+        editor_name = text(item.get('editor_name', ''), 100).strip()
+        if editor_name:
+            block['editor_name'] = editor_name
         if block['tone'] == 'custom':
             color = item.get('background', '#ffffff')
             if not isinstance(color, str) or not re.fullmatch(r'#[0-9a-fA-F]{6}', color):
