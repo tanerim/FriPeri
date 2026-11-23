@@ -2479,3 +2479,26 @@ textarea { min-height: 180px; resize: vertical; }
   .public-site .footer-social-links { justify-content: center; }
   .public-site .footer-powered { display: inline-block; line-height: 1.6; }
 }
+
+/* Navbar Design, scoped to public pages so the admin chrome stays unchanged. */
+.public-site[data-navbar-position=static] .site-header{position:relative}
+.public-site[data-navbar-position=sticky] .site-header{position:sticky;top:0}
+.public-site .nav{min-height:var(--navbar-height,72px)}
+.public-site .nav-links{font-size:var(--navbar-font-size,14px);font-weight:var(--navbar-font-weight,650)}
+.public-site .brand-mark,.public-site .brand-logo-image{width:var(--navbar-logo-size,38px);height:var(--navbar-logo-size,38px);flex-shrink:0}
+.public-site .brand-logo-image{object-fit:contain}
+.public-site[data-navbar-width=wide] .nav{width:min(1720px,calc(100% - 48px));}
+.public-site[data-navbar-width=full] .nav{width:calc(100% - 40px);max-width:none}
+.public-site[data-navbar-alignment=left] .nav-links{margin-right:auto;margin-left:0}
+.public-site[data-navbar-alignment=center] .nav-links{margin-inline:auto}
+.public-site[data-navbar-alignment=right] .nav-links{margin-left:auto}
+.public-site[data-navbar-font=serif] .nav-links{font-family:Georgia,serif}
+.public-site[data-navbar-font=monospace] .nav-links{font-family:ui-monospace,monospace}
+.public-site[data-navbar-style=minimal] .site-header{background:transparent;backdrop-filter:none;border-color:transparent}
+.public-site[data-navbar-style=glass] .site-header{background:color-mix(in srgb,var(--color-page-bg,#f8faf8) 72%,transparent);backdrop-filter:blur(22px)}
+.public-site[data-navbar-style=solid] .site-header{background:var(--color-nav,#142536);border-color:transparent}
+.public-site[data-navbar-style=solid] .brand-name,.public-site[data-navbar-style=solid] .brand-tagline,
+.public-site[data-navbar-style=solid] .nav-links>a,.public-site[data-navbar-style=solid] .brand{color:#fff}
+.public-site[data-navbar-style=solid] .nav-links a:hover{color:var(--color-separator-3,#f2c14e)}
+.public-site[data-navbar-style=solid] .brand-mark{background:#fff;color:var(--color-nav,#142536)}
+@media(max-width:900px){.public-site[data-navbar-alignment] .nav-links{margin:0}.public-site .nav{min-height:var(--navbar-height,72px)}}

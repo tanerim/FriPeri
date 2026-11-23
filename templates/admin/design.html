@@ -1,6 +1,6 @@
 {% extends "admin/base.html" %}
 {% from "admin/partials/color_control.html" import color_control %}
-{% block extra_head %}<script src="{{ static_url('appearance-controls.js') }}" defer></script><script src="{{ static_url('color-templates.js') }}" defer></script><link rel="stylesheet" href="{{ static_url('color-templates.css') }}">{% endblock %}
+{% block extra_head %}<script src="{{ static_url('appearance-controls.js') }}" defer></script><script src="{{ static_url('color-templates.js') }}" defer></script><link rel="stylesheet" href="{{ static_url('color-templates.css') }}"><script src="{{ static_url('navbar-logo-upload.js') }}" defer></script>{% endblock %}
 
 {% block content %}
 <main id="admin-content" class="admin-settings-page admin-compact-page design-settings-page" tabindex="-1">
@@ -33,6 +33,58 @@
         <script type="application/json" id="design-color-template-data">{{ color_templates|tojson }}</script>
       </section>
 
+
+      <section class="settings-card-v3 navbar-design-section">
+        <header>
+          <h2>Navigation Bar</h2>
+          <p>Customize layout, typography, branding and scroll behavior. These settings affect the public website.</p>
+        </header>
+        <div class="navbar-style-options">
+          {% for value,label,description in [
+            ('classic','Classic','Clean navigation with subtle background'),
+            ('minimal','Minimal','Transparent, quiet navigation'),
+            ('glass','Glass','Translucent frosted navigation'),
+            ('solid','Solid','Accent-colored navigation surface')
+          ] %}
+          <label class="navbar-style-tile">
+            <input type="radio" name="navbar_style" value="{{ value }}" {{ 'checked' if settings.navbar_style == value else '' }}>
+            <strong>{{ label }}</strong><small>{{ description }}</small>
+          </label>
+          {% endfor %}
+        </div>
+        <div class="settings-grid-v3 two-col navbar-settings-grid">
+          <label><span>Position</span><select name="navbar_position">
+            {% for value,label in [('sticky','Sticky — follows scroll'),('static','Static — scrolls away')] %}
+            <option value="{{ value }}" {{ 'selected' if settings.navbar_position == value else '' }}>{{ label }}</option>{% endfor %}
+          </select></label>
+          <label><span>Menu alignment</span><select name="navbar_alignment">
+            {% for value in ['left','center','right'] %}<option value="{{ value }}" {{ 'selected' if settings.navbar_alignment == value else '' }}>{{ value|capitalize }}</option>{% endfor %}
+          </select></label>
+          <label><span>Navigation width</span><select name="navbar_width">
+            {% for value in ['contained','wide','full'] %}<option value="{{ value }}" {{ 'selected' if settings.navbar_width == value else '' }}>{{ value|capitalize }}</option>{% endfor %}
+          </select></label>
+          <label><span>Font family</span><select name="navbar_font">
+            {% for value in ['sans','serif','monospace'] %}<option value="{{ value }}" {{ 'selected' if settings.navbar_font == value else '' }}>{{ value|capitalize }}</option>{% endfor %}
+          </select></label>
+          <label><span>Menu font size (px)</span><input type="number" name="navbar_font_size" min="11" max="22" value="{{ settings.navbar_font_size }}"></label>
+          <label><span>Menu font weight</span><select name="navbar_font_weight">
+            {% for value,label in [('400','Normal'),('500','Medium'),('600','Semibold'),('650','Default'),('700','Bold'),('800','Heavy')] %}
+            <option value="{{ value }}" {{ 'selected' if settings.navbar_font_weight == value else '' }}>{{ label }}</option>{% endfor %}
+          </select></label>
+          <label><span>Navigation height (px)</span><input type="number" name="navbar_height" min="52" max="112" value="{{ settings.navbar_height }}"></label>
+          <label><span>Logo size (px)</span><input type="number" name="navbar_logo_size" min="24" max="100" value="{{ settings.navbar_logo_size }}"></label>
+          <label><span>Logo display</span><select name="navbar_logo_mode">
+            {% for value,label in [('initials','Site initials'),('image','Uploaded logo'),('none','No logo mark')] %}
+            <option value="{{ value }}" {{ 'selected' if settings.navbar_logo_mode == value else '' }}>{{ label }}</option>{% endfor %}
+          </select></label>
+          <label class="settings-check"><input type="checkbox" name="navbar_show_tagline" value="1" {{ 'checked' if settings.navbar_show_tagline == '1' else '' }}><span>Show tagline</span></label>
+          <label><span>Logo image URL</span><input id="navbar-logo-url" name="navbar_logo_url" value="{{ settings.navbar_logo_url }}" placeholder="/static/uploads/navbar-..."></label>
+          <label><span>Upload logo (PNG, JPG, WebP)</span><input id="navbar-logo-upload" type="file" accept="image/png,image/jpeg,image/webp"></label>
+          <p id="navbar-logo-feedback" class="builder-help" role="status" aria-live="polite"></p>
+        </div>
+        <input type="hidden" id="navbar-upload-token" value="{{ navbar_upload_token }}">
+        <p class="design-scope-help">Uploading a logo does not publish your settings until Save changes is selected.</p>
+      </section>
       {% set color_groups = [
         ('design.page', ['color_page_bg']),
         ('design.navigation', ['color_nav', 'color_nav_hover', 'color_nav_active']),

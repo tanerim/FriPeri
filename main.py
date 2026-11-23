@@ -2351,6 +2351,42 @@ async def save_cms_category_design(request: Request) -> Response:
     return RedirectResponse(f"/admin/cms-design?category={int(raw_id)}&saved=1", status_code=303)
 
 
+NAVBAR_DESIGN_CHOICES = {
+    'navbar_style': {'classic', 'minimal', 'glass', 'solid'},
+    'navbar_position': {'sticky', 'static'},
+    'navbar_alignment': {'left', 'center', 'right'},
+    'navbar_width': {'contained', 'wide', 'full'},
+    'navbar_font': {'sans', 'serif', 'monospace'},
+    'navbar_logo_mode': {'initials', 'image', 'none'},
+}
+NAVBAR_DESIGN_RANGES = {
+    'navbar_font_size': (11, 22),
+    'navbar_font_weight': (400, 800),
+    'navbar_height': (52, 112),
+    'navbar_logo_size': (24, 100),
+}
+
+def validated_navbar_settings(form, current):
+    changes = {}
+    for key, valid in NAVBAR_DESIGN_CHOICES.items():
+        value = str(form.get(key, current[key])).strip()
+        if value not in valid:
+            raise ValueError('Invalid navbar setting: ' + key)
+        changes[key] = value
+    for key, (minimum, maximum) in NAVBAR_DESIGN_RANGES.items():
+        value = str(form.get(key, current[key])).strip()
+        if not value.isdecimal() or not minimum <= int(value) <= maximum:
+            raise ValueError('Invalid navbar size: ' + key)
+        changes[key] = str(int(value))
+    logo = str(form.get('navbar_logo_url', current['navbar_logo_url'])).strip()
+    if logo and not (logo.startswith('/static/uploads/') and valid_url(logo, relative=True)
+                     or logo.startswith('https://') and valid_url(logo)):
+        raise ValueError('Invalid navbar logo URL')
+    changes['navbar_logo_url'] = logo
+    changes['navbar_show_tagline'] = '1' if form.get('navbar_show_tagline') else '0'
+    return changes
+
+
 @app.get("/admin/design", response_class=HTMLResponse)
 async def admin_design(request: Request) -> Response:
     user = require_user(request)
@@ -2368,9 +2404,27 @@ async def admin_design(request: Request) -> Response:
             "saved": request.query_params.get("saved") == "1",
             "active_admin": "design",
             "color_templates": list_templates(),
+            "navbar_upload_token": custom_home_token(user),
         },
         user,
     )
+
+
+@app.post('/admin/design/navbar-logo')
+async def upload_navbar_logo(request: Request) -> Response:
+    user = require_user(request)
+    if not user:
+        return JSONResponse({'error': 'Login required'}, status_code=401)
+    form = await request.form()
+    if not hmac.compare_digest(str(form.get('editor_token', '')), custom_home_token(user)):
+        return JSONResponse({'error': 'Invalid token'}, status_code=403)
+    try:
+        path = await store_image_upload(form.get('file'), UPLOAD_DIR, prefix='navbar-')
+    except ImageUploadError as exc:
+        return JSONResponse({'error': exc.message}, status_code=exc.status_code)
+    if not path:
+        return JSONResponse({'error': 'Choose an image'}, status_code=400)
+    return JSONResponse({'url': path})
 
 
 @app.get("/admin/homepage", response_class=HTMLResponse)
@@ -2448,6 +2502,10 @@ async def save_design(request: Request) -> Response:
         for key in ("footer_text_secondary", "footer_text_en"):
             settings[key] = str(form.get(key, settings.get(key, ""))).strip()
         settings["show_footer"] = "1" if form.get("show_footer") else "0"
+        try:
+            settings.update(validated_navbar_settings(form, settings))
+        except ValueError:
+            return Response('Invalid navbar configuration', status_code=400)
         set_site_settings(conn, settings)
     return RedirectResponse("/admin/design?saved=1", status_code=303)
 

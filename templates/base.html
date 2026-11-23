@@ -36,7 +36,11 @@
     {{ site_settings.head_snippet | safe }}
     {% endif %}
   </head>
-  <body class="{{ 'admin-site' if request.url.path.startswith('/admin') else 'public-site' }}">
+  <body class="{{ 'admin-site' if request.url.path.startswith('/admin') else 'public-site' }}"
+    data-navbar-style="{{ site_settings.navbar_style }}" data-navbar-position="{{ site_settings.navbar_position }}"
+    data-navbar-alignment="{{ site_settings.navbar_alignment }}" data-navbar-width="{{ site_settings.navbar_width }}"
+    data-navbar-font="{{ site_settings.navbar_font }}"
+    style="--navbar-height:{{ site_settings.navbar_height }}px;--navbar-font-size:{{ site_settings.navbar_font_size }}px;--navbar-font-weight:{{ site_settings.navbar_font_weight }};--navbar-logo-size:{{ site_settings.navbar_logo_size }}px">
     <header class="site-header">{% include "partials/nav.html" %}</header>
     {% block content %}{% endblock %}
     {% if site_settings.show_footer == '1' %}

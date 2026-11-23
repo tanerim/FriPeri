@@ -1,10 +1,13 @@
 <nav class="nav" aria-label="{{ t(lang, 'common.main_navigation') }}">
   <a class="brand" href="/">
-    <span class="brand-mark">{{ site_initials }}</span>
+    {% if site_settings.navbar_logo_mode == 'image' and site_settings.navbar_logo_url %}
+    <img class="brand-logo-image" src="{{ site_settings.navbar_logo_url }}" alt="{{ site_name }} logo">
+    {% elif site_settings.navbar_logo_mode != 'none' %}
+    <span class="brand-mark">{{ site_initials }}</span>{% endif %}
     <div class="brand-text">
       <span class="brand-name">{{ site_name }}</span>
       {% set tagline = localized(site_settings, 'hero_kicker') %}
-      {% if tagline %}
+      {% if tagline and site_settings.navbar_show_tagline == '1' %}
         <span class="brand-tagline">{{ tagline }}</span>
       {% endif %}
     </div>
