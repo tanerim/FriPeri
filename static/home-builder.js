@@ -111,7 +111,7 @@
       category:{category:config.categories[0]?.slug || '',count:4},
       heading:{text:t('heading_hint'),level:'h2'}, text:{html:'',foreground:''},
       list:{items:[t('item')],ordered:false}, table:{rows:[[t('heading'),t('heading')],[t('item'),t('item')]],caption:''},
-      image:{url:'',alt:'',caption:'',link_url:'',link_target:'same_tab'},video:{url:'',alt:'',caption:''},button:{text:t('starter_button'),url:'',appearance:{icon:'none'}},brand_logo:{width:'wide'},icon_button:{text:'Home',url:'/',icon_name:'house',appearance:{variant:'solid'}},divider:{line_width:2,line_style:'single',line_color:'#a5b3be'},
+      image:{url:'',alt:'',caption:'',link_url:'',link_target:'same_tab'},video:{url:'',alt:'',caption:''},button:{text:t('starter_button'),url:'',appearance:{icon:'none',variant:'plain',hover_effect:'none'}},icon:{icon_name:'star',icon_label:'',appearance:{icon_size:48,background_mode:'none'}},brand_logo:{width:'wide'},icon_button:{text:'Home',url:'/',icon_name:'house',appearance:{variant:'solid'}},divider:{line_width:2,line_style:'single',line_color:'#a5b3be'},
       quote:{text:t('quote_hint'),attribution:''},callout:{title:t('callout'),text:t('text_hint'),image_url:'',image_alt:''},
       stats:{items:[{value:'100+',label:t('stat_label')}]},team:{width:'wide',appearance:{direction:'vertical',style:'classic',columns:3,photo_width:180,gap:24},items:[{photo:'',name:'',title:'',bio:'',shape:'rectangle',orientation:'portrait',fit:'cover',zoom:1,focal_x:50,focal_y:50}]},faq:{items:[{question:t('question'),answer:t('answer')}]},legacy_html:{html:''}
     }[type]);
@@ -215,11 +215,11 @@
       gap:44,vertical_align:'center',edge:'flat'
     });
   }
-  const symbols = {icon_button:'◎',section:'▥',heading:'H',text:'¶',list:'☷',table:'▦',image:'▧',video:'▷',button:'↗',quote:'❝',callout:'!',stats:'№',team:'♙',faq:'?',divider:'―',category:'▤',legacy_html:'<>',brand_logo:'✦'};
+  const symbols = {icon_button:'◎',icon:'✧',section:'▥',heading:'H',text:'¶',list:'☷',table:'▦',image:'▧',video:'▷',button:'↗',quote:'❝',callout:'!',stats:'№',team:'♙',faq:'?',divider:'―',category:'▤',legacy_html:'<>',brand_logo:'✦'};
   Object.keys(symbols).forEach(type => {
     const node = button('', () => add(type), 'builder-add-button');
     node.dataset.blockType = type;
-    node.append(el('span','builder-block-symbol',symbols[type]),el('span','',type==='brand_logo'?'FriPeri Logo':type==='icon_button'?'Icon Button':t(type)));
+    node.append(el('span','builder-block-symbol',symbols[type]),el('span','',type==='brand_logo'?'FriPeri Logo':type==='icon_button'?'Icon Button':type==='icon'?'Icon':t(type)));
     document.getElementById('builder-add-blocks').append(node);
   });
   const presets = document.getElementById('builder-section-presets');
@@ -732,9 +732,16 @@
     heading: [['font_size',18,160,48],['font_weight',['normal','bold','heavy']],['accent_color','color','#2563eb'],['accent_opacity',0,100,100],['accent_style',['color_only','underline']],['accent_new_line',['no','yes']]],
     list: [['font_size',10,72,18],['item_gap',0,48,8]],
     table: [['cell_background','color','#ffffff'],['cell_color','color','#17243b'],['header_background','color','#eef2ff'],['header_color','color','#17243b']],
+    icon: [['icon_size',12,160,48],['icon_color','color',config.design?.accent||'#286e7a'],
+      ['background_mode',['none','circle','rounded','square']],['frame_size',24,220,84],
+      ['frame_color','color','#e6f2f0'],['radius',0,80,16],['shadow',['none','soft','medium']]],
     icon_button: [['button_background','color',config.design?.accent || '#286e7a'],['button_hover','color',config.design?.navHover || '#20435b'],['button_text','color','#ffffff'],['button_hover_text','color','#ffffff'],['font_size',10,48,20],['variant',['solid','outline','ghost','text_link','underlined']],['width_mode',['auto','full','custom']],['width_px',40,1200,64],['height',24,240,52],['radius',0,120,12],['target',['same_tab','new_tab']]],
     button: [['button_background','color',config.design?.accent || '#286e7a'],['button_hover','color',config.design?.navHover || '#20435b'],['button_text','color','#ffffff'],['button_hover_text','color','#ffffff'],['font_size',10,48,16],['width_mode',['auto','full','custom']],['width_px',40,1200,240],['height',24,240,56],['radius',0,120,100],
-      ['variant',['solid','outline','ghost','text_link','underlined']],['icon',['none','arrow','external']],
+      ['variant',['plain','solid','outline','ghost','text_link','underlined']],
+      ['icon',['none','arrow','external',
+       'arrow-up-light','arrow-up-heavy','arrow-down-light','arrow-down-heavy',
+       'arrow-left-light','arrow-left-heavy','arrow-right-light','arrow-right-heavy']],
+      ['hover_effect',['none','color','lift']],
       ['border_width',0,8,0],['border_color','color','#2563eb'],['padding_x',0,96,24],['padding_y',0,48,16],['target',['same_tab','new_tab']]],
     image: [
       ['ratio',['original','square','four_three','three_two','wide','portrait','cinema']],
@@ -858,11 +865,24 @@
     }
     if (block.type === 'button' || block.type === 'icon_button') {
       body.dataset.variant = appearance.variant || 'solid';
+      body.dataset.hoverEffect = appearance.hover_effect || (appearance.variant === 'plain' ? 'none' : 'color');
       const icon = body.querySelector('.builder-button-icon');
       if (icon) {
-        icon.hidden = !appearance.icon || appearance.icon === 'none';
-        icon.textContent = appearance.icon === 'arrow' ? '→' : '↗';
+        const glyphs={arrow:'arrow-right',external:'box-arrow-up-right',
+          'arrow-up-light':'arrow-up','arrow-up-heavy':'arrow-up-circle-fill',
+          'arrow-down-light':'arrow-down','arrow-down-heavy':'arrow-down-circle-fill',
+          'arrow-left-light':'arrow-left','arrow-left-heavy':'arrow-left-circle-fill',
+          'arrow-right-light':'arrow-right','arrow-right-heavy':'arrow-right-circle-fill'};
+        const name=glyphs[appearance.icon];
+        icon.replaceChildren();icon.hidden=!name;
+        if(name)icon.append(el('i','bi bi-'+name));
       }
+    }
+    if(block.type==='icon'){
+      const glyph=body.querySelector('.friperi-standalone-icon i');
+      if(glyph)glyph.className='bi bi-'+(block.icon_name||'star');
+      body.dataset.iconBackground=appearance.background_mode||'none';
+      body.dataset.iconShadow=appearance.shadow||'none';
     }
     if (block.type === 'section') {
       Object.assign(body.dataset, {
@@ -909,7 +929,11 @@
         fetch_priority:'Fetch priority'
       };
       const teamLabels={title_size:'Title font size',title_color:'Title text color',title_weight:'Title font weight',title_style:'Title font style',title_font:'Title font family',direction:'Team direction',style:'Team style',columns:'Team columns',photo_width:'Photo width',gap:'Card gap',card_padding:'Card padding',radius:'Card corner radius',accent_color:'Accent color',card_background:'Card background',shadow:'Card shadow'};
-      const labelText=block.type==='team'?(teamLabels[key]||t(key)):block.type==='image'?(imageLabels[key]||key):(key==='landing_style'?'Landing appearance':t(key));
+      const iconLabels={icon_size:'Icon size',icon_color:'Icon color',background_mode:'Icon background',
+        frame_size:'Frame size',frame_color:'Frame color',radius:'Corner radius',shadow:'Shadow',hover_effect:'Hover effect'};
+      const labelText=block.type==='team'?(teamLabels[key]||t(key)):
+        ['icon','button'].includes(block.type)?(iconLabels[key]||t(key)):
+        block.type==='image'?(imageLabels[key]||key):(key==='landing_style'?'Landing appearance':t(key));
       label.append(el('span','',labelText+(typeof kind === 'number' && key !== 'columns' ? (key.endsWith('_opacity') ? ' (%)' : ' (px)') : '')));
       let input;
       if(Array.isArray(kind)) {
@@ -1305,7 +1329,7 @@
         Array.from(canvas.children).forEach((node,i)=>node.classList.toggle('is-selected',i===index));
       });
       const hero=heroContent(block);
-      const label=String(index+1).padStart(2,'0')+' / '+(block.type==='icon_button'?'Icon Button':block.type==='brand_logo'?'FriPeri Logo':t(hero ? 'hero_section' : block.type));
+      const label=String(index+1).padStart(2,'0')+' / '+(block.type==='icon'?'Icon':block.type==='icon_button'?'Icon Button':block.type==='brand_logo'?'FriPeri Logo':t(hero ? 'hero_section' : block.type));
       const header=el('header','builder-block-header');
       const toggle=button('',()=>{
         if (collapsedBlocks.has(block)) collapsedBlocks.delete(block);
@@ -1446,14 +1470,26 @@
         mock.append(sidebar,content);
         feature.append(brand,words,mock);body.append(feature);
       }
-      if(block.type==='icon_button') {
-        const names=['house','arrow-right','arrow-left','arrow-up-right','envelope','telephone','search','download','share','link-45deg','github','linkedin','instagram','youtube','heart','star','plus-lg','chevron-right','geo-alt','calendar','file-earmark-text','book','chat-dots','globe','people','graph-up','gear','play-fill','camera','image','info-circle','question-circle'];
-        const preview=el('span','custom-button custom-icon-button');
-        const glyph=el('i','bi bi-'+(block.icon_name || 'house'));glyph.setAttribute('aria-hidden','true');preview.append(glyph);
-        body.append(preview);
-        body.append(select('Icon',block.icon_name || 'house',names.map(name=>[name,name.replaceAll('-',' ')]),value=>{block.icon_name=value;glyph.className='bi bi-'+value;}));
-        body.append(field('Accessible label',block.text || 'Home',value=>{block.text=value;}));
-        body.append(field(t('url'),block.url,value=>{block.url=value;}));
+      if(block.type==='icon_button' || block.type==='icon') {
+        const names=["house","arrow-right","arrow-left","arrow-up-right","envelope","telephone","search","download","share","link-45deg","github","linkedin","instagram","youtube","heart","star","plus-lg","chevron-right","geo-alt","calendar","file-earmark-text","book","chat-dots","globe","people","graph-up","gear","play-fill","camera","image","info-circle","question-circle","arrow-down","arrow-down-circle-fill","arrow-up","arrow-up-circle-fill","arrow-left-circle-fill","arrow-right-circle-fill","arrow-left-short","arrow-right-short","arrow-up-short","arrow-down-short","chevron-up","chevron-down","chevron-left","chevron-double-left","chevron-double-right","chevron-double-up","chevron-double-down","arrow-up-left","arrow-down-left","arrow-down-right","box-arrow-up-right","check-lg","check-circle","x-lg","plus-circle","minus-circle","lightning-charge","bar-chart","bar-chart-line","pie-chart","diagram-3","share-fill","cloud-download","person","person-circle","shield-check","mortarboard","journal-text","chat-square-text","database","code-slash","layers","palette","brush","flower1","sun","moon","compass","pin-map","paperclip","clock","bell","flag","eye","lock","unlock"];
+        const standalone=block.type==='icon';
+        const preview=el('span',standalone?'friperi-standalone-icon':'custom-button custom-icon-button');
+        const glyph=el('i','bi bi-'+(block.icon_name || (standalone?'star':'house')));
+        glyph.setAttribute('aria-hidden','true');preview.append(glyph);body.append(preview);
+        body.append(select('Icon',block.icon_name || (standalone?'star':'house'),
+          names.map(name=>[name,name.replaceAll('-',' ').replace(/^./,c=>c.toUpperCase())]),
+          value=>{block.icon_name=value;glyph.className='bi bi-'+value;}));
+        if(standalone){
+          body.append(field('Accessible description (optional)',block.icon_label||'',value=>{
+            block.icon_label=value.slice(0,160);
+            if(block.icon_label){preview.setAttribute('role','img');preview.setAttribute('aria-label',block.icon_label);}
+            else{preview.removeAttribute('role');preview.removeAttribute('aria-label');}
+          }));
+          if(block.icon_label){preview.setAttribute('role','img');preview.setAttribute('aria-label',block.icon_label);}
+        }else{
+          body.append(field('Accessible label',block.text||'Home',value=>{block.text=value;}));
+          body.append(field(t('url'),block.url,value=>{block.url=value;}));
+        }
       }
       if(block.type==='quote') {
         const quote=el('blockquote');

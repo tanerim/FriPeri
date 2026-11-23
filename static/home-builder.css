@@ -633,3 +633,12 @@
 .hyperui-admin .builder-svg-preview-image{display:block;width:100%;height:100%;min-height:110px;object-fit:cover}
 @media(max-width:800px){.hyperui-admin .builder-svg-controls-v2{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:510px){.hyperui-admin .builder-svg-controls-v2{grid-template-columns:1fr}.hyperui-admin .builder-svg-colors{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+/* Editable Callout copy should remain visible within dark or SVG-patterned Sections. */
+.hyperui-admin .builder-section-content .custom-callout{min-width:0;isolation:isolate}
+.hyperui-admin .builder-section-content .custom-callout .friperi-callout-copy [contenteditable]{
+ display:block;min-width:0;min-height:1.4em;white-space:pre-wrap;visibility:visible;opacity:1;
+ color:inherit;overflow-wrap:anywhere
+}
+.hyperui-admin .builder-section-content .custom-callout .friperi-callout-copy h3[contenteditable]{color:var(--block-title-color,#17243b)}
+.hyperui-admin .builder-section-content .custom-callout .friperi-callout-copy p[contenteditable]{color:var(--block-body-color,#17243b)}

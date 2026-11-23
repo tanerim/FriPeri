@@ -835,3 +835,50 @@
 .custom-team-social-link:hover{background:var(--block-accent-color,#286e7a);color:#fff}
 .custom-team-social-link:focus-visible{outline:3px solid var(--block-accent-color,#286e7a);outline-offset:2px}
 @media(prefers-reduced-motion:reduce){.custom-team-social-link{transition:none}}
+
+/* Button: new plain blocks remain centered and motionless unless a hover effect is requested. */
+.custom-block.custom-button > .custom-button{justify-content:center;text-align:center;gap:.6em}
+.custom-block.custom-button > .custom-button .bi{line-height:1}
+.custom-block.custom-button[data-variant=plain] > .custom-button{
+  display:inline-flex;align-items:center;justify-content:center;text-align:center;
+  padding:var(--block-padding-y,12px) var(--block-padding-x,24px);
+  background:transparent;border-color:transparent;box-shadow:none;
+  color:var(--block-button-text,var(--text-color,#17243b));
+  text-decoration:none;transition:none;
+}
+.custom-block.custom-button[data-hover-effect=none] > .custom-button{transition:none}
+.custom-block.custom-button[data-hover-effect=none] > .custom-button:hover{
+  background:var(--block-button-background,transparent);color:var(--block-button-text,inherit);
+  box-shadow:none;text-decoration:none;transform:none
+}
+.custom-block.custom-button[data-variant=plain][data-hover-effect=none] > .custom-button:hover{
+  background:transparent;color:var(--block-button-text,var(--text-color,#17243b));
+}
+.custom-block.custom-button[data-hover-effect=lift] > .custom-button:hover{transform:translateY(-3px);box-shadow:0 10px 24px #14253620}
+.custom-block.custom-button[data-variant=plain][data-hover-effect=lift] > .custom-button:hover{
+  background:transparent;color:var(--block-button-text,var(--text-color,#17243b));
+}
+.custom-block.custom-button[data-variant=plain][data-hover-effect=color] > .custom-button:hover{
+  background:var(--block-button-hover,transparent);color:var(--block-button-hover-text,var(--text-color,#17243b));
+}
+.custom-block.custom-icon{display:flex;flex-direction:column;align-items:flex-start;justify-content:center}
+.custom-block.custom-icon.align-center{align-items:center}
+.custom-block.custom-icon.align-right{align-items:flex-end}
+.custom-icon .friperi-standalone-icon{
+  display:inline-grid;place-items:center;flex:none;width:var(--block-frame-size,84px);height:var(--block-frame-size,84px);
+  color:var(--block-icon-color,var(--color-accent,#286e7a));background:transparent;box-shadow:none
+}
+.custom-icon .friperi-standalone-icon .bi{font-size:var(--block-icon-size,48px);line-height:1}
+.custom-icon[data-icon-background=circle] .friperi-standalone-icon{border-radius:50%;background:var(--block-frame-color,#e6f2f0)}
+.custom-icon[data-icon-background=rounded] .friperi-standalone-icon{border-radius:var(--block-radius,16px);background:var(--block-frame-color,#e6f2f0)}
+.custom-icon[data-icon-background=square] .friperi-standalone-icon{border-radius:0;background:var(--block-frame-color,#e6f2f0)}
+.custom-icon[data-icon-shadow=soft] .friperi-standalone-icon{box-shadow:0 8px 20px #14253a18}
+.custom-icon[data-icon-shadow=medium] .friperi-standalone-icon{box-shadow:0 14px 32px #14253a2b}
+/* A nested Callout must not inherit white-on-dark colors from its parent Section. */
+.custom-block.custom-callout{
+ --block-title-color:#17243b;--block-body-color:#17243b;color:#17243b!important
+}
+.custom-block.custom-callout .friperi-callout-copy{
+ display:block;flex:1 1 0;min-width:0;position:relative;z-index:1;overflow-wrap:anywhere
+}
+.custom-block.custom-callout .friperi-callout-copy :is(h3,p){visibility:visible;opacity:1}

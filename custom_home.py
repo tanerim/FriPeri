@@ -22,9 +22,10 @@ ICON_BUTTON_NAMES = (
     'chevron-right', 'geo-alt', 'calendar', 'file-earmark-text', 'book',
     'chat-dots', 'globe', 'people', 'graph-up', 'gear', 'play-fill',
     'camera', 'image', 'info-circle', 'question-circle',
+    'arrow-down', 'arrow-down-circle-fill', 'arrow-up', 'arrow-up-circle-fill', 'arrow-left-circle-fill', 'arrow-right-circle-fill', 'arrow-left-short', 'arrow-right-short', 'arrow-up-short', 'arrow-down-short', 'chevron-up', 'chevron-down', 'chevron-left', 'chevron-double-left', 'chevron-double-right', 'chevron-double-up', 'chevron-double-down', 'arrow-up-left', 'arrow-down-left', 'arrow-down-right', 'box-arrow-up-right', 'check-lg', 'check-circle', 'x-lg', 'plus-circle', 'minus-circle', 'lightning-charge', 'bar-chart', 'bar-chart-line', 'pie-chart', 'diagram-3', 'share-fill', 'cloud-download', 'person', 'person-circle', 'shield-check', 'mortarboard', 'journal-text', 'chat-square-text', 'database', 'code-slash', 'layers', 'palette', 'brush', 'flower1', 'sun', 'moon', 'compass', 'pin-map', 'paperclip', 'clock', 'bell', 'flag', 'eye', 'lock', 'unlock',
 )
 
-BLOCK_TYPES = {'section', 'heading', 'text', 'list', 'table', 'image', 'video', 'button', 'icon_button', 'brand_logo', 'divider', 'category', 'quote', 'callout', 'stats', 'team', 'faq', 'legacy_html'}
+BLOCK_TYPES = {'section', 'heading', 'text', 'list', 'table', 'image', 'video', 'button', 'icon_button', 'icon', 'brand_logo', 'divider', 'category', 'quote', 'callout', 'stats', 'team', 'faq', 'legacy_html'}
 
 # Optional presentation settings keep existing documents on their theme defaults.
 APPEARANCE_FIELDS = {
@@ -50,8 +51,11 @@ APPEARANCE_FIELDS = {
     'button': {'button_background': 'color', 'button_hover': 'color', 'button_text': 'color',
                'button_hover_text': 'color', 'font_size': (10, 48), 'width_mode': ('auto', 'full', 'custom'),
                'width_px': (40, 1200), 'height': (24, 240), 'radius': (0, 120),
-               'variant': ('solid', 'outline', 'ghost', 'text_link', 'underlined'),
-               'icon': ('external', 'arrow', 'none'), 'border_width': (0, 8),
+               'variant': ('plain', 'solid', 'outline', 'ghost', 'text_link', 'underlined'),
+               'icon': ('external','arrow','none','arrow-up-light','arrow-up-heavy',
+                        'arrow-down-light','arrow-down-heavy','arrow-left-light','arrow-left-heavy',
+                        'arrow-right-light','arrow-right-heavy'),
+               'hover_effect': ('none','color','lift'), 'border_width': (0, 8),
                'border_color': 'color', 'padding_x': (0, 96), 'padding_y': (0, 48),
                'target': ('same_tab', 'new_tab')},
     'icon_button': {'button_background': 'color', 'button_hover': 'color',
@@ -62,6 +66,10 @@ APPEARANCE_FIELDS = {
                     'border_width': (0, 8), 'border_color': 'color',
                     'padding_x': (0, 96), 'padding_y': (0, 48),
                     'target': ('same_tab', 'new_tab')},
+    'icon': {'icon_size': (12, 160), 'icon_color': 'color',
+             'background_mode': ('none', 'circle', 'rounded', 'square'),
+             'frame_size': (24, 220), 'frame_color': 'color',
+             'radius': (0, 80), 'shadow': ('none', 'soft', 'medium')},
     'image': {
         'fit': ('cover', 'contain', 'fill', 'scale-down'),
         'ratio': ('original', 'square', 'four_three', 'three_two', 'wide', 'portrait', 'cinema'),
@@ -444,6 +452,12 @@ def _validate_blocks(data, depth, remaining, anchors):
             block['count'] = count
         if kind in {'heading', 'button', 'icon_button'}:
             block['text'] = text(item.get('text', ''), 500)
+        if kind == 'icon':
+            name = item.get('icon_name', 'star')
+            if name not in ICON_BUTTON_NAMES:
+                raise ValueError('Invalid icon symbol')
+            block['icon_name'] = name
+            block['icon_label'] = text(item.get('icon_label', ''), 160)
         if kind == 'heading':
             block['level'] = item.get('level') if item.get('level') in ('h1', 'h2', 'h3') else 'h2'
             if 'accent' in item:
