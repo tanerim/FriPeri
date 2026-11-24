@@ -11,6 +11,7 @@ from datetime import datetime, timezone
 from contextlib import closing
 from language_migration import backup_before_language_migration, migrate_languages
 from site_defaults import DEFAULT_SITE_SETTINGS
+from privileges import install_schema as install_privilege_schema
 from custom_home import starter_document
 
 class SiteConnection(sqlite3.Connection):
@@ -158,6 +159,7 @@ def migrate_database(path: Path, settings=None, username=None, password=None) ->
             email TEXT PRIMARY KEY COLLATE NOCASE,
             blocked_at TEXT NOT NULL
         )""")
+        install_privilege_schema(conn)
         # Role-based access control: legacy users retain full administrator access.
         # Per-category archive presentation, independent of site-wide Design colors.
         add_column(conn, "categories", "archive_design_json", "TEXT NOT NULL DEFAULT '{}'")

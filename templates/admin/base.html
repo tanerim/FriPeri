@@ -28,7 +28,7 @@
     {% endif %}
     <div class="admin-shell">
       <header class="admin-topbar">
-        <span class="admin-topbar-title">{% if user %}<a href="/admin">{{ t(lang, 'dashboard.title') }}</a>{% if active_admin|default('admin') != 'admin' %}<span aria-hidden="true"> / </span><span>{{ t(lang, 'language.title' if active_admin == 'language' else ('admin.social_links_title' if active_admin == 'social_links' else 'admin.' ~ active_admin)) }}</span>{% endif %}{% else %}<a href="/first-run"><img class="admin-topbar-logo" src="{{ static_url('images/FriPeri_Logo.png') }}" alt="FriPeri"></a>{% endif %}</span>
+        <span class="admin-topbar-title">{% if user %}<a href="/admin">{{ t(lang, 'dashboard.title') }}</a>{% if active_admin|default('admin') != 'admin' %}<span aria-hidden="true"> / </span><span>{{ 'Privileges' if active_admin == 'privileges' else t(lang, 'language.title' if active_admin == 'language' else ('admin.social_links_title' if active_admin == 'social_links' else 'admin.' ~ active_admin)) }}</span>{% endif %}{% else %}<a href="/first-run"><img class="admin-topbar-logo" src="{{ static_url('images/FriPeri_Logo.png') }}" alt="FriPeri"></a>{% endif %}</span>
         <div class="admin-topbar-actions">{% include 'partials/lang_switch.html' %}<a class="admin-secondary" href="/">{{ t(lang, 'nav.home') }} ↗</a></div>
       </header>
       {% block content %}{% endblock %}

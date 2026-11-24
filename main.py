@@ -41,6 +41,7 @@ from backup_security import (BackupError, MAX_UPLOAD_BYTES, create_backup as wri
                              restore_backup as restore_secure_backup, validate_backup, safe_backup_path)
 from login_security import blocked as login_blocked, failed as login_failed, succeeded as login_succeeded
 from documentation import list_documents, render_document
+from privileges import ProtectedStaticFiles, create_router
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
@@ -124,7 +125,10 @@ async def branded_public_not_found(request: Request, call_next):
     return response
 
 
-app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
+app.mount("/static", ProtectedStaticFiles(
+    directory=STATIC_DIR, db=lambda: get_db(), secret=lambda: SECRET_KEY,
+    admin_check=lambda request: bool((actor(request) or {}).get("role") == "admin"),
+), name="static")
 
 @app.api_route("/sitemap.xml", methods=["GET", "HEAD"], include_in_schema=False)
 async def sitemap(request: Request) -> Response:
@@ -3384,3 +3388,19 @@ async def delete_account(account_id: int, request: Request) -> Response:
         conn.execute("DELETE FROM user_categories WHERE user_id=?", (account_id,))
         conn.execute("DELETE FROM users WHERE id=?", (account_id,))
     return RedirectResponse("/admin/users", status_code=303)
+
+
+# Directory-scoped privileges are deliberately isolated from CMS users.
+app.include_router(create_router(
+    db=get_db,
+    static_dir=STATIC_DIR,
+    secret=lambda: SECRET_KEY,
+    secure_cookie=SESSION_COOKIE_SECURE,
+    password_hash=hash_password,
+    password_verify=verify_password,
+    admin_account=actor,
+    admin_token=lambda request, username: settings_form_token(request, username),
+    now=now_iso,
+    render_admin=lambda request, template, title, context, username:
+        render_template(request, template, title, context, username),
+))
