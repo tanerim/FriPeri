@@ -1420,6 +1420,7 @@
         if (collapsedBlocks.has(block)) collapsedBlocks.delete(block);
         else collapsedBlocks.add(block);
         showBlockState();
+        updateCollapseAll();
       },'builder-block-toggle');
       const chevron=el('span','builder-block-chevron');
       chevron.setAttribute('aria-hidden','true');
@@ -1439,7 +1440,7 @@
           if(!name.contains(input))return;
           if(commit){
             const value=input.value.trim().replace(/\s+/g,' ').slice(0,100);
-            if(value!==previous){checkpoint();block.editor_name=value;checkpoint();}
+            if(value!==previous){checkpoint();block.editor_name=value;checkpoint();renderStructureMap();}
           }
           name.textContent=defaultLabel+(block.editor_name?' — '+block.editor_name:'');
           name.title='Double-click to rename this block';
