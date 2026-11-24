@@ -9,6 +9,7 @@ import hashlib
 import hmac
 import os
 import re
+import sqlite3
 import secrets
 import time
 from pathlib import Path
@@ -17,7 +18,6 @@ from urllib.parse import quote, urlsplit
 from fastapi import APIRouter, Request
 from fastapi.responses import HTMLResponse, RedirectResponse, Response
 from fastapi.staticfiles import StaticFiles
-from starlette.datastructures import Headers
 from login_security import blocked as login_blocked, failed as login_failed, succeeded as login_succeeded
 
 COOKIE = "friperi_privilege_session"
@@ -119,20 +119,27 @@ class ProtectedStaticFiles(StaticFiles):
 
     StaticFiles continues to handle safe path resolution and symlink protection.
     """
-    def __init__(self, *, directory, db, secret, admin_check=None):
+    def __init__(self, *, directory, db, secret, admin_check=None, first_run=None):
         super().__init__(directory=directory, html=False, check_dir=True, follow_symlink=False)
         self._db, self._secret, self._admin = db, secret, admin_check
+        self._first_run = first_run
 
     async def __call__(self, scope, receive, send):
         path = scope.get("path", "")
         relative = path.split("/static/", 1)[-1] if "/static/" in path else ""
         folder = relative.split("/", 1)[0]
         if scope["type"] == "http" and folder and FOLDER_RE.fullmatch(folder):
-            with self._db() as conn:
-                gated = private_folder(conn, folder)
-                permitted = not gated or allowed(Request(scope), conn, folder, self._secret(), self._admin)
+            try:
+                with self._db() as conn:
+                    gated = private_folder(conn, folder)
+                    permitted = not gated or allowed(Request(scope), conn, folder, self._secret(), self._admin)
+            except sqlite3.OperationalError:
+                if self._first_run and self._first_run():
+                    return await super().__call__(scope, receive, send)
+                response = Response("Static access temporarily unavailable", status_code=503, headers=HEADERS)
+                await response(scope, receive, send)
+                return
             if gated and not permitted:
-                headers = Headers(scope=scope)
                 wants_page = relative.endswith((".html", "/")) or "/" not in relative
                 if wants_page and scope["method"] in ("GET", "HEAD"):
                     response = RedirectResponse(access_url(folder, path), status_code=303, headers=HEADERS)
@@ -246,7 +253,7 @@ def create_router(*, db, static_dir: Path, secret, secure_cookie: bool,
                 return Response(status_code=409)
             exists = conn.execute("SELECT id FROM privilege_accounts WHERE email=?", (email,)).fetchone()
             if exists:
-                return page(request, folder, "An account may already exist. Please sign in.")
+                return page(request, folder, "If you have an existing account, please sign in.")
             salt, digest = password_hash(password)
             cur = conn.execute(
                 "INSERT INTO privilege_accounts(first_name,last_name,email,password_salt,password_hash,created_at) VALUES(?,?,?,?,?,?)",

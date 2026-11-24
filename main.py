@@ -128,6 +128,7 @@ async def branded_public_not_found(request: Request, call_next):
 app.mount("/static", ProtectedStaticFiles(
     directory=STATIC_DIR, db=lambda: get_db(), secret=lambda: SECRET_KEY,
     admin_check=lambda request: bool((actor(request) or {}).get("role") == "admin"),
+    first_run=lambda: not DB_PATH.exists(),
 ), name="static")
 
 @app.api_route("/sitemap.xml", methods=["GET", "HEAD"], include_in_schema=False)
