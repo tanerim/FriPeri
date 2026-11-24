@@ -132,6 +132,7 @@ def test_reset_revokes_session_and_new_password_works(app_site):
 
 def test_admin_actions_are_csrf_and_role_protected(app_site):
     client,db,_=app_site
+    set_private(client)
     register(client)
     assert client.post("/admin/privileges/video_sorgu/mode",
           data={"settings_token":"admin-csrf","mode":"private"}).status_code==403

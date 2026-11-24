@@ -26,7 +26,7 @@ SESSION_AGE = 7 * 24 * 3600
 HEADERS = {"Cache-Control": "no-store", "Referrer-Policy": "no-referrer",
            "X-Content-Type-Options": "nosniff"}
 EMAIL_RE = re.compile(r"^[^@\s]{1,64}@[^@\s]{1,190}\.[^@\s]{2,}$")
-FOLDER_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_. -]{0,119}$")
+FOLDER_RE = re.compile(r"^[^/\\\\\x00-\x1f]{1,120}$")
 
 
 def install_schema(conn):
@@ -243,6 +243,11 @@ def create_router(*, db, static_dir: Path, secret, secure_cookie: bool,
         form = await request.form()
         if not valid_public_form(request, form):
             return Response(status_code=403)
+        ip = request.client.host if request.client else "unknown"
+        registration_key = "privilege-registration"
+        if login_blocked(ip, registration_key):
+            return Response("Too many registration attempts", status_code=429,
+                            headers={**HEADERS, "Retry-After": "900"})
         first, last = (str(form.get(key,"")).strip() for key in ("first_name", "last_name"))
         email, password = str(form.get("email","")).strip().lower(), str(form.get("password",""))
         if not (1<=len(first)<=80 and 1<=len(last)<=80 and EMAIL_RE.fullmatch(email)
@@ -254,6 +259,7 @@ def create_router(*, db, static_dir: Path, secret, secure_cookie: bool,
             exists = conn.execute("SELECT id FROM privilege_accounts WHERE email=?", (email,)).fetchone()
             if exists:
                 return page(request, folder, "If you have an existing account, please sign in.")
+            login_failed(ip, registration_key)
             salt, digest = password_hash(password)
             cur = conn.execute(
                 "INSERT INTO privilege_accounts(first_name,last_name,email,password_salt,password_hash,created_at) VALUES(?,?,?,?,?,?)",
