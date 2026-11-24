@@ -1001,7 +1001,6 @@
     })));
     return panel;
   }
-  const imagePanelOpen=new WeakMap();
   function imageAppearanceControls(block,body) {
     const groups=[
       ['Size & crop', ['ratio','fit','position','width_mode','width_px','height_px']],
@@ -1009,22 +1008,14 @@
       ['Interaction & performance', ['image_action','caption_align','caption_size','loading','decoding','fetch_priority']]
     ];
     const wrapper=el('div','builder-image-appearance');
-    const opened=imagePanelOpen.get(block) || new Set();
     for(const [title,names] of groups){
-      const details=el('details','builder-image-panel');
-      details.open=opened.has(title);
-      details.addEventListener('toggle',()=>{
-        const next=new Set(imagePanelOpen.get(block) || opened);
-        if(details.open)next.add(title);else next.delete(title);
-        imagePanelOpen.set(block,next);
-      });
+      const details=bindPanelState(block,'image:'+title,el('details','builder-image-panel'));
       const heading=el('summary','',title);
       const controls=appearanceControls(block,body,appearanceFields.image.filter(([name])=>names.includes(name)));
       details.append(heading,controls);wrapper.append(details);
     }
     return wrapper;
   }
-  const calloutPanelOpen=new WeakMap();
   function calloutAppearanceControls(block,body) {
     const groups=[
       ['Accent & frame',['accent_side','accent_color','accent_width','shadow','background_color','border_color','border_width','radius','padding']],
@@ -1032,15 +1023,9 @@
       ['Body typography',['body_color','body_size','body_weight','body_style','body_decoration']],
       ['Image layout',['image_position','image_width','image_fit','image_ratio','image_radius','gap']]
     ];
-    const opened=calloutPanelOpen.get(block) || new Set();
     const root=el('div','builder-callout-appearance');
     for(const [name,keys] of groups){
-      const panel=el('details','builder-image-panel');panel.open=opened.has(name);
-      panel.addEventListener('toggle',()=>{
-        const next=new Set(calloutPanelOpen.get(block)||opened);
-        if(panel.open)next.add(name);else next.delete(name);
-        calloutPanelOpen.set(block,next);
-      });
+      const panel=bindPanelState(block,'callout:'+name,el('details','builder-image-panel'));
       panel.append(el('summary','',name),appearanceControls(block,body,appearanceFields.callout.filter(([key])=>keys.includes(key))));
       root.append(panel);
     }
