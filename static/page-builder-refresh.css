@@ -126,3 +126,17 @@
     grid-template-columns:repeat(3,minmax(0,1fr));
   }
 }
+
+/* Section identification in the editor only: 1% of the active Design palette
+   on each header, plus a narrow accent stripe for accessible differentiation.
+   Never touches the public-facing page or the Section's actual background. */
+.hyperui-admin .page-builder-refresh #builder-canvas .builder-block[data-editor-section=true] > .builder-block-header{
+  background:color-mix(in srgb,var(--editor-section-accent,#286e7a) 1%, #ffffff);
+  border-inline-start:3px solid color-mix(in srgb,var(--editor-section-accent,#286e7a) 42%, #ffffff);
+}
+.hyperui-admin .page-builder-refresh #builder-canvas .builder-block[data-editor-section=true].is-collapsed > .builder-block-header{
+  border-bottom:0;
+}
+.hyperui-admin .page-builder-refresh #builder-canvas .builder-block[data-editor-section=true] > .builder-block-header .builder-block-name{
+  color:color-mix(in srgb,var(--editor-section-accent,#286e7a) 55%, #28344b);
+}

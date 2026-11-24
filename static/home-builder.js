@@ -1336,6 +1336,23 @@
   function renderBlocks(items, container, depth) {
     items.forEach((block,index) => {
       const card = el('section','builder-block'+(!depth && selected===index?' is-selected':''));
+      if (block.type === 'section') {
+        // Read the active Design / Color Template values from this editor's
+        // own theme variables. Presentation only: never modify page data.
+        const roleColors = [
+          '--color-accent', '--color-nav', '--color-accent-secondary',
+          '--color-feature-border', '--color-nav-hover', '--color-feature-text',
+          '--color-feature-bg', '--color-page-bg'
+        ];
+        const validHex = /^#[0-9a-f]{6}(?:[0-9a-f]{2})?$/i;
+        const palette = roleColors.map(key=>canvas.style.getPropertyValue(key).trim())
+          .filter(color=>validHex.test(color));
+        const fallback=['#286e7a','#20435b','#68b6b9','#ca8e39'];
+        const colors = [...new Set(palette.length?palette:fallback)];
+        const color = colors[(index + depth * 3) % colors.length];
+        card.dataset.editorSection='true';
+        card.style.setProperty('--editor-section-accent',color);
+      }
       if (!depth) card.addEventListener('focusin',() => {
         selected=index;
         Array.from(canvas.children).forEach((node,i)=>node.classList.toggle('is-selected',i===index));
