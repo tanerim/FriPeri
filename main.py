@@ -94,14 +94,17 @@ async def section_svg(digest: str, request: Request) -> Response:
     # This special SVG route precedes the /static mount: enforce the same
     # folder-level permissions so /static/images never bypasses Privileges.
     private_images = False
-    if is_initialized(DB_PATH):
-        with get_db() as conn:
-            private_images = private_folder(conn, "images")
-            if private_images and not privilege_allowed(
-                request, conn, "images", SECRET_KEY,
-                admin_check=lambda req: bool((actor(req) or {}).get("role") == "admin"),
-            ):
-                return Response(status_code=403, headers={"Cache-Control": "no-store"})
+    if DB_PATH.exists():
+        try:
+            with get_db() as conn:
+                private_images = private_folder(conn, "images")
+                if private_images and not privilege_allowed(
+                    request, conn, "images", SECRET_KEY,
+                    admin_check=lambda req: bool((actor(req) or {}).get("role") == "admin"),
+                ):
+                    return Response(status_code=403, headers={"Cache-Control": "no-store"})
+        except sqlite3.Error:
+            return Response(status_code=503, headers={"Cache-Control": "no-store"})
     filename = f"friperi-section-{digest}.svg"
     if not re.fullmatch(SECTION_SVG_FILENAME, filename):
         return Response(status_code=404)
