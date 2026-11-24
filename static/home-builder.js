@@ -17,6 +17,21 @@
   const previewButton = document.getElementById('builder-preview');
   const removeDialog = document.getElementById('builder-remove-dialog');
   const collapsedBlocks = new WeakSet();
+  // Expand/collapse state belongs to the editor, never to published page data.
+  // Rebuilds triggered by unrelated controls must preserve each panel independently.
+  const blockPanelOpen = new WeakMap();
+  function bindPanelState(block, key, panel, initiallyOpen = false) {
+    let state=blockPanelOpen.get(block);
+    if(!state){state=new Map();blockPanelOpen.set(block,state);}
+    panel.open=state.has(key)?state.get(key):initiallyOpen;
+    panel.addEventListener('toggle',()=>{
+      // A queued toggle from an element removed during render must not
+      // overwrite the state of the new, live panel.
+      if(!panel.isConnected)return;
+      state.set(key,panel.open);
+    });
+    return panel;
+  }
   let pendingRemoval;
   document.getElementById('builder-cancel-remove').addEventListener('click',()=>removeDialog.close('cancel'));
   document.getElementById('builder-confirm-remove').addEventListener('click',()=>removeDialog.close('remove'));
@@ -994,7 +1009,7 @@
       ['Interaction & performance', ['image_action','caption_align','caption_size','loading','decoding','fetch_priority']]
     ];
     const wrapper=el('div','builder-image-appearance');
-    const opened=imagePanelOpen.get(block) || new Set(['Size & crop']);
+    const opened=imagePanelOpen.get(block) || new Set();
     for(const [title,names] of groups){
       const details=el('details','builder-image-panel');
       details.open=opened.has(title);
@@ -1017,7 +1032,7 @@
       ['Body typography',['body_color','body_size','body_weight','body_style','body_decoration']],
       ['Image layout',['image_position','image_width','image_fit','image_ratio','image_radius','gap']]
     ];
-    const opened=calloutPanelOpen.get(block) || new Set(['Accent & frame','Heading typography','Body typography','Image layout']);
+    const opened=calloutPanelOpen.get(block) || new Set();
     const root=el('div','builder-callout-appearance');
     for(const [name,keys] of groups){
       const panel=el('details','builder-image-panel');panel.open=opened.has(name);
@@ -1069,7 +1084,6 @@
 
   function sectionSvgGenerator(block, body) {
     const panel=el('details','builder-section-panel builder-svg-generator');
-    panel.open=true;
     panel.append(el('summary','','SVG background designer'));
     const preview=el('div','builder-svg-preview');
     const settings=el('div','builder-svg-controls builder-svg-controls-v2');
@@ -1188,7 +1202,11 @@
     remove.disabled=!block.appearance?.svg_pattern||block.appearance.svg_pattern==='none';
     actions.append(save,remove);
     panel.append(preview,settings,actions,note);
-    refreshColors();redraw();
+    refreshColors();
+    panel.addEventListener('toggle',()=>{
+      if(panel.open && panel.isConnected)redraw();
+      if(!panel.open){clearTimeout(previewTimer);requestCounter++;}
+    });
     return panel;
   }
 
@@ -1239,10 +1257,10 @@
     body.append(el('div','section-overlay'));
     body.append(document.getElementById('builder-section-edge').content.firstElementChild.cloneNode(true));
     const tools = el('div','builder-section-settings');
-    const layout = el('details','builder-section-panel');
+    const layout = bindPanelState(block,'section:layout',el('details','builder-section-panel'));
     layout.append(el('summary','',t('section_layout')), appearanceControls(block, body, sectionControls[0][1]));
     layout.append(field(t('section_anchor'),block.anchor,value=>{block.anchor=value.trim();}));
-    const background = el('details','builder-section-panel');
+    const background = bindPanelState(block,'section:background',el('details','builder-section-panel'));
     background.append(el('summary','',t('section_background')), appearanceControls(block, body, sectionControls[1][1]));
     const mediaFields = el('div','builder-media-fields');
     const urlField = field(t('section_image'),block.image,value=>{block.image=value.trim();});
@@ -1264,8 +1282,7 @@
     uploadField.append(el('span','',t('upload')),file);
     mediaFields.append(urlField,uploadField);
     background.append(mediaFields);
-    const generator = sectionSvgGenerator(block,body);
-    generator.open = depth === 0 && !hero;
+    const generator = bindPanelState(block,'section:svg',sectionSvgGenerator(block,body));
     tools.append(layout,background,generator);
     if (hero) card.append(editHero(hero));
     card.append(tools);
