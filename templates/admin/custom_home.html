@@ -6,7 +6,7 @@
 {% if builder_page|default('home') != 'post' %}
     <header class="settings-page-header">
       <div><h2 id="custom-home-title"><span class="page-heading-icon">{{ icon('design') }}</span>{{ t(lang, 'admin.pages' if builder_page|default('home') == 'page' else ('admin.about' if builder_page|default('home') == 'about' else 'admin.custom_home')) }}</h2><p>{{ t(lang, 'builder.intro') }}</p></div>
-      <div class="builder-actions">{% if builder_page|default('home') != 'post' %}<button type="button" class="admin-secondary" id="builder-collapse-all" aria-expanded="true" aria-controls="builder-canvas">Collapse All</button>{% endif %}<button type="button" class="admin-secondary" id="builder-preview">{{ t(lang, 'common.preview') }}</button><button type="button" class="settings-primary" id="builder-save">{{ icon('save') }}{{ t(lang, 'builder.publish') }}</button></div>
+      <div class="builder-actions"><button type="button" class="admin-secondary" id="builder-preview">{{ t(lang, 'common.preview') }}</button><button type="button" class="settings-primary" id="builder-save">{{ icon('save') }}{{ t(lang, 'builder.publish') }}</button></div>
     </header>
 {% endif %}
     <noscript><p class="error">{{ t(lang, 'builder.javascript') }}</p></noscript>
@@ -24,7 +24,22 @@
         <hr /><button type="button" class="admin-secondary" id="builder-starter" {% if builder_page|default('home') != 'post' %}hidden{% endif %}>{{ t(lang, 'builder.starter') }}</button>
         <p class="builder-help">{{ t(lang, 'builder.media_help') }}</p>
       </aside>
-      <div class="builder-workspace"><div id="builder-canvas" class="builder-canvas" style="--color-accent: {{ design_vars.color_accent_primary }}; --color-nav: {{ design_vars.color_nav }}; --color-nav-hover: {{ design_vars.color_nav_hover }}; --color-feature-bg: {{ design_vars.color_feature_bg }}; --color-feature-text: {{ design_vars.color_feature_text }}; --color-accent-secondary: {{ design_vars.color_accent_secondary }}; --color-page-bg: {{ design_vars.color_page_bg }}; --color-feature-border: {{ design_vars.color_feature_border }};"></div></div>
+      <div class="builder-workspace">
+        {% if builder_page|default('home') != 'post' %}
+        <div class="builder-workspace-tools" role="toolbar" aria-label="Page builder tools">
+          <div class="builder-workspace-tools-main">
+            <strong>Page structure</strong>
+            <span id="builder-structure-count" aria-live="polite"></span>
+          </div>
+          <div class="builder-workspace-tool-buttons">
+            <button type="button" class="admin-secondary" id="builder-collapse-all" aria-controls="builder-canvas">Collapse All</button>
+            <button type="button" class="admin-secondary" id="builder-expand-all" aria-controls="builder-canvas">Expand All</button>
+            <button type="button" class="admin-secondary" id="builder-focus" aria-pressed="false" aria-controls="builder-canvas">Focus canvas</button>
+          </div>
+        </div>
+        <nav class="builder-section-map" id="builder-section-map" aria-label="Jump to page section"></nav>
+        {% endif %}
+        <div id="builder-canvas" class="builder-canvas" style="--color-accent: {{ design_vars.color_accent_primary }}; --color-nav: {{ design_vars.color_nav }}; --color-nav-hover: {{ design_vars.color_nav_hover }}; --color-feature-bg: {{ design_vars.color_feature_bg }}; --color-feature-text: {{ design_vars.color_feature_text }}; --color-accent-secondary: {{ design_vars.color_accent_secondary }}; --color-page-bg: {{ design_vars.color_page_bg }}; --color-feature-border: {{ design_vars.color_feature_border }}; --color-separator-1: {{ design_vars.color_separator_1 }}; --color-separator-2: {{ design_vars.color_separator_2 }}; --color-separator-3: {{ design_vars.color_separator_3 }};"></div></div>
     </div>
   <dialog id="builder-remove-dialog" aria-labelledby="builder-remove-title" aria-describedby="builder-remove-help">
     <h2 id="builder-remove-title">{{ t(lang, 'builder.remove_block_title') }}</h2>

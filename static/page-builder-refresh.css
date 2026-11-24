@@ -140,3 +140,59 @@
 .hyperui-admin .page-builder-refresh #builder-canvas .builder-block[data-editor-section=true] > .builder-block-header .builder-block-name{
   color:color-mix(in srgb,var(--editor-section-accent,#286e7a) 55%, #28344b);
 }
+
+/* Editor Section palette: substantial separation while preserving theme identity.
+   Background uses ~16% palette tint; colored edge and number are stronger.
+   These selectors never affect public page sections. */
+.hyperui-admin .page-builder-refresh #builder-canvas .builder-block[data-editor-section=true] > .builder-block-header{
+  background:color-mix(in srgb,var(--editor-section-accent,#286e7a) 16%, #ffffff);
+  border-inline-start:5px solid var(--editor-section-accent,#286e7a);
+}
+.hyperui-admin .page-builder-refresh #builder-canvas .builder-block[data-editor-section=true] > .builder-block-header .builder-block-name{
+  color:color-mix(in srgb,var(--editor-section-accent,#286e7a) 56%, #142536);
+  font-weight:800;
+}
+/* Workspace controls are intentionally inside the workspace rather than
+   the fixed publishing footer, so they stay visible near the canvas. */
+.hyperui-admin .page-builder-refresh .builder-workspace-tools{
+ display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;
+ gap:10px;padding:11px 13px;border:1px solid #d8e1eb;
+ border-radius:11px 11px 0 0;background:#fff;
+}
+.hyperui-admin .page-builder-refresh .builder-workspace-tools-main{display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+.hyperui-admin .page-builder-refresh .builder-workspace-tools-main strong{font-size:13px;color:#1a2a45}
+.hyperui-admin .page-builder-refresh #builder-structure-count{font-size:11px;color:#62728a}
+.hyperui-admin .page-builder-refresh .builder-workspace-tool-buttons{display:flex;flex-wrap:wrap;align-items:center;gap:7px}
+.hyperui-admin .page-builder-refresh .builder-workspace-tool-buttons button{font-size:11px;min-height:32px;padding:6px 9px}
+.hyperui-admin .page-builder-refresh .builder-section-map{
+ display:flex;flex-wrap:nowrap;overflow-x:auto;gap:7px;padding:9px 12px;
+ background:#f8fafc;border-inline:1px solid #d8e1eb;border-bottom:1px solid #d8e1eb;
+ scrollbar-width:thin;max-width:100%;
+}
+.hyperui-admin .page-builder-refresh .builder-section-jump{
+ display:inline-flex;align-items:center;flex:none;gap:7px;
+ padding:6px 10px;border:1px solid #d5deeb;background:#fff;
+ border-radius:9px;color:#34435d;font-size:11px;cursor:pointer;max-width:230px;
+}
+.hyperui-admin .page-builder-refresh .builder-section-jump span:last-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.hyperui-admin .page-builder-refresh .builder-section-jump:hover{border-color:#8299bf;background:#f0f5fb}
+.hyperui-admin .page-builder-refresh .builder-section-jump:focus-visible{outline:2px solid #6366f1;outline-offset:2px}
+.hyperui-admin .page-builder-refresh .builder-section-dot{
+ flex:none;width:10px;height:10px;border-radius:50%;
+ box-shadow:0 0 0 1px #0002;
+}
+.hyperui-admin .page-builder-refresh .builder-map-empty{font-size:11px;color:#6b7890}
+.hyperui-admin .page-builder-refresh .builder-workspace #builder-canvas{
+ border-radius:0 0 12px 12px;border-top:0;
+}
+.hyperui-admin .page-builder-refresh .builder-layout.is-focus-mode{
+ grid-template-columns:minmax(0,1fr);
+}
+.hyperui-admin .page-builder-refresh .builder-layout.is-focus-mode > .builder-palette{display:none}
+.hyperui-admin .page-builder-refresh .builder-layout.is-focus-mode .builder-workspace{width:100%}
+@media(max-width:700px){
+ .hyperui-admin .page-builder-refresh .builder-workspace-tools{align-items:flex-start}
+ .hyperui-admin .page-builder-refresh .builder-workspace-tool-buttons{width:100%}
+}
+/* Earlier template cards remained visually identical at 1%; keep the theme
+   accents only in the editor, and never force Section content backgrounds. */

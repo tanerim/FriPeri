@@ -74,7 +74,7 @@
     document.getElementById('builder-redo').disabled ||= busy > 0;
     const starterButton=document.getElementById('builder-starter');
     if(starterButton)starterButton.disabled=busy>0;
-    if (collapseAllButton) collapseAllButton.disabled=busy>0 || !blocks().length;
+    updateCollapseAll();
     document.dispatchEvent(new CustomEvent('homepage:builder-busy', {detail: busy > 0}));
   }
   function checkpoint() {
@@ -1325,10 +1325,73 @@
     }
   }
 
+  // All hues are derived from the current site's Design palette, not hard-coded
+  // to a specific template. Avoid washed-out near-white swatches.
+  const sectionPaletteRoles=[
+    '--color-accent','--color-separator-1','--color-separator-2',
+    '--color-separator-3','--color-nav','--color-nav-hover',
+    '--color-accent-secondary','--color-feature-border','--color-feature-text'
+  ];
+  const parseHex=color=>{
+    const match=/^#([0-9a-f]{6})$/i.exec(color);
+    return match ? [0,2,4].map(i=>parseInt(match[1].slice(i,i+2),16)):null;
+  };
+  const sectionPalette=()=>{
+    const values=sectionPaletteRoles
+      .map(name=>canvas.style.getPropertyValue(name).trim())
+      .filter(color=>parseHex(color));
+    const unique=[];
+    for(const color of values){
+      const rgb=parseHex(color);
+      const bright=rgb.reduce((sum,part)=>sum+part,0)/3;
+      // Very pale swatches are backgrounds, not useful section identifiers.
+      if(bright>217)continue;
+      const distance=other=>Math.hypot(...rgb.map((part,i)=>part-parseHex(other)[i]));
+      if(unique.every(other=>distance(other)>62))unique.push(color);
+    }
+    if(!unique.length)unique.push(config.design?.accent||'#286e7a');
+    return unique;
+  };
+  const sectionColor=(index,depth)=>{
+    const colors=sectionPalette();
+    return colors[(index+depth*2)%colors.length];
+  };
+
+  function renderStructureMap(){
+    const nav=document.getElementById('builder-section-map');
+    const count=document.getElementById('builder-structure-count');
+    if(!nav && !count)return;
+    const top=blocks().filter(block=>block.type==='section');
+    const all=allBlocks(blocks());
+    if(count)count.textContent=top.length+' sections · '+all.length+' blocks';
+    if(!nav)return;
+    nav.replaceChildren();
+    const entries=Array.from(canvas.children);
+    blocks().forEach((block,index)=>{
+      if(block.type!=='section')return;
+      const chip=button('',()=>{
+        const target=entries[index];
+        if(!target)return;
+        selected=index;
+        entries.forEach((element,i)=>element.classList.toggle('is-selected',i===index));
+        target.scrollIntoView({behavior:'smooth',block:'start'});
+        const toggle=target.querySelector(':scope > .builder-block-header .builder-block-toggle');
+        if(toggle && collapsedBlocks.has(block))toggle.click();
+      },'builder-section-jump');
+      const dot=el('span','builder-section-dot');dot.setAttribute('aria-hidden','true');
+      dot.style.background=sectionColor(index,0);
+      const label=el('span','',String(index+1).padStart(2,'0')+' · '+(block.editor_name||'Section'));
+      chip.append(dot,label);chip.title='Jump to '+(block.editor_name||'Section '+(index+1));
+      nav.append(chip);
+    });
+    if(!top.length)nav.append(el('span','builder-map-empty','Add a Section to navigate your page here.'));
+  }
+
   function render() {
     canvas.replaceChildren();
     if (!blocks().length) { const empty = el('div','builder-empty');empty.append(el('span','builder-block-symbol','＋'),el('h2','',t('empty')),el('p','',t('add_help')));canvas.append(empty); }
     renderBlocks(blocks(),canvas,0);
+    renderStructureMap();
     updateStatus();
     updateCollapseAll();
   }
@@ -1337,19 +1400,7 @@
     items.forEach((block,index) => {
       const card = el('section','builder-block'+(!depth && selected===index?' is-selected':''));
       if (block.type === 'section') {
-        // Read the active Design / Color Template values from this editor's
-        // own theme variables. Presentation only: never modify page data.
-        const roleColors = [
-          '--color-accent', '--color-nav', '--color-accent-secondary',
-          '--color-feature-border', '--color-nav-hover', '--color-feature-text',
-          '--color-feature-bg', '--color-page-bg'
-        ];
-        const validHex = /^#[0-9a-f]{6}(?:[0-9a-f]{2})?$/i;
-        const palette = roleColors.map(key=>canvas.style.getPropertyValue(key).trim())
-          .filter(color=>validHex.test(color));
-        const fallback=['#286e7a','#20435b','#68b6b9','#ca8e39'];
-        const colors = [...new Set(palette.length?palette:fallback)];
-        const color = colors[(index + depth * 3) % colors.length];
+        const color=sectionColor(index,depth);
         card.dataset.editorSection='true';
         card.style.setProperty('--editor-section-accent',color);
       }
@@ -1883,20 +1934,29 @@
     });
   }
   const collapseAllButton=document.getElementById('builder-collapse-all');
-  const allBlocks=(items)=>items.flatMap(block=>[block,...allBlocks(block.children || [])]);
+  const expandAllButton=document.getElementById('builder-expand-all');
+  const focusButton=document.getElementById('builder-focus');
+  const allBlocks=items=>items.flatMap(block=>[block,...allBlocks(block.children||[])]);
   const updateCollapseAll=()=>{
-    if (!collapseAllButton) return;
     const every=allBlocks(blocks());
-    const collapsed=every.length>0 && every.every(block=>collapsedBlocks.has(block));
-    collapseAllButton.textContent=collapsed?'Expand All':'Collapse All';
-    collapseAllButton.setAttribute('aria-expanded',String(!collapsed));
-    collapseAllButton.disabled=busy>0 || every.length===0;
+    const noneOpen=every.length>0 && every.every(block=>collapsedBlocks.has(block));
+    const noneClosed=every.length>0 && every.every(block=>!collapsedBlocks.has(block));
+    if(collapseAllButton)collapseAllButton.disabled=busy>0||!every.length||noneOpen;
+    if(expandAllButton)expandAllButton.disabled=busy>0||!every.length||noneClosed;
   };
   collapseAllButton?.addEventListener('click',()=>{
-    const every=allBlocks(blocks());
-    const shouldCollapse=!every.every(block=>collapsedBlocks.has(block));
-    every.forEach(block=>shouldCollapse?collapsedBlocks.add(block):collapsedBlocks.delete(block));
+    allBlocks(blocks()).forEach(block=>collapsedBlocks.add(block));
     render();
+  });
+  expandAllButton?.addEventListener('click',()=>{
+    allBlocks(blocks()).forEach(block=>collapsedBlocks.delete(block));
+    render();
+  });
+  focusButton?.addEventListener('click',()=>{
+    const layout=canvas.closest('.builder-layout');
+    const active=layout.classList.toggle('is-focus-mode');
+    focusButton.textContent=active?'Show block palette':'Focus canvas';
+    focusButton.setAttribute('aria-pressed',String(active));
   });
   document.getElementById('builder-language').addEventListener('change',event=>{checkpoint();language=event.target.value;selected=-1;document.querySelectorAll('[data-builder-language-fields]').forEach(node=>{node.hidden=node.dataset.builderLanguageFields!==language;});render();});
   document.getElementById('builder-undo').addEventListener('click',()=>{checkpoint();if(cursor>0){documents=JSON.parse(history[--cursor]);selected=-1;render();}});
