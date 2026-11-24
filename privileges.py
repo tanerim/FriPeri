@@ -71,6 +71,27 @@ def private_folder(conn, folder: str) -> bool:
     return bool(row and row["is_private"])
 
 
+def hash_privilege_password(password: str):
+    """New privilege accounts use PBKDF2-HMAC-SHA256 with 600k iterations.
+
+    Separate versioned salt keeps compatibility with accounts created by
+    earlier FriPeri builds without changing CMS password storage.
+    """
+    salt = secrets.token_hex(16)
+    digest = hashlib.pbkdf2_hmac("sha256", password.encode(), salt.encode(), 600_000).hex()
+    return "pbkdf2-600k:" + salt, digest
+
+
+def verify_privilege_password(password: str, salt: str, digest: str, legacy_verify):
+    if salt.startswith("pbkdf2-600k:"):
+        raw = salt.split(":", 1)[1]
+        if not re.fullmatch(r"[0-9a-f]{32}", raw):
+            return False
+        candidate = hashlib.pbkdf2_hmac("sha256", password.encode(), raw.encode(), 600_000).hex()
+        return hmac.compare_digest(candidate, digest)
+    return legacy_verify(password, salt, digest)
+
+
 def sign_session(account, secret: str) -> str:
     expiry = int(time.time()) + SESSION_AGE
     payload = f"{account['id']}:{account['session_version']}:{expiry}:{secrets.token_hex(12)}"
@@ -268,7 +289,7 @@ def create_router(*, db, static_dir: Path, secret, secure_cookie: bool,
             if exists:
                 return page(request, folder, "If you have an existing account, please sign in.")
             login_failed(ip, registration_key)
-            salt, digest = password_hash(password)
+            salt, digest = hash_privilege_password(password)
             cur = conn.execute(
                 "INSERT INTO privilege_accounts(first_name,last_name,email,password_salt,password_hash,created_at) VALUES(?,?,?,?,?,?)",
                 (first,last,email,salt,digest,now()))
@@ -294,7 +315,7 @@ def create_router(*, db, static_dir: Path, secret, secure_cookie: bool,
             return Response("Too many attempts", status_code=429, headers={**HEADERS,"Retry-After":"900"})
         with db() as conn:
             account=conn.execute("SELECT * FROM privilege_accounts WHERE email=?", (email,)).fetchone()
-        if not account or not password_verify(password, account["password_salt"], account["password_hash"]):
+        if not account or not verify_privilege_password(password, account["password_salt"], account["password_hash"], password_verify):
             login_failed(ip,key)
             return page(request,folder,"Invalid credentials.")
         login_succeeded(ip,key)

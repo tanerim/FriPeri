@@ -55,7 +55,7 @@ Private assets return `Cache-Control: private, no-store`.
 
 - Directory access accounts are separate from FriPeri CMS users and never get
   Admin permissions.
-- Passwords use FriPeri's PBKDF2 hashing. No plaintext passwords are stored.
+- Privilege passwords use versioned PBKDF2-HMAC-SHA256 with 600,000 iterations and individual random salts. Legacy privilege hashes remain verifiable, and CMS passwords are unchanged. No plaintext passwords are stored.
 - Reset replaces the password; the administrator must transmit it out of band
   using a secure channel. No email service is silently used.
 - Approve, Deny and Revoke are scoped to the selected folder.
