@@ -41,7 +41,7 @@ from backup_security import (BackupError, MAX_UPLOAD_BYTES, create_backup as wri
                              restore_backup as restore_secure_backup, validate_backup, safe_backup_path)
 from login_security import blocked as login_blocked, failed as login_failed, succeeded as login_succeeded
 from documentation import list_documents, render_document
-from privileges import ProtectedStaticFiles, create_router
+from privileges import ProtectedStaticFiles, create_router, private_folder, allowed as privilege_allowed
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
@@ -91,11 +91,22 @@ app = FastAPI(
 )
 @app.api_route("/static/images/friperi-section-{digest}.svg", methods=["GET", "HEAD"], include_in_schema=False)
 async def section_svg(digest: str, request: Request) -> Response:
+    # This special SVG route precedes the /static mount: enforce the same
+    # folder-level permissions so /static/images never bypasses Privileges.
+    private_images = False
+    if is_initialized(DB_PATH):
+        with get_db() as conn:
+            private_images = private_folder(conn, "images")
+            if private_images and not privilege_allowed(
+                request, conn, "images", SECRET_KEY,
+                admin_check=lambda req: bool((actor(req) or {}).get("role") == "admin"),
+            ):
+                return Response(status_code=403, headers={"Cache-Control": "no-store"})
     filename = f"friperi-section-{digest}.svg"
     if not re.fullmatch(SECTION_SVG_FILENAME, filename):
         return Response(status_code=404)
     asset = STATIC_DIR / "images" / filename
-    headers = {"Cache-Control": "public, max-age=31536000, immutable", "X-Content-Type-Options": "nosniff"}
+    headers = {"Cache-Control": "private, no-store" if private_images else "public, max-age=31536000, immutable", "X-Content-Type-Options": "nosniff"}
     if asset.is_file():
         return FileResponse(asset, media_type="image/svg+xml", headers=headers)
     if not request.app.state.initialized:
