@@ -66,6 +66,7 @@ APPEARANCE_FIELDS = {
                     'border_width': (0, 8), 'border_color': 'color',
                     'padding_x': (0, 96), 'padding_y': (0, 48),
                     'target': ('same_tab', 'new_tab')},
+    'divider': {'padding_top': (0, 240), 'padding_bottom': (0, 240)},
     'icon': {'icon_size': (12, 160), 'icon_color': 'color',
              'background_mode': ('none', 'circle', 'rounded', 'square'),
              'frame_size': (24, 220), 'frame_color': 'color',
@@ -383,20 +384,18 @@ def text(value, limit=20_000):
 
 
 def divider_wave_path(style):
-    """Generate bounded decorative SVG paths, independent of user-supplied markup."""
-    if style not in {'wave', 'wave-tight', 'zigzag'}:
-        return ''
-    points = ['M 0 24']
+    """Smooth, bounded decorative SVG paths. Shared geometry with the editor."""
     if style == 'wave':
-        for x in range(0, 1200, 80):
-            points.append(f'C {x + 20} 2 {x + 20} 2 {x + 40} 24 S {x + 60} 46 {x + 80} 24')
-    elif style == 'wave-tight':
-        for x in range(0, 1200, 40):
-            points.append(f'Q {x + 10} 4 {x + 20} 24 T {x + 40} 24')
-    else:
-        for x in range(0, 1200, 48):
-            points.append(f'L {x + 24} 5 L {x + 48} 24')
-    return ' '.join(points)
+        return 'M0 24 C150 5 250 5 400 24 S650 43 800 24 S1050 5 1200 24'
+    if style == 'wave-tight':
+        return 'M0 24 C65 14 135 14 200 24 S335 34 400 24 S535 14 600 24 S735 34 800 24 S935 14 1000 24 S1135 34 1200 24'
+    if style == 'zigzag':
+        return 'M0 24 ' + ' '.join(f'L{x + 25} 18 L{x + 50} 30' for x in range(0, 1200, 50))
+    if style == 'arc':
+        return 'M0 32 Q600 -16 1200 32'
+    if style == 'swoosh':
+        return 'M0 39 C330 38 460 3 690 17 S1020 38 1200 6'
+    return ''
 
 def validate_document(raw):
     if not isinstance(raw, str) or len(raw.encode('utf-8')) > MAX_DOCUMENT_BYTES:
@@ -439,14 +438,14 @@ def _validate_blocks(data, depth, remaining, anchors):
             line_width = item.get('line_width', 2)
             line_style = item.get('line_style', 'single')
             line_color = item.get('line_color', '#a5b3be')
-            if type(line_width) is not int or not 2 <= line_width <= 20:
-                raise ValueError('Divider line width must be 2–20 px')
-            if line_style not in ('single', 'dashed', 'dotted', 'wave', 'wave-tight', 'zigzag'):
+            if type(line_width) is not int or not 1 <= line_width <= 20:
+                raise ValueError('Divider line width must be 1–20 px')
+            if line_style not in ('single', 'double', 'dashed', 'dotted', 'fade', 'wave', 'wave-tight', 'zigzag', 'arc', 'swoosh'):
                 raise ValueError('Invalid divider line style')
             if not isinstance(line_color, str) or not re.fullmatch(r'#[0-9a-fA-F]{6}', line_color):
                 raise ValueError('Invalid divider line color')
             block.update(line_width=line_width, line_style=line_style, line_color=line_color.lower())
-            if line_style in ('wave', 'wave-tight', 'zigzag'):
+            if line_style in ('wave', 'wave-tight', 'zigzag', 'arc', 'swoosh'):
                 block['line_path'] = divider_wave_path(line_style)
         if kind == 'category':
             block['category'] = text(item.get('category', ''), 200)

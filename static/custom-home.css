@@ -882,3 +882,18 @@
  display:block;flex:1 1 0;min-width:0;position:relative;z-index:1;overflow-wrap:anywhere
 }
 .custom-block.custom-callout .friperi-callout-copy :is(h3,p){visibility:visible;opacity:1}
+
+/* Elegant divider treatments with independent vertical whitespace. */
+.custom-block.custom-divider{
+  padding-top:var(--block-padding-top,8px);
+  padding-bottom:var(--block-padding-bottom,8px);
+}
+.custom-divider-line.style-double hr{border-top-style:double;border-top-width:max(3px,calc(var(--divider-width,1px) * 3))}
+.custom-divider-line.style-fade hr{
+  -webkit-mask-image:linear-gradient(90deg,transparent,#000 22%,#000 78%,transparent);
+  mask-image:linear-gradient(90deg,transparent,#000 22%,#000 78%,transparent);
+}
+.custom-divider-line.style-dotted hr{border-top-style:dotted}
+.custom-divider-line.style-dashed hr{border-top-style:dashed}
+.custom-divider-wave{height:48px;max-height:48px}
+.custom-divider-wave path{stroke-linecap:round;stroke-linejoin:round}

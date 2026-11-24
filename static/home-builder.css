@@ -656,3 +656,18 @@
 }
 .hyperui-admin .builder-block-rename-input:focus-visible{outline:2px solid #818cf8;outline-offset:1px}
 .hyperui-admin .builder-block-rename-prefix{flex-shrink:0}
+
+/* Divider preview follows the public style, without artificial extra spacing. */
+.hyperui-admin .builder-canvas .custom-divider{
+ padding-top:var(--block-padding-top,8px);
+ padding-bottom:var(--block-padding-bottom,8px);
+}
+.hyperui-admin .builder-divider-spacing{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;padding:0 0 8px}
+.hyperui-admin .builder-divider-spacing .builder-field{margin:0}
+.hyperui-admin .builder-divider-line{padding:8px 0}
+.hyperui-admin .builder-divider-line.style-double hr{border-top: max(3px,calc(var(--divider-width,1px) * 3)) double var(--divider-color)}
+.hyperui-admin .builder-divider-line.style-fade hr{
+ -webkit-mask-image:linear-gradient(90deg,transparent,#000 22%,#000 78%,transparent);
+ mask-image:linear-gradient(90deg,transparent,#000 22%,#000 78%,transparent)
+}
+@media(max-width:650px){.hyperui-admin .builder-divider-spacing{grid-template-columns:1fr}}

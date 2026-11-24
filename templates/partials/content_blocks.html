@@ -126,7 +126,7 @@
       <div class="custom-faq-items">{% for item in block['items'] %}<details><summary>{{ item.question }}</summary><p>{{ item.answer }}</p></details>{% endfor %}</div>
     {% elif block.type == 'divider' %}
       <div class="custom-divider-line style-{{ block.line_style|default('single') }}" style="--divider-width: {{ block.line_width|default(2) }}px; --divider-color: {{ block.line_color|default('#a5b3be') }};">
-        {% if block.line_style|default('single') in ['wave', 'wave-tight', 'zigzag'] %}
+        {% if block.line_style|default('single') in ['wave', 'wave-tight', 'zigzag', 'arc', 'swoosh'] %}
         <svg class="custom-divider-wave" viewBox="0 0 1200 48" preserveAspectRatio="none" role="img" aria-label="{{ block.line_style }}">
           <path d="{{ block.line_path }}" fill="none" stroke="var(--divider-color)" stroke-width="var(--divider-width)" vector-effect="non-scaling-stroke" stroke-linecap="round" stroke-linejoin="round" />
         </svg>

@@ -111,7 +111,7 @@
       category:{category:config.categories[0]?.slug || '',count:4},
       heading:{text:t('heading_hint'),level:'h2'}, text:{html:'',foreground:''},
       list:{items:[t('item')],ordered:false}, table:{rows:[[t('heading'),t('heading')],[t('item'),t('item')]],caption:''},
-      image:{url:'',alt:'',caption:'',link_url:'',link_target:'same_tab'},video:{url:'',alt:'',caption:''},button:{text:t('starter_button'),url:'',appearance:{icon:'none',variant:'plain',hover_effect:'none'}},icon:{icon_name:'star',icon_label:'',appearance:{icon_size:48,background_mode:'none'}},brand_logo:{width:'wide'},icon_button:{text:'Home',url:'/',icon_name:'house',appearance:{variant:'solid'}},divider:{line_width:2,line_style:'single',line_color:'#a5b3be'},
+      image:{url:'',alt:'',caption:'',link_url:'',link_target:'same_tab'},video:{url:'',alt:'',caption:''},button:{text:t('starter_button'),url:'',appearance:{icon:'none',variant:'plain',hover_effect:'none'}},icon:{icon_name:'star',icon_label:'',appearance:{icon_size:48,background_mode:'none'}},brand_logo:{width:'wide'},icon_button:{text:'Home',url:'/',icon_name:'house',appearance:{variant:'solid'}},divider:{line_width:1,line_style:'single',line_color:'#a5b3be',appearance:{padding_top:36,padding_bottom:36}},
       quote:{text:t('quote_hint'),attribution:''},callout:{title:t('callout'),text:t('text_hint'),image_url:'',image_alt:''},
       stats:{items:[{value:'100+',label:t('stat_label')}]},team:{width:'wide',appearance:{direction:'vertical',style:'classic',columns:3,photo_width:180,gap:24},items:[{photo:'',name:'',title:'',bio:'',shape:'rectangle',orientation:'portrait',fit:'cover',zoom:1,focal_x:50,focal_y:50}]},faq:{items:[{question:t('question'),answer:t('answer')}]},legacy_html:{html:''}
     }[type]);
@@ -732,6 +732,7 @@
     heading: [['font_size',18,160,48],['font_weight',['normal','bold','heavy']],['accent_color','color','#2563eb'],['accent_opacity',0,100,100],['accent_style',['color_only','underline']],['accent_new_line',['no','yes']]],
     list: [['font_size',10,72,18],['item_gap',0,48,8]],
     table: [['cell_background','color','#ffffff'],['cell_color','color','#17243b'],['header_background','color','#eef2ff'],['header_color','color','#17243b']],
+    divider: [['padding_top',0,240,36],['padding_bottom',0,240,36]],
     icon: [['icon_size',12,160,48],['icon_color','color',config.design?.accent||'#286e7a'],
       ['background_mode',['none','circle','rounded','square']],['frame_size',24,220,84],
       ['frame_color','color','#e6f2f0'],['radius',0,80,16],['shadow',['none','soft','medium']]],
@@ -1778,72 +1779,84 @@
         const settings=el('div','builder-divider-controls');
         const visual=el('div','builder-divider-line');
         const styleName=()=>block.line_style||'single';
+        const paths={
+          wave:'M0 24 C150 5 250 5 400 24 S650 43 800 24 S1050 5 1200 24',
+          'wave-tight':'M0 24 C65 14 135 14 200 24 S335 34 400 24 S535 14 600 24 S735 34 800 24 S935 14 1000 24 S1135 34 1200 24',
+          arc:'M0 32 Q600 -16 1200 32',
+          swoosh:'M0 39 C330 38 460 3 690 17 S1020 38 1200 6'
+        };
         const draw=()=>{
           visual.replaceChildren();
-          visual.style.setProperty('--divider-width',(block.line_width||2)+'px');
+          visual.style.setProperty('--divider-width',(block.line_width??1)+'px');
           visual.style.setProperty('--divider-color',block.line_color||'#a5b3be');
           visual.className='builder-divider-line style-'+styleName();
-          if(['wave','wave-tight','zigzag'].includes(styleName())) {
+          if(['wave','wave-tight','zigzag','arc','swoosh'].includes(styleName())){
             const svg=document.createElementNS('http://www.w3.org/2000/svg','svg');
             svg.setAttribute('viewBox','0 0 1200 48');
             svg.setAttribute('preserveAspectRatio','none');
             svg.setAttribute('aria-hidden','true');
             const path=document.createElementNS('http://www.w3.org/2000/svg','path');
-            const pieces=['M 0 24'];
-            if(styleName()==='wave'){
-              for(let x=0;x<1200;x+=80)
-                pieces.push(`C ${x+20} 2 ${x+20} 2 ${x+40} 24 S ${x+60} 46 ${x+80} 24`);
-            } else if(styleName()==='wave-tight'){
-              for(let x=0;x<1200;x+=40)
-                pieces.push(`Q ${x+10} 4 ${x+20} 24 T ${x+40} 24`);
-            } else {
-              for(let x=0;x<1200;x+=48)
-                pieces.push(`L ${x+24} 5 L ${x+48} 24`);
+            let d=paths[styleName()];
+            if(styleName()==='zigzag'){
+              const bits=['M0 24'];
+              for(let x=0;x<1200;x+=50)bits.push('L'+(x+25)+' 18 L'+(x+50)+' 30');
+              d=bits.join(' ');
             }
-            path.setAttribute('d',pieces.join(' '));
+            path.setAttribute('d',d);
             path.setAttribute('fill','none');
             path.setAttribute('stroke','var(--divider-color)');
             path.setAttribute('stroke-width','var(--divider-width)');
             path.setAttribute('vector-effect','non-scaling-stroke');
             path.setAttribute('stroke-linecap','round');
             path.setAttribute('stroke-linejoin','round');
-            svg.append(path); visual.append(svg);
-          } else visual.append(el('hr'));
+            svg.append(path);visual.append(svg);
+          }else visual.append(el('hr'));
         };
-        const widthLabel=el('label','builder-field');
-        widthLabel.append(el('span','',t('divider_line_width')));
-        const widthInput=el('input');
-        widthInput.type='number';widthInput.min='2';widthInput.max='20';widthInput.step='1';
-        widthInput.value=String(block.line_width||2);
-        widthInput.addEventListener('change',()=>{
-          block.line_width=Math.max(2,Math.min(20,Math.round(Number(widthInput.value)||2)));
-          widthInput.value=String(block.line_width);
-          draw();change();
+        const makeNumber=(label,value,min,max,update)=>{
+          const wrap=el('label','builder-field');
+          const input=el('input');input.type='number';
+          input.min=String(min);input.max=String(max);input.step='1';input.value=String(value);
+          wrap.append(el('span','',label),input);
+          input.addEventListener('change',()=>{
+            const numeric=Math.max(min,Math.min(max,Math.round(Number(input.value)||0)));
+            input.value=String(numeric);update(numeric);change();
+          });
+          return wrap;
+        };
+        const widthControl=makeNumber('Line width (px)',block.line_width??1,1,20,value=>{
+          block.line_width=value;draw();
         });
-        widthLabel.append(widthInput);
-        const styleLabel=el('label','builder-select');
-        styleLabel.append(el('span','',t('divider_line_style')));
+        const styleLabel=el('label','builder-select');styleLabel.append(el('span','','Line style'));
         const styleInput=el('select');
         for(const [key,label] of [
-          ['single','divider_single'],['dashed','divider_dashed'],
-          ['dotted','divider_dotted'],['wave','divider_wave'],
-          ['wave-tight','divider_wave_tight'],['zigzag','divider_zigzag']
-        ]){const option=new Option(t(label),key);styleInput.add(option);}
+          ['single','Fine line'],['double','Double hairline'],['fade','Soft fade'],
+          ['dashed','Delicate dashes'],['dotted','Round dots'],
+          ['wave','Gentle wave'],['wave-tight','Soft ripple'],['arc','Elegant arc'],
+          ['swoosh','Flowing curve'],['zigzag','Subtle zigzag']
+        ])styleInput.add(new Option(label,key));
         styleInput.value=styleName();
         styleInput.addEventListener('change',()=>{
           block.line_style=styleInput.value;draw();change();
         });
         styleLabel.append(styleInput);
-        const colorLabel=el('label','builder-field');
-        colorLabel.append(el('span','',t('divider_line_color')));
+        const colorLabel=el('label','builder-field');colorLabel.append(el('span','','Line color'));
         const colorInput=el('input');colorInput.type='color';
         colorInput.value=block.line_color||'#a5b3be';
         colorInput.addEventListener('input',()=>{
           block.line_color=colorInput.value;draw();change();
+        });colorLabel.append(colorInput);
+        settings.append(widthControl,styleLabel,colorLabel);
+        const spacing=el('div','builder-divider-spacing');
+        const topInput=makeNumber('Padding top (px)',block.appearance?.padding_top??36,0,240,value=>{
+          block.appearance={...block.appearance,padding_top:value};
+          applyAppearance(block,body);
         });
-        colorLabel.append(colorInput);
-        settings.append(widthLabel,styleLabel,colorLabel);
-        body.append(settings,visual);
+        const bottomInput=makeNumber('Padding bottom (px)',block.appearance?.padding_bottom??36,0,240,value=>{
+          block.appearance={...block.appearance,padding_bottom:value};
+          applyAppearance(block,body);
+        });
+        spacing.append(topInput,bottomInput);
+        body.append(settings,spacing,visual);
         draw();
       }
       applyAppearance(block,body);
