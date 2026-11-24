@@ -49,6 +49,14 @@ def install_schema(conn):
         PRIMARY KEY(account_id,folder)
     )""")
     conn.execute("CREATE INDEX IF NOT EXISTS privilege_requests_folder ON privilege_requests(folder,status)")
+    conn.execute("""CREATE TABLE IF NOT EXISTS privilege_audit(
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        actor TEXT NOT NULL,
+        action TEXT NOT NULL,
+        folder TEXT NOT NULL,
+        account_id INTEGER,
+        created_at TEXT NOT NULL
+    )""")
 
 
 def folders(static_dir: Path):
@@ -244,7 +252,7 @@ def create_router(*, db, static_dir: Path, secret, secure_cookie: bool,
         if not valid_public_form(request, form):
             return Response(status_code=403)
         ip = request.client.host if request.client else "unknown"
-        registration_key = "privilege-registration"
+        registration_key = "privilege-registration:" + ip
         if login_blocked(ip, registration_key):
             return Response("Too many registration attempts", status_code=429,
                             headers={**HEADERS, "Retry-After": "900"})
@@ -354,9 +362,17 @@ def create_router(*, db, static_dir: Path, secret, secure_cookie: bool,
         if mode=="private" and os.getenv("PRIVILEGES_STATIC_PROXY_CONFIRMED","0")!="1":
             return Response("Private mode requires PRIVILEGES_STATIC_PROXY_CONFIRMED=1 after verifying the reverse proxy.",status_code=409)
         with db() as conn:
+            previous=private_folder(conn, folder)
             conn.execute("""INSERT INTO privilege_directories(folder,is_private,updated_at) VALUES(?,?,?)
                  ON CONFLICT(folder) DO UPDATE SET is_private=excluded.is_private,updated_at=excluded.updated_at""",
                  (folder,int(mode=="private"),now()))
+            # Switching Public -> Private never silently restores older grants.
+            if mode=="private" and not previous:
+                conn.execute("UPDATE privilege_requests SET status='pending',updated_at=? WHERE folder=? AND status='approved'",
+                             (now(),folder))
+            admin=admin_account(request)
+            conn.execute("INSERT INTO privilege_audit(actor,action,folder,account_id,created_at) VALUES(?,?,?,NULL,?)",
+                         (admin["username"],"mode:"+mode,folder,now()))
         return RedirectResponse("/admin/privileges",status_code=303)
 
     @router.post("/admin/privileges/{folder}/{account_id}/{action}")
@@ -381,6 +397,9 @@ def create_router(*, db, static_dir: Path, secret, secure_cookie: bool,
                 if action in ("deny","revoke"):
                     # Invalidate all previously issued signed privilege cookies.
                     conn.execute("UPDATE privilege_accounts SET session_version=session_version+1 WHERE id=?",(account_id,))
+            admin=admin_account(request)
+            conn.execute("INSERT INTO privilege_audit(actor,action,folder,account_id,created_at) VALUES(?,?,?,?,?)",
+                         (admin["username"],action,folder,account_id,now()))
         return RedirectResponse("/admin/privileges",status_code=303)
 
     return router
