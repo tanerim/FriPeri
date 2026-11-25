@@ -173,3 +173,46 @@ def test_privilege_password_hashes_are_salted_and_versioned():
     assert len(digest)==64
     assert verify_privilege_password("long-test-password-2026",salt,digest,verify_password)
     assert not verify_privilege_password("wrong-password",salt,digest,verify_password)
+
+
+def test_registration_with_https_origin_behind_http_upstream(app_site):
+    client, db, _ = app_site
+    set_private(client)
+    token = csrf(client)
+    result = client.post("/access/video_sorgu/register", headers={
+        "Origin": "https://testserver", "Host": "testserver"
+    }, data={
+        "csrf": token, "first_name": "Test", "last_name": "Person",
+        "email": "origin-check@example.org", "password": "strong-long-password-2026",
+    })
+    assert result.status_code == 303
+    with db() as conn:
+        request = conn.execute("SELECT status FROM privilege_requests WHERE folder='video_sorgu'").fetchone()
+    assert request is not None and request["status"] == "pending"
+
+
+def test_csrf_failure_displays_recovery_page_without_creating_account(app_site):
+    client, db, _ = app_site
+    set_private(client)
+    response = client.post("/access/video_sorgu/register", data={
+        "csrf": "invalid", "first_name": "Test", "last_name": "Person",
+        "email": "should-not-register@example.org", "password": "strong-long-password-2026",
+    })
+    assert response.status_code == 403
+    assert "Form verification failed" in response.text
+    assert "Return to access page" in response.text
+    with db() as conn:
+        assert conn.execute("SELECT COUNT(*) FROM privilege_accounts").fetchone()[0] == 0
+
+
+def test_cross_site_registration_rejected_even_with_csrf_cookie(app_site):
+    client, db, _ = app_site
+    set_private(client)
+    token = csrf(client)
+    response = client.post("/access/video_sorgu/register",
+       headers={"Origin": "https://attacker.example"},
+       data={"csrf": token, "first_name": "Test", "last_name": "Person",
+             "email": "forbidden@example.org", "password": "strong-long-password-2026"})
+    assert response.status_code == 403
+    with db() as conn:
+        assert conn.execute("SELECT COUNT(*) FROM privilege_accounts").fetchone()[0] == 0
