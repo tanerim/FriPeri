@@ -173,7 +173,7 @@ class SystemStaticFiles(StaticFiles):
             response = Response(status_code=404)
             await response(scope, receive, send)
             return
-        if folder and DB_PATH.exists():
+        if folder and folder not in {"images", "uploads"} and DB_PATH.exists():
             try:
                 with get_db() as conn:
                     controlled = (
@@ -213,7 +213,7 @@ async def legacy_privilege_urls(request: Request, call_next):
                 old_folders.update(r[0] for r in conn.execute("SELECT DISTINCT folder FROM privilege_external_mappings"))
         except sqlite3.Error:
             old_folders = set()
-        if len(parts) == 2 and parts[0] in old_folders:
+        if len(parts) == 2 and parts[0] not in {"images", "uploads"} and parts[0] in old_folders:
             url = "/user_files/" + parts[0] + "/" + parts[1]
             if request.url.query:
                 url += "?" + request.url.query
