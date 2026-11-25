@@ -1286,26 +1286,31 @@
     generator.classList.add('builder-section-svg-panel');
     tools.append(layout,background,generator);
     if (hero) card.append(editHero(hero));
-    card.append(tools);
+    // Section-level configuration belongs above the general block style row.
+    card.insertBefore(tools,card.querySelector(':scope > .builder-style-controls'));
     const content = el('div','section-content builder-section-content');
 
     const addControls = el('div','builder-section-add-controls');
     const addLabel = el('label','builder-section-add-label');
-    addLabel.append(el('span','',t('section_add')));
+    addLabel.append(el('span','','Add a block to this section'));
     const add = el('select','builder-section-add-select');
-    add.setAttribute('aria-label',t('section_add'));
+    add.setAttribute('aria-label','Block type to add to this section');
     add.add(new Option('Choose a block to add…',''));
     for (const kind of Object.keys(symbols)) {
       if (kind !== 'section') add.add(new Option(t(kind),kind));
     }
-    add.addEventListener('change',()=>{
-      if (!add.value) return;
-      const kind = add.value; add.value = '';
+    const addSelectedBlock=()=>{
+      if (!add.value) {add.focus();return;}
+      const kind=add.value;add.value='';
       if (blockCount(blocks()) >= 80) return message(t('limit'),true);
       mutate(()=>block.children.push(newBlock(kind)));
+    };
+    add.addEventListener('keydown',event=>{
+      if(event.key==='Enter'){event.preventDefault();addSelectedBlock();}
     });
     addLabel.append(add);
     addControls.append(addLabel);
+    addControls.append(button('+ Add block',addSelectedBlock,'builder-section-add-button builder-add-selected-button'));
     // Section nesting is supported by the validator to a maximum depth of three.
     if (depth < 2) {
       const addSection = button('+ Add nested section',()=>{
@@ -1337,7 +1342,10 @@
       body.append(advanced);
     } else {
       renderBlocks(block.children,content,depth+1);
-      body.append(content,addControls);
+      body.append(content);
+      // Outside the preview body: background artwork must not cover form controls.
+      card.dataset.hasSectionToolbar='true';
+      card._sectionAddControls=addControls;
     }
   }
 
@@ -1415,6 +1423,12 @@
   function renderBlocks(items, container, depth) {
     items.forEach((block,index) => {
       const card = el('section','builder-block'+(!depth && selected===index?' is-selected':''));
+      if(depth>0 && block.type!=='section') {
+        // Fixed Sunlit Horizon sequence for editor-only child block headers.
+        const colors=['#0d3b66','#f4d35e','#ee964b','#f95738','#faf0ca'];
+        card.dataset.sunlitChild='true';
+        card.style.setProperty('--sunlit-child-color',colors[index%colors.length]);
+      }
       if (block.type === 'section') {
         const color=sectionColor(index,depth);
         card.dataset.editorSection='true';
@@ -1947,7 +1961,10 @@
         draw();
       }
       applyAppearance(block,body);
-      card.append(body); if(imageControls) card.append(imageControls); container.append(card);
+      card.append(body);
+      if(card._sectionAddControls)card.append(card._sectionAddControls);
+      if(imageControls) card.append(imageControls);
+      container.append(card);
     });
   }
   const collapseAllButton=document.getElementById('builder-collapse-all');
