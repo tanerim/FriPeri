@@ -78,3 +78,29 @@ def test_register_displays_mutually_exclusive_panels(app_site):
     assert 'class="login-panel"' in response.text
     assert 'class="register"' in response.text
     assert "main:has(.register[open]) .login-panel{display:none}" in response.text
+    # The register details must NOT be nested inside the hidden login div.
+    from html.parser import HTMLParser
+
+    class Structure(HTMLParser):
+        def __init__(self):
+            super().__init__()
+            self.login_depth = 0
+            self.register_inside_login = False
+
+        def handle_starttag(self, tag, attrs):
+            attributes = dict(attrs)
+            if tag == "div" and "login-panel" in attributes.get("class", "").split():
+                self.login_depth += 1
+            elif tag == "details" and "register" in attributes.get("class", "").split():
+                self.register_inside_login = self.login_depth > 0
+            elif tag == "div" and self.login_depth:
+                self.login_depth += 1
+
+        def handle_endtag(self, tag):
+            if tag == "div" and self.login_depth:
+                self.login_depth -= 1
+
+    structure = Structure()
+    structure.feed(response.text)
+    assert not structure.register_inside_login
+
