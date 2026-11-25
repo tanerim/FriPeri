@@ -1420,6 +1420,55 @@
     updateCollapseAll();
   }
 
+  // Move the original block object, preserving its complete subtree and editor state.
+  function moveDestinations(block, source) {
+    const result=[];
+    const height=item=>item.type==='section'
+      ? 1+Math.max(0,...(item.children||[]).filter(child=>child.type==='section').map(height))
+      : 0;
+    const sectionHeight=height(block);
+    if(source!==blocks())result.push({items:blocks(),label:'Page root',ancestors:[]});
+    function visit(items, path=[], ancestors=[]) {
+      items.forEach((item,index)=>{
+        if(item===block || item.type!=='section')return;
+        const nextPath=[...path,String(index+1).padStart(2,'0')+' / '+(item.editor_name||'Section')];
+        const nextAncestors=[...ancestors,item];
+        if(item.children!==source && nextAncestors.length+sectionHeight<=3)
+          result.push({items:item.children,label:nextPath.join(' › '),ancestors:nextAncestors});
+        visit(item.children,nextPath,nextAncestors);
+      });
+    }
+    visit(blocks());
+    return result;
+  }
+
+  function moveToSection(block, source) {
+    const destinations=moveDestinations(block,source);
+    const dialog=el('dialog','builder-move-dialog');
+    const form=el('form');form.method='dialog';
+    form.append(el('h3','','Move to section'),el('p','','Choose a destination. The block will be appended at the end.'));
+    const picker=el('select');picker.setAttribute('aria-label','Destination section');
+    destinations.forEach((destination,index)=>{
+      const option=el('option','',destination.label);option.value=String(index);picker.append(option);
+    });
+    const controls=el('div','builder-block-actions');
+    controls.append(button('Cancel',()=>dialog.close()),button('Move',()=>{
+      const destination=destinations[Number(picker.value)];
+      const index=source.indexOf(block);
+      if(!destination || index<0)return;
+      dialog.close();
+      mutate(()=>{
+        source.splice(index,1);
+        destination.items.push(block);
+        destination.ancestors.forEach(item=>collapsedBlocks.delete(item));
+        selected=destination.ancestors.length?blocks().indexOf(destination.ancestors[0]):blocks().indexOf(block);
+      });
+    }));
+    form.append(picker,controls);dialog.append(form);
+    dialog.addEventListener('close',()=>dialog.remove(),{once:true});
+    document.body.append(dialog);dialog.showModal();picker.focus();
+  }
+
   function renderBlocks(items, container, depth) {
     items.forEach((block,index) => {
       const card = el('section','builder-block'+(!depth && selected===index?' is-selected':''));
@@ -1525,7 +1574,10 @@
         document.getElementById('builder-remove-name').textContent=label;
         removeDialog.showModal();
       });
-      actions.append(up,down,copy,remove);
+      const transfer=button('Move to…',()=>moveToSection(block,items));
+      transfer.title='Move block to another section';
+      transfer.disabled=moveDestinations(block,items).length===0;
+      actions.append(up,down,transfer,copy,remove);
       header.append(actions); card.append(header);
       const styles=el('div','builder-style-controls');
       for (const [key,values] of [['tone',['plain','soft','accent','dark','white','page','navigation','secondary','custom']],['align',['left','center','right']],['width',['normal','wide']]]) {
