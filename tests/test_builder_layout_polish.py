@@ -39,3 +39,9 @@ def test_child_blocks_are_wide_and_colors_are_named():
     assert "Overlay color" in JS
     assert "Title text color" in JS
     assert "Text color" in JS
+
+
+def test_block_color_pickers_distinguish_foreground_and_background():
+    assert "field('Text color',block.foreground" in JS
+    assert "field('Block background color',block.background" in JS
+    assert "field(t('color_selection')" not in JS
