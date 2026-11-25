@@ -16,16 +16,7 @@
       <div class="builder-actions"><button type="button" class="admin-secondary" id="builder-undo">↶ {{ t(lang, 'builder.undo') }}</button><button type="button" class="admin-secondary" id="builder-redo">↷ {{ t(lang, 'builder.redo') }}</button><span id="builder-dirty">{{ t(lang, 'builder.ready') }}</span></div>
     </div>
     <div class="builder-layout">
-      <aside class="admin-card builder-palette">
-        <h2>{{ t(lang, 'builder.add') }}</h2><p>{{ t(lang, 'builder.add_help') }}</p>
-        <div id="builder-section-presets" class="builder-section-presets"></div>
-        <hr class="builder-palette-divider" />
-        <div id="builder-add-blocks"></div>
-        <hr /><button type="button" class="admin-secondary" id="builder-starter" {% if builder_page|default('home') != 'post' %}hidden{% endif %}>{{ t(lang, 'builder.starter') }}</button>
-        <p class="builder-help">{{ t(lang, 'builder.media_help') }}</p>
-      </aside>
-      <div class="builder-workspace">
-        {% if builder_page|default('home') != 'post' %}
+      {% if builder_page|default('home') != 'post' %}
         <div class="builder-workspace-tools" role="toolbar" aria-label="Page builder tools">
           <div class="builder-workspace-tools-main">
             <strong>Page structure</strong>
@@ -37,6 +28,17 @@
             <button type="button" class="admin-secondary" id="builder-focus" aria-pressed="false" aria-controls="builder-canvas">Focus canvas</button>
           </div>
         </div>
+      {% endif %}
+      <aside class="admin-card builder-palette">
+        <h2>{{ t(lang, 'builder.add') }}</h2><p>{{ t(lang, 'builder.add_help') }}</p>
+        <div id="builder-section-presets" class="builder-section-presets"></div>
+        <hr class="builder-palette-divider" />
+        <div id="builder-add-blocks"></div>
+        <hr /><button type="button" class="admin-secondary" id="builder-starter" {% if builder_page|default('home') != 'post' %}hidden{% endif %}>{{ t(lang, 'builder.starter') }}</button>
+        <p class="builder-help">{{ t(lang, 'builder.media_help') }}</p>
+      </aside>
+      <div class="builder-workspace">
+        {% if builder_page|default('home') != 'post' %}
         <nav class="builder-section-map" id="builder-section-map" aria-label="Jump to page section"></nav>
         {% endif %}
         <div id="builder-canvas" class="builder-canvas" style="--color-accent: {{ design_vars.color_accent_primary }}; --color-nav: {{ design_vars.color_nav }}; --color-nav-hover: {{ design_vars.color_nav_hover }}; --color-feature-bg: {{ design_vars.color_feature_bg }}; --color-feature-text: {{ design_vars.color_feature_text }}; --color-accent-secondary: {{ design_vars.color_accent_secondary }}; --color-page-bg: {{ design_vars.color_page_bg }}; --color-feature-border: {{ design_vars.color_feature_border }}; --color-separator-1: {{ design_vars.color_separator_1 }}; --color-separator-2: {{ design_vars.color_separator_2 }}; --color-separator-3: {{ design_vars.color_separator_3 }};"></div></div>

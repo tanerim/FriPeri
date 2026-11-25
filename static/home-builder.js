@@ -2095,6 +2095,12 @@
       container.append(card);
     });
   }
+  const palette=canvas.closest('.builder-layout')?.querySelector('.builder-palette');
+  if(palette && typeof ResizeObserver!=='undefined'){
+    const measurePalette=()=>palette.style.setProperty('--builder-palette-height',palette.getBoundingClientRect().height+'px');
+    new ResizeObserver(measurePalette).observe(palette);
+    measurePalette();
+  }
   const collapseAllButton=document.getElementById('builder-collapse-all');
   const expandAllButton=document.getElementById('builder-expand-all');
   const focusButton=document.getElementById('builder-focus');
