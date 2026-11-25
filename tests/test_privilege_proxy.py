@@ -1,5 +1,5 @@
 """Additional regression checks for proxy-aware privilege registration."""
-from test_privileges import csrf, set_private
+from test_privileges import app_site, csrf, set_private
 
 
 def test_register_behind_proxy_with_configured_origin(app_site, monkeypatch):
