@@ -164,3 +164,35 @@ def test_lifespan_configured_and_database_started(site):
     page = client.get("/login")
     assert page.status_code == 200
     assert "text/html" in page.headers.get("content-type", "")
+
+
+def test_dashboard_extended_admin_metrics_and_charts(site):
+    client, db = site
+    sign_in(client)
+    with sqlite3.connect(db) as conn:
+        conn.execute(
+            "INSERT INTO custom_pages(title,slug,published,created_at,updated_at) "
+            "VALUES('Published example','published-example',1,'2026-11-25','2026-11-25')")
+        conn.execute(
+            "INSERT INTO privilege_directories(folder,is_private,updated_at) "
+            "VALUES('video_sorgu',1,'2026-11-25')")
+    response = client.get("/admin")
+    assert response.status_code == 200
+    assert "Published pages" in response.text
+    assert "Private directories" in response.text
+    assert "CMS users" in response.text
+    assert "Access accounts" in response.text
+    assert "Content overview" in response.text
+    assert "Page publishing status" in response.text
+
+
+def test_creator_dashboard_hides_admin_only_metrics(site):
+    from test_roles import _make_user, _as
+    client, db = site
+    _make_user(db, "dashboard_creator", "cc")
+    _as(client, "dashboard_creator")
+    response = client.get("/admin")
+    assert response.status_code == 200
+    assert "Published pages" not in response.text
+    assert "Access accounts" not in response.text
+    assert "Content overview" in response.text
