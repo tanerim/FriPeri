@@ -47,6 +47,7 @@ def app_site(tmp_path, monkeypatch):
         secure_cookie=True, password_hash=hash_password,
         password_verify=verify_password,
         admin_account=account, admin_token=lambda r,u:"admin-csrf",
+        site_name=lambda:"Research Portal",
         now=lambda:"2026-11-25T12:00:00+00:00", render_admin=render_admin))
     monkeypatch.setenv("PRIVILEGES_STATIC_PROXY_CONFIRMED", "1")
     with TestClient(app, base_url="https://testserver",follow_redirects=False) as client:
@@ -249,3 +250,18 @@ def test_tampered_and_expired_tokens_are_rejected(app_site):
         assert response.status_code==403
     with db() as conn:
         assert conn.execute("SELECT count(*) FROM privilege_accounts").fetchone()[0]==0
+
+
+def test_access_screen_uses_site_brand_and_hides_internal_paths(app_site):
+    client, _, _ = app_site
+    set_private(client)
+    response = client.get("/access/video_sorgu")
+    assert response.status_code == 200
+    assert "Research Portal · Controlled Access" in response.text
+    assert "FriPeri · Controlled Access" not in response.text
+    assert "Directory:" not in response.text
+    assert ">Access page</a>" not in response.text
+    assert ">Home</a>" not in response.text
+    assert 'name="csrf"' in response.text
+    assert '/access/video_sorgu/register' in response.text
+    assert '/access/video_sorgu/login' in response.text
