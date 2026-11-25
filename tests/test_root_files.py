@@ -4,10 +4,10 @@ import sqlite3
 
 
 def test_file_name_allowlist(tmp_path):
-    for allowed in ("ads.txt", "app-ads.txt", "google123456789abc.html"):
+    for allowed in ("ads.txt", "app-ads.txt", "test.txt", "google123456789abc.html"):
         assert root_filename(allowed)
         assert safe_root_file(tmp_path / "root_files", allowed)
-    for denied in ("test.txt", ".env", "../app-ads.txt", "robots.txt", "sitemap.xml",
+    for denied in (".env", "../app-ads.txt", "robots.txt", "sitemap.xml",
                    "index.html", "private.css", "admin.html", "foo.txt"):
         assert not root_filename(denied)
 

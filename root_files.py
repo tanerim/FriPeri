@@ -12,7 +12,7 @@ def root_filename(name: str) -> bool:
     if not ROOT_NAME_RE.fullmatch(name) or name in RESERVED or ".." in name:
         return False
     # Prevent root-file hosting from overriding arbitrary application routes.
-    return name in {"app-ads.txt", "ads.txt"} or bool(
+    return name.endswith(".txt") or bool(
         re.fullmatch(r"google[A-Za-z0-9_-]{8,90}\.html", name))
 
 

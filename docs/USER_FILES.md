@@ -12,7 +12,7 @@ After pulling, run `python -m pytest -q tests/test_privilege*.py`, restart the s
 
 ## Root Files
 
-The administrator can manage explicitly published files under Configuration → Root Files. Allowed file names: `ads.txt`, `app-ads.txt`, or `google<token>.html`. The files are kept in `root_files/`, separate from public CMS assets, and **do not** become public until the administrator explicitly clicks Publish.
+The administrator can manage explicitly published files under Configuration → Root Files. Allowed file names: ASCII-safe `.txt` files (including `ads.txt`, `app-ads.txt`, and `test.txt`) or `google<token>.html` verification files. Reserved route names cannot be replaced. Google HTML verification files must contain only `google-site-verification: <filename>` (no executable HTML). The files are kept in `root_files/`, separate from public CMS assets, and **do not** become public until the administrator explicitly clicks Publish.
 
 For existing Google verification or app-ads files, upload them in the Root Files interface and publish. Files that previously existed at `static/app-ads.txt` are not automatically published.
 

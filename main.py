@@ -30,6 +30,7 @@ from language_migration import (backup_before_language_migration, migrate_langua
 
 from dotenv import load_dotenv
 from fastapi import FastAPI, Request, UploadFile, Form
+from starlette.datastructures import UploadFile as StarletteUploadFile
 from root_files import install_schema as install_root_file_schema, root_filename, safe_root_file, ROOT_FILE_TYPES
 from fastapi.responses import HTMLResponse, RedirectResponse, Response, JSONResponse, FileResponse
 from section_svg_design import render_svg
@@ -161,6 +162,17 @@ class SystemStaticFiles(StaticFiles):
         path = scope.get("path", "")
         relative = path.split("/static/", 1)[-1] if path.startswith("/static/") else ""
         folder = relative.split("/", 1)[0]
+        # Only CMS-owned public assets may reside under /static.
+        # Privileges applications must be under /user_files, never served
+        # through a stray folder accidentally left in static.
+        if ("/" in relative and folder not in {"images", "uploads"}):
+            response = Response(status_code=404)
+            await response(scope, receive, send)
+            return
+        if ("/" not in relative and not relative.endswith((".js", ".css", ".xml"))):
+            response = Response(status_code=404)
+            await response(scope, receive, send)
+            return
         if folder and DB_PATH.exists():
             try:
                 with get_db() as conn:
@@ -3555,7 +3567,7 @@ async def admin_root_files_action(request: Request) -> Response:
         return Response(status_code=400)
     if action == "upload":
         upload = form.get("file")
-        if not isinstance(upload, UploadFile):
+        if not isinstance(upload, StarletteUploadFile):
             return Response("Select a file", status_code=400)
         if upload.filename != name:
             return Response("File name must match the publishing name", status_code=400)
@@ -3563,9 +3575,11 @@ async def admin_root_files_action(request: Request) -> Response:
         if not data or len(data) > 1024 * 1024 or b"\x00" in data:
             return Response("Invalid file (max 1 MB, plain text)", status_code=400)
         try:
-            data.decode("utf-8")
+            decoded = data.decode("utf-8")
         except UnicodeDecodeError:
             return Response("UTF-8 text required", status_code=400)
+        if name.endswith(".html") and decoded.strip() != f"google-site-verification: {name}":
+            return Response("Google verification HTML must contain only its verification token", status_code=400)
         ROOT_FILES_DIR.mkdir(parents=True, exist_ok=True)
         temp = ROOT_FILES_DIR / (".upload-" + secrets.token_hex(16))
         try:
