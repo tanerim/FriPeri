@@ -233,7 +233,7 @@ class ProtectedStaticFiles(StaticFiles):
 
 
 def create_router(*, db, static_dir: Path, secret, secure_cookie: bool,
-                  password_hash, password_verify, admin_account, admin_token, now, render_admin):
+                  password_hash, password_verify, admin_account, admin_token, now, render_admin, site_name=None):
     router = APIRouter()
 
     def csrf_token():
@@ -319,48 +319,80 @@ def create_router(*, db, static_dir: Path, secret, secure_cookie: bool,
 
     def shell(title, folder, body, next_path=""):
         from html import escape as e
-        f = e(folder)
+        # The brand comes from the CMS settings, not a separate access label.
+        brand = str(site_name() if site_name else "FriPeri").strip() or "FriPeri"
         return ("""<!doctype html><html lang="en"><head><meta charset="utf-8">
         <meta name="viewport" content="width=device-width,initial-scale=1">
-        <meta name="robots" content="noindex,nofollow"><title>""" + e(title) + """ · FriPeri</title>
+        <meta name="robots" content="noindex,nofollow"><title>""" + e(title) + " · " + e(brand) + """</title>
         <style>
+        :root{color-scheme:light;--navy:#182749;--blue:#2449bf;--sky:#e7f2fc;--line:#dbe4f1}
         *{box-sizing:border-box}
-        body{margin:0;min-height:100vh;padding:30px 16px;font:15px/1.5 system-ui,-apple-system,sans-serif;
-             background:linear-gradient(145deg,#edf2f8,#f8fafc);color:#1b2b43;display:grid;place-items:center}
-        main{width:min(520px,100%);background:#fff;border:1px solid #dce5ee;border-radius:18px;
-             padding:clamp(22px,5vw,38px);box-shadow:0 18px 52px #17314b13}
-        .brand{margin:0 0 18px;color:#516b88;font-weight:650;letter-spacing:.02em;font-size:13px}
-        h1{margin:0 0 10px;font-size:clamp(24px,4vw,30px);line-height:1.2;letter-spacing:-.02em}
-        p{color:#536780;margin:12px 0}.folder{background:#f1f5f9;border-radius:9px;padding:11px 14px;
-             overflow-wrap:anywhere;margin:18px 0 24px;color:#405673}
-        .folder strong{color:#1b3452}
-        label{display:grid;gap:7px;margin:15px 0;font-weight:600;font-size:13px;color:#30435e}
-        input{width:100%;padding:12px 13px;border:1px solid #c9d5e2;border-radius:9px;font:inherit;
-              background:white;min-height:44px}
-        input:focus-visible,summary:focus-visible,a:focus-visible,button:focus-visible{
-              outline:2px solid #3174aa;outline-offset:3px}
-        button{width:100%;background:#204c6c;color:white;border:0;border-radius:9px;
-               padding:12px 18px;min-height:46px;cursor:pointer;font:inherit;font-weight:650;margin-top:9px}
-        button:hover{background:#173b57}a{color:#17618b}
-        .helper{font-size:12px;color:#677b92;margin:8px 0 0}
-        .register{border-top:1px solid #e3eaf1;margin-top:24px;padding-top:20px}
-        main:has(.register[open]) .login-panel{display:none}
-        .register[open]{border-top:0;margin-top:0;padding-top:0}
+        body{margin:0;min-height:100vh;display:grid;place-items:center;padding:26px;
+             background:#eaf2fa;font:15px/1.5 system-ui,-apple-system,sans-serif;color:var(--navy)}
+        main{width:min(920px,100%);display:grid;grid-template-columns:minmax(0,.86fr) minmax(0,1fr);
+             min-height:550px;background:#fff;border-radius:22px;overflow:hidden;
+             box-shadow:0 24px 70px rgba(19,41,76,.12);border:1px solid #d6e1ef}
+        .visual{background:linear-gradient(150deg,#203d9e,#2d64d5 65%,#77b4ee);color:#fff;
+                padding:45px 38px;display:flex;flex-direction:column;position:relative;overflow:hidden}
+        .visual:before,.visual:after{content:"";position:absolute;border:1px solid #ffffff35;
+                border-radius:50%;width:430px;height:430px;right:-210px;top:90px;pointer-events:none}
+        .visual:after{width:310px;height:310px;right:-130px;top:165px;background:#ffffff0d}
+        .visual-brand{position:relative;z-index:1;font-weight:800;font-size:20px;letter-spacing:-.03em}
+        .visual-content{position:relative;z-index:1;margin:auto 0}
+        .visual-content h2{font-size:clamp(30px,3.5vw,46px);line-height:1.1;letter-spacing:-.045em;
+                           margin:0 0 18px;font-weight:800}
+        .visual-content p{margin:0;color:#e3edff;max-width:290px;line-height:1.7}
+        .visual-bottom{position:relative;z-index:1;font-size:12px;color:#dae6ff}
+        .auth{padding:clamp(26px,4vw,58px);display:flex;flex-direction:column;justify-content:center;min-width:0}
+        .eyebrow{font-size:11px;letter-spacing:.13em;text-transform:uppercase;font-weight:800;color:#3156ba;margin:0 0 12px}
+        h1{font-size:clamp(26px,3vw,34px);line-height:1.18;letter-spacing:-.035em;margin:0 0 9px}
+        .subtitle{color:#697991;font-size:14px;line-height:1.6;margin:0 0 26px}
+        label{display:grid;gap:7px;font-size:13px;font-weight:650;color:#324360;margin:0 0 17px}
+        input{min-height:47px;padding:11px 13px;width:100%;border:1px solid #cbd7e7;border-radius:9px;
+              font:inherit;background:#fbfdff;color:#162746}
+        input:focus-visible,button:focus-visible,summary:focus-visible{outline:3px solid #9abafb;outline-offset:2px}
+        input:focus{border-color:#4c74d4}
+        button{border:0;background:var(--blue);color:#fff;width:100%;min-height:48px;border-radius:9px;
+               padding:12px;font:inherit;font-weight:700;cursor:pointer;transition:background .15s}
+        button:hover{background:#183b9f}
+        .register{margin-top:22px;padding-top:20px;border-top:1px solid var(--line)}
+        .register summary{list-style:none;cursor:pointer;color:#3154b5;font-weight:700;text-align:center;font-size:13px}
+        .register summary::-webkit-details-marker{display:none}
         .register .register-open{display:none}
         .register[open] .register-closed{display:none}
         .register[open] .register-open{display:inline}
-        .register[open] summary{margin-bottom:18px}
-        summary{cursor:pointer;font-weight:650;color:#205477;padding:6px 0}
-        nav{display:flex;gap:18px;flex-wrap:wrap;margin-top:25px;padding-top:17px;
-            border-top:1px solid #e3eaf1;font-size:13px}
-        [role=alert]{border-left:3px solid #c44d4d;background:#fff5f5;padding:10px 12px;border-radius:5px}
+        .register[open]{border-top:0;margin-top:0;padding-top:0}
+        .register[open] summary{margin-top:16px;order:2}
+        .register[open]{display:flex;flex-direction:column}
+        .register[open] form{order:1}
+        .login-panel:has(+.register[open]){display:none}
+        .auth:has(.register[open])>.auth-heading{display:none}
+        .register[open]:before{content:"Create an account";font-size:30px;letter-spacing:-.035em;
+                              font-weight:800;line-height:1.25;margin-bottom:22px}
         .name-fields{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-        @media(max-width:460px){.name-fields{grid-template-columns:1fr}}
+        .helper{color:#6b7b92;font-size:12px;margin:0 0 16px}
+        [role=alert]{background:#fff1f2;border-left:3px solid #c84152;color:#8d3041;
+                     border-radius:6px;padding:12px 14px;font-size:13px}
+        .auth-status{color:#536785;line-height:1.65}
+        @media(max-width:690px){
+          body{padding:14px}main{grid-template-columns:1fr;min-height:0;border-radius:16px}
+          .visual{padding:25px 26px;min-height:150px}
+          .visual-content{margin:22px 0 0}.visual-content h2{font-size:25px;margin-bottom:6px}
+          .visual-content p{font-size:12px}.visual-bottom{display:none}
+          .auth{padding:30px 25px 35px}.name-fields{grid-template-columns:1fr}
+        }
+        @media(prefers-reduced-motion:reduce){button{transition:none}}
         </style></head><body><main>
-        <p class="brand">FriPeri · Controlled Access</p><h1>""" + e(title) + """</h1>
-        <div class="folder">Directory: <strong>""" + f + """</strong></div>""" +
-        body + """<nav><a href="/access/""" + quote(folder, safe="") +
-        """">Access page</a><a href="/">Home</a></nav></main></body></html>""")
+        <aside class="visual" aria-label="Site access">
+          <div class="visual-brand">""" + e(brand) + """</div>
+          <div class="visual-content"><h2>Private access.<br>Simply managed.</h2>
+          <p>Sign in to access protected content, or request an account for administrator review.</p></div>
+          <div class="visual-bottom">Secure access portal</div>
+        </aside>
+        <section class="auth"><div class="auth-heading"><p class="eyebrow">""" +
+        e(brand) + """ · Controlled Access</p><h1>""" + e(title) +
+        """</h1><p class="subtitle">Use your account to continue securely.</p></div>""" +
+        body + """</section></main></body></html>""")
 
     def page(request, folder, error="", next_path=""):
         from html import escape as e
@@ -376,7 +408,7 @@ def create_router(*, db, static_dir: Path, secret, secure_cookie: bool,
                 if status and status["status"] == "approved":
                     return RedirectResponse(safe_target(next_path, folder), status_code=303)
                 state = status["status"] if status else "No access request yet"
-                form = (f'<p>Access status: <strong>{e(state)}</strong></p>'
+                form = (f'<p class="auth-status">Access status: <strong>{e(state)}</strong></p>'
                         f'<form method="post" action="/access/{quote(folder,safe="")}/request">'
                         '<input type="hidden" name="csrf" value="{{CSRF}}">'
                         '<button type="submit">Request access</button></form>' if not status else
@@ -401,7 +433,7 @@ def create_router(*, db, static_dir: Path, secret, secure_cookie: bool,
                     '<input type="hidden" name="csrf" value="{{CSRF}}">'
                     '<button type="submit">Register and request access</button></form></details>')
         msg = f'<p role="alert">{e(error)}</p>' if error else ""
-        return csrf_page(request, shell("Restricted directory", folder, msg+login+register))
+        return csrf_page(request, shell("Welcome back", folder, msg+login+register))
 
     @router.get("/access/{folder}", response_class=HTMLResponse)
     async def access_page(request: Request, folder: str):
