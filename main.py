@@ -1503,10 +1503,24 @@ async def admin(request: Request) -> Response:
                 SELECT COUNT(*) FROM posts p LEFT JOIN categories c ON c.id = p.category_id
                 WHERE c.id IS NULL
             """).fetchone()[0]
+    dashboard_extra = None
+    if account and account["role"] == "admin":
+        with get_db() as conn:
+            dashboard_extra = {
+                "published_pages": conn.execute("SELECT COUNT(*) FROM pages WHERE published=1").fetchone()[0],
+                "total_pages": conn.execute("SELECT COUNT(*) FROM pages").fetchone()[0],
+                "users": conn.execute("SELECT COUNT(*) FROM users").fetchone()[0],
+                "private_directories": conn.execute(
+                    "SELECT COUNT(*) FROM privilege_directories WHERE is_private=1 AND lower(folder) NOT IN ('images','uploads')").fetchone()[0],
+                "access_accounts": conn.execute("SELECT COUNT(*) FROM privilege_accounts").fetchone()[0],
+                "pending_requests": conn.execute(
+                    "SELECT COUNT(*) FROM privilege_requests WHERE status='pending'").fetchone()[0],
+            }
     is_first_run = not counts.get('total') and not category_counts
     return render_template(request, "admin/index.html", t(lang, "dashboard.title"), {
         "active_admin": "admin", "counts": counts, "recent_posts": recent_posts,
         "category_counts": category_counts, "uncategorized_count": uncategorized_count,
+        "dashboard_extra": dashboard_extra,
         "is_first_run": is_first_run,
     }, user=user)
 
