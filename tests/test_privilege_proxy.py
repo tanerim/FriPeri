@@ -2,9 +2,10 @@
 from test_privileges import csrf, set_private
 
 
-def test_register_behind_proxy_with_forwarded_host(app_site):
+def test_register_behind_proxy_with_configured_origin(app_site, monkeypatch):
     client, db, _ = app_site
     set_private(client)
+    monkeypatch.setenv("FRIPERI_PUBLIC_ORIGIN", "https://public.example.org")
     token = csrf(client)
     response = client.post(
         "/access/video_sorgu/register",
