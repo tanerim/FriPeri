@@ -77,7 +77,7 @@ def test_register_displays_mutually_exclusive_panels(app_site):
     assert response.status_code == 200
     assert 'class="login-panel"' in response.text
     assert 'class="register"' in response.text
-    assert "main:has(.register[open]) .login-panel{display:none}" in response.text
+    assert ".login-panel:has(+.register[open]){display:none}" in response.text
     # The register details must NOT be nested inside the hidden login div.
     from html.parser import HTMLParser
 
