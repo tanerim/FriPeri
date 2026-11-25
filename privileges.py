@@ -194,18 +194,27 @@ def create_router(*, db, static_dir: Path, secret, secure_cookie: bool,
                   password_hash, password_verify, admin_account, admin_token, now, render_admin):
     router = APIRouter()
 
+    def csrf_token():
+        # Stateless, tamper-evident form token: no dependency on the browser
+        # returning a cookie through a reverse proxy or privacy extension.
+        expiry = int(time.time()) + 3600
+        nonce = secrets.token_hex(16)
+        payload = f"{expiry}:{nonce}"
+        signature = hmac.new(secret().encode(),
+                             ("privilege-csrf:" + payload).encode(),
+                             hashlib.sha256).hexdigest()
+        return f"{payload}:{signature}"
+
     def csrf_page(request: Request, content: str, status=200):
-        token = request.cookies.get(CSRF_COOKIE) or secrets.token_urlsafe(32)
-        if not re.fullmatch(r"[A-Za-z0-9_-]{32,64}", token):
-            token = secrets.token_urlsafe(32)
-        response = HTMLResponse(content.replace("{{CSRF}}", token), status_code=status, headers=HEADERS)
-        response.set_cookie(CSRF_COOKIE, token, secure=secure_cookie,
-                            httponly=True, samesite="lax", max_age=3600, path="/access")
-        return response
+        token = csrf_token()
+        # A fresh token is embedded directly in the HTML form. Private pages
+        # are no-store. An old double-submit cookie is not required.
+        return HTMLResponse(content.replace("{{CSRF}}", token),
+                            status_code=status, headers=HEADERS)
 
     def valid_public_form(request, form):
-        # Compare the submitted Origin to the actual forwarded Host. A TLS
-        # terminator may create request.url from an internal HTTP upstream.
+        # Origin must match the public Host received from the proxy. This is
+        # independent of the ASGI request URL's internal HTTP scheme.
         origin = request.headers.get("origin", "")
         if origin:
             parsed = urlsplit(origin)
@@ -215,14 +224,28 @@ def create_router(*, db, static_dir: Path, secret, secure_cookie: bool,
                 return False
         elif request.headers.get("sec-fetch-site", "") == "cross-site":
             return False
+
         supplied = str(form.get("csrf", ""))
-        cookie = request.cookies.get(CSRF_COOKIE, "")
-        return bool(supplied and cookie and hmac.compare_digest(supplied, cookie))
+        parts = supplied.split(":")
+        if len(parts) != 3:
+            return False
+        expiry, nonce, signature = parts
+        if (not expiry.isdecimal() or not re.fullmatch(r"[0-9a-f]{32}", nonce)
+                or not re.fullmatch(r"[0-9a-f]{64}", signature)):
+            return False
+        now_time = int(time.time())
+        if not now_time <= int(expiry) <= now_time + 3600:
+            return False
+        payload = f"{expiry}:{nonce}"
+        expected = hmac.new(secret().encode(),
+                            ("privilege-csrf:" + payload).encode(),
+                            hashlib.sha256).hexdigest()
+        return hmac.compare_digest(signature, expected)
 
     def rejected_public_form(request, folder):
-        # Keep the CSRF protection and show a recoverable error, not a blank 403.
-        body = ('<p role="alert">Your form could not be verified. Please reload '
-                'the access page and try again. Enable cookies for this site.</p>'
+        # Keep CSRF protection while explaining the recovery action.
+        body = ('<p role="alert">Your form could not be verified. Please '
+                'reload the access page and submit it again.</p>'
                 f'<p><a href="{access_url(folder)}">Return to access page</a></p>')
         return csrf_page(request, shell("Form verification failed", folder, body), status=403)
 
