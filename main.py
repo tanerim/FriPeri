@@ -160,19 +160,21 @@ app.mount("/user_files", ProtectedStaticFiles(
     first_run=lambda: not DB_PATH.exists(), mount_prefix="/user_files",
 ), name="user_files")
 
-@app.api_route("/static/{legacy_folder}/{legacy_path:path}", methods=["GET", "HEAD"], include_in_schema=False)
-async def legacy_privilege_asset(legacy_folder: str, legacy_path: str):
-    # This route is registered after the static mount; the middleware below
-    # handles legacy URLs before static can serve anything.
-    return Response(status_code=404)
-
 @app.middleware("http")
 async def legacy_privilege_urls(request: Request, call_next):
     path = request.url.path
     if path.startswith("/static/"):
         parts = path[len("/static/"):].split("/", 1)
-        if len(parts) == 2 and parts[0] in {p.name for p in USER_FILES_DIR.iterdir()
-                                            if p.is_dir() and not p.is_symlink()}:
+        # Only migrate registered Privileges names. Otherwise the public
+        # static assets (and their URL space) remain owned by the CMS.
+        try:
+            with get_db() as conn:
+                old_folders = {r[0] for r in conn.execute("SELECT folder FROM privilege_directories")}
+                old_folders.update(r[0] for r in conn.execute("SELECT DISTINCT folder FROM privilege_requests"))
+                old_folders.update(r[0] for r in conn.execute("SELECT DISTINCT folder FROM privilege_external_mappings"))
+        except sqlite3.Error:
+            old_folders = set()
+        if len(parts) == 2 and parts[0] in old_folders:
             url = "/user_files/" + parts[0] + "/" + parts[1]
             if request.url.query:
                 url += "?" + request.url.query

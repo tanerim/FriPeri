@@ -78,9 +78,11 @@ def migrate_user_folders(static_dir: Path, user_dir: Path, conn) -> list[str]:
     A conflicting destination aborts startup rather than merging or exposing
     content. Never follow a top-level symlink.
     """
-    user_dir.mkdir(parents=True, exist_ok=True)
-    if user_dir.is_symlink() or user_dir.resolve().is_relative_to(static_dir.resolve()):
+    if (user_dir.is_symlink() or user_dir.resolve() == static_dir.resolve()
+            or user_dir.resolve().is_relative_to(static_dir.resolve())
+            or static_dir.resolve().is_relative_to(user_dir.resolve())):
         raise RuntimeError("USER_FILES_DIR must be separate from static")
+    user_dir.mkdir(parents=True, exist_ok=True)
     existing = {row[0] for row in conn.execute("SELECT folder FROM privilege_directories")}
     existing.update(row[0] for row in conn.execute("SELECT DISTINCT folder FROM privilege_external_mappings"))
     existing.update(row[0] for row in conn.execute("SELECT DISTINCT folder FROM privilege_requests"))
@@ -91,6 +93,8 @@ def migrate_user_folders(static_dir: Path, user_dir: Path, conn) -> list[str]:
             continue
         src, dst = static_dir / name, user_dir / name
         if dst.exists():
+            if dst.is_symlink() or not dst.is_dir():
+                raise RuntimeError(f"Unsafe user folder destination: {name}")
             if src.exists():
                 raise RuntimeError(f"Conflicting user folder: {name}")
             continue
@@ -100,13 +104,6 @@ def migrate_user_folders(static_dir: Path, user_dir: Path, conn) -> list[str]:
             src.rename(dst)
             moved.append(name)
     return moved
-
-
-def migrate_mapping_links(user_dir: Path, conn):
-    """Mapped links move with their enclosing directory; no DB key changes."""
-    # The existing mapping records are intentionally preserved unchanged:
-    # ProtectedStaticFiles checks each symlink relative to user_dir at request time.
-    return None
 
 
 def folders(static_dir: Path):
