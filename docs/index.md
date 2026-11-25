@@ -2,6 +2,11 @@
 
 This is the full documentation for **FriPeri**, a self-hosted personal publishing application built with FastAPI, Jinja2, and SQLite. The [repository README](../README.md) provides a short introduction and quick start; the guides below contain the complete instructions and reference material.
 
+## What's new
+
+- **[Recent features (November 2026)](recent-features.md)** — Dashboard metrics and charts, improved admin navigation, website design and homepage composition, private directory access, and protected video streaming.
+- **[Directory privileges and deployment security](PRIVILEGES.md)** — Approval workflow, secure static-file serving, proxy configuration, and video archive symlink rules.
+
 ## Start here
 
 | Guide | What it covers |
