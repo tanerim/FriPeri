@@ -71,3 +71,30 @@ Run regression tests locally:
 ```bash
 python -m pytest -q tests/test_privileges.py
 ```
+
+## Approved external video archive symlink
+
+The controlled directory `/static/video_sorgu/videos/` may refer to
+`/home/taner/6feb_data/videos` through an explicit symbolic link:
+
+```sh
+ln -s /home/taner/6feb_data/videos \
+  /home/taner/websites/network_analiz/static/video_sorgu/videos
+```
+
+The authorized root defaults to `/home/taner/6feb_data/videos`. Override it
+using the FriPeri service environment variable `PRIVILEGES_VIDEO_ARCHIVE_DIR`
+when deploying elsewhere. The link **must** resolve to that exact root.
+Other out-of-tree symlinks and nested symlinks within the video archive are
+not followed. Directories and non-regular files are not served by this rule.
+
+The existing Private/Approved checks happen before the static file lookup.
+Starlette's `FileResponse` handles `Range` video requests (HTTP 206).
+Confirm the web server user can traverse the source's parent directories and
+read video files; symlink permissions do not override filesystem permissions.
+Avoid any Nginx `alias` or other static shortcut around FriPeri's application
+authorization layer.
+
+```sh
+python -m pytest -q tests/test_privilege_video_archive.py
+```
