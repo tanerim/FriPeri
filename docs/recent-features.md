@@ -36,17 +36,13 @@ The public access screen uses the configured **site name** followed by “Contro
 
 **Deployment is security-sensitive:** all `/static/` requests must reach FastAPI rather than bypassing authorization through a reverse-proxy file alias or CDN. Private mode also requires `PRIVILEGES_STATIC_PROXY_CONFIRMED=1` after checking the proxy. Read [the full privileges and Nginx guide](PRIVILEGES.md) before enabling Private access.
 
-## Protected external video archive
+## External directory mappings
 
-A deliberately narrow symbolic-link exception allows:
-
-```text
-/static/video_sorgu/videos/  ->  /home/taner/6feb_data/videos/
-```
-
-The target can be configured with `PRIVILEGES_VIDEO_ARCHIVE_DIR`. The symlink must resolve to the exact approved archive root; other external symlinks and nested symlinks remain blocked. Authorization is enforced before streaming videos; approved sessions can receive HTTP 200 or partial-content HTTP 206 responses. Video player URLs must use the protected `/static/video_sorgu/videos/` prefix, not a separate `/videos/` URL or unprotected Nginx alias.
-
-See [Privileges](PRIVILEGES.md) for security checks, operational requirements, and the regression test checklist.
+Administrators can approve existing external directory symlinks per eligible
+static folder, with optional extension restrictions and enable/disable controls.
+Mappings are stored in SQLite and inherit the folder's access policy. Existing
+video links must be registered in the panel after upgrading. See
+[Privileges](PRIVILEGES.md) for deployment and security details.
 
 ## Verification
 

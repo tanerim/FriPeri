@@ -38,6 +38,13 @@ def install_schema(conn):
         folder TEXT PRIMARY KEY, is_private INTEGER NOT NULL DEFAULT 0
         CHECK(is_private IN (0,1)), updated_at TEXT NOT NULL
     )""")
+    conn.execute("""CREATE TABLE IF NOT EXISTS privilege_external_mappings(
+        id INTEGER PRIMARY KEY, folder TEXT NOT NULL, relative_path TEXT NOT NULL,
+        target_path TEXT NOT NULL, allowed_extensions TEXT NOT NULL DEFAULT '',
+        enabled INTEGER NOT NULL DEFAULT 1 CHECK(enabled IN (0,1)),
+        created_at TEXT NOT NULL, updated_at TEXT NOT NULL,
+        UNIQUE(folder,relative_path)
+    )""")
     conn.execute("""CREATE TABLE IF NOT EXISTS privilege_accounts(
         id INTEGER PRIMARY KEY, first_name TEXT NOT NULL,
         last_name TEXT NOT NULL, email TEXT NOT NULL UNIQUE COLLATE NOCASE,
@@ -161,39 +168,49 @@ class ProtectedStaticFiles(StaticFiles):
         self._first_run = first_run
 
     def lookup_path(self, path: str):
-        # Allow only the explicitly configured video archive link, keeping the
-        # default symlink protections for all other static assets.
-        if not path or path.startswith(("/", "\\\\")):
-            return super().lookup_path(path)
         parts = Path(path).parts
-        if (len(parts) < 3 or parts[:2] != ("video_sorgu", "videos")
-                or any(part in ("", ".", "..") for part in parts)
-                or "\\\\" in path):
+        if (len(parts) < 2 or Path(path).is_absolute() or "\\" in path
+                or any(x in ("", ".", "..") for x in parts)):
             return super().lookup_path(path)
-
-        link = Path(self.directory) / "video_sorgu" / "videos"
-        trusted = Path(os.getenv("PRIVILEGES_VIDEO_ARCHIVE_DIR",
-                                "/home/taner/6feb_data/videos")).resolve()
-        # The symlink must resolve to exactly the intended archive; pointing
-        # to an arbitrary location inside /home is not sufficient.
-        if not link.is_symlink() or link.resolve() != trusted or not trusted.is_dir():
-            return "", None
-        relative = Path(*parts[2:])
-        candidate = trusted / relative
-        # Do not expose nested symlinks in the external archive.
-        if any((trusted / Path(*relative.parts[:i])).is_symlink()
-               for i in range(1, len(relative.parts) + 1)):
-            return "", None
-        resolved = candidate.resolve()
-        if not resolved.is_relative_to(trusted) or resolved == trusted:
-            return "", None
         try:
-            info = os.stat(resolved)
-        except (FileNotFoundError, NotADirectoryError):
+            with self._db() as conn:
+                mappings = [dict(r) for r in conn.execute(
+                    "SELECT * FROM privilege_external_mappings WHERE folder=?", (parts[0],))]
+        except sqlite3.OperationalError:
+            return super().lookup_path(path)
+        for mapping in sorted(mappings, key=lambda r: len(r["relative_path"]), reverse=True):
+            prefix = (mapping["folder"], *mapping["relative_path"].split("/"))
+            if parts[:len(prefix)] != prefix:
+                continue
+            if not mapping["enabled"] or len(parts) <= len(prefix):
+                return "", None
+            try:
+                trusted = Path(mapping["target_path"])
+                if not trusted.is_absolute() or trusted.resolve() != trusted or not trusted.is_dir():
+                    return "", None
+                link = Path(self.directory).joinpath(*prefix)
+                if any(Path(self.directory).joinpath(*prefix[:i]).is_symlink()
+                       for i in range(1, len(prefix))):
+                    return "", None
+                if not link.is_symlink() or link.resolve() != trusted:
+                    return "", None
+                relative = parts[len(prefix):]
+                if any(trusted.joinpath(*relative[:i]).is_symlink()
+                       for i in range(1, len(relative)+1)):
+                    return "", None
+                resolved = trusted.joinpath(*relative).resolve()
+                if not resolved.is_relative_to(trusted):
+                    return "", None
+                extensions = mapping["allowed_extensions"].split(",")
+                if mapping["allowed_extensions"] and resolved.suffix.lower().lstrip(".") not in extensions:
+                    return "", None
+                info = resolved.stat()
+                if stat.S_ISREG(info.st_mode):
+                    return str(resolved), info
+            except (OSError, RuntimeError, ValueError):
+                pass
             return "", None
-        if not stat.S_ISREG(info.st_mode):
-            return "", None
-        return str(resolved), info
+        return super().lookup_path(path)
 
     async def __call__(self, scope, receive, send):
         path = scope.get("path", "")
@@ -530,13 +547,15 @@ def create_router(*, db, static_dir: Path, secret, secure_cookie: bool,
         if not admin or admin["role"]!="admin":return Response(status_code=403)
         # Dedicated template, data kept separate and escaped by Jinja.
         with db() as conn:
+            mappings=[dict(r) for r in conn.execute("SELECT * FROM privilege_external_mappings ORDER BY relative_path")]
             modes={r["folder"]:bool(r["is_private"]) for r in conn.execute("SELECT * FROM privilege_directories")}
             rows=[dict(r) for r in conn.execute("""SELECT r.folder,r.status,r.account_id,a.first_name,a.last_name,a.email,r.updated_at
                   FROM privilege_requests r JOIN privilege_accounts a ON a.id=r.account_id ORDER BY r.updated_at DESC""")]
         return render_admin(request,"admin/privileges.html","Privileges",{
             "active_admin":"privileges","directories":[
                 {"name":name,"private":modes.get(name,False),
-                 "requests":[r for r in rows if r["folder"]==name]}
+                 "requests":[r for r in rows if r["folder"]==name],
+                 "mappings":[r for r in mappings if r["folder"]==name]}
                 for name in folders(static_dir)],
             "settings_token":admin_token(request,admin["username"]),
             "proxy_confirmed":os.getenv("PRIVILEGES_STATIC_PROXY_CONFIRMED","0")=="1",
@@ -568,6 +587,70 @@ def create_router(*, db, static_dir: Path, secret, secure_cookie: bool,
             admin=admin_account(request)
             conn.execute("INSERT INTO privilege_audit(actor,action,folder,account_id,created_at) VALUES(?,?,?,NULL,?)",
                          (admin["username"],"mode:"+mode,folder,now()))
+        return RedirectResponse("/admin/privileges",status_code=303)
+
+    @router.post("/admin/privileges/{folder}/mapping")
+    async def mapping_action(request: Request, folder: str):
+        if folder not in folders(static_dir):
+            return Response(status_code=404)
+        form = await request.form()
+        if not admin_action(request, form.get("settings_token", "")):
+            return Response(status_code=403)
+        action = str(form.get("action", "save"))
+        raw_id = str(form.get("mapping_id", ""))
+        if raw_id and (not raw_id.isdecimal() or len(raw_id) > 18):
+            return Response(status_code=400)
+        mid = int(raw_id) if raw_id else None
+        with db() as conn:
+            old = conn.execute("SELECT * FROM privilege_external_mappings WHERE id=? AND folder=?",
+                               (mid, folder)).fetchone() if mid is not None else None
+            if mid is not None and old is None:
+                return Response(status_code=404)
+            if action in ("delete", "disable"):
+                if old is None:
+                    return Response(status_code=400)
+                if action == "delete":
+                    conn.execute("DELETE FROM privilege_external_mappings WHERE id=?", (mid,))
+                else:
+                    conn.execute("UPDATE privilege_external_mappings SET enabled=0,updated_at=? WHERE id=?", (now(),mid))
+            elif action == "save":
+                relative = str(form.get("relative_path", "")).strip()
+                target = str(form.get("target_path", "")).strip()
+                extensions = sorted(set(x.strip().lower().lstrip(".") for x in
+                                        str(form.get("allowed_extensions", "")).split(",") if x.strip()))
+                parts = relative.split("/")
+                if (len(relative)>512 or not all(re.fullmatch(r"[A-Za-z0-9_-][A-Za-z0-9_.-]*", x) for x in parts)
+                        or not all(re.fullmatch(r"[a-z0-9]{1,16}", x) for x in extensions)
+                        or len(target)>4096):
+                    return Response("Invalid mapping path or extensions", status_code=400)
+                try:
+                    root = Path(target)
+                    static_root = static_dir.resolve()
+                    link = static_dir.joinpath(folder, *parts)
+                    prefix = (folder, *parts)
+                    if (not root.is_absolute() or root.resolve()!=root or not root.is_dir()
+                            or root.is_relative_to(static_root) or static_root.is_relative_to(root)
+                            or any(static_dir.joinpath(*prefix[:i]).is_symlink() for i in range(1,len(prefix)))
+                            or not link.is_symlink() or link.resolve()!=root):
+                        return Response("Mapping requires an existing symlink to the exact external directory", status_code=400)
+                except (OSError, RuntimeError, ValueError):
+                    return Response("Invalid external directory", status_code=400)
+                for row in conn.execute("SELECT id,relative_path FROM privilege_external_mappings WHERE folder=?", (folder,)):
+                    other = row["relative_path"]
+                    if row["id"] != mid and (other==relative or other.startswith(relative+"/") or relative.startswith(other+"/")):
+                        return Response("Overlapping mapping", status_code=409)
+                values = (relative, str(root), ",".join(extensions), now())
+                if old is None:
+                    conn.execute("""INSERT INTO privilege_external_mappings
+                        (folder,relative_path,target_path,allowed_extensions,created_at,updated_at)
+                        VALUES(?,?,?,?,?,?)""", (folder,*values,now()))
+                else:
+                    conn.execute("""UPDATE privilege_external_mappings SET relative_path=?,target_path=?,
+                        allowed_extensions=?,updated_at=?,enabled=1 WHERE id=?""", (*values,mid))
+            else:
+                return Response(status_code=400)
+            conn.execute("INSERT INTO privilege_audit(actor,action,folder,account_id,created_at) VALUES(?,?,?,NULL,?)",
+                         (admin_account(request)["username"],"mapping:"+action,folder,now()))
         return RedirectResponse("/admin/privileges",status_code=303)
 
     @router.post("/admin/privileges/{folder}/{account_id}/{action}")

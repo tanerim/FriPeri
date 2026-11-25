@@ -72,33 +72,27 @@ Run regression tests locally:
 python -m pytest -q tests/test_privileges.py
 ```
 
-## Approved external video archive symlink
+## External directory mappings
 
-The controlled directory `/static/video_sorgu/videos/` may refer to
-`/home/taner/6feb_data/videos` through an explicit symbolic link:
+Create a symbolic link inside an eligible static directory on the server, then
+open Configuration → Privileges → External directory mappings. Enter the
+relative link path, exact canonical absolute target directory, and optionally
+comma-separated file extensions. Save to enable. Edit, disable or remove the
+mapping in the same panel. Removing a mapping does not delete files or links.
 
-```sh
-ln -s /home/taner/6feb_data/videos \
-  /home/taner/websites/network_analiz/static/video_sorgu/videos
-```
+Existing video deployments must register their existing link in this panel
+after upgrading; the old video-specific environment variable is no longer used.
+No external links are automatically trusted. Until registered, they return 404.
 
-The authorized root defaults to `/home/taner/6feb_data/videos`. Override it
-using the FriPeri service environment variable `PRIVILEGES_VIDEO_ARCHIVE_DIR`
-when deploying elsewhere. The link **must** resolve to that exact root.
-Other out-of-tree symlinks and nested symlinks within the video archive are
-not followed. Directories and non-regular files are not served by this rule.
+Private folder approval is checked before serving files. Nested symlinks,
+overlapping mappings and non-regular files are rejected. Video Range requests
+remain supported. Keep external archives administrator-controlled and use
+extension restrictions for media; an empty extension list permits all regular
+files, including active content. Do not map sensitive or untrusted directories.
+The service user must have filesystem read and traversal permissions.
+Never bypass the application using an Nginx alias.
 
-The existing Private/Approved checks happen before the static file lookup.
-Starlette's `FileResponse` handles `Range` video requests (HTTP 206).
-Confirm the web server user can traverse the source's parent directories and
-read video files; symlink permissions do not override filesystem permissions.
-Avoid any Nginx `alias` or other static shortcut around FriPeri's application
-authorization layer.
-
-```sh
-python -m pytest -q tests/test_privilege_video_archive.py
-```
-
+Run: `python -m pytest -q tests/test_privilege_video_archive.py`
 
 ## User interface and form protection
 

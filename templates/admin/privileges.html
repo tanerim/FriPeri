@@ -106,6 +106,35 @@
       <p class="privileges-hint">Changing a Public directory to Private resets previously approved access requests to Pending.</p>
     </div>
     <div class="privileges-section">
+      <div class="privileges-section-head"><h3>External directory mappings</h3></div>
+      <p class="privileges-hint">Create the symbolic link on the server first. Only explicitly approved targets are served. Leave extensions empty to allow all regular files; use a narrow list for media.</p>
+      {% for mapping in directory.mappings %}
+      <details class="privileges-reset">
+        <summary>{{ mapping.relative_path }} — {{ 'Enabled' if mapping.enabled else 'Disabled' }}</summary>
+        <form class="privileges-mode-form" method="post" action="/admin/privileges/{{ directory.name | urlencode }}/mapping">
+          <input type="hidden" name="settings_token" value="{{ settings_token }}">
+          <input type="hidden" name="mapping_id" value="{{ mapping.id }}">
+          <label>Relative directory<input name="relative_path" required value="{{ mapping.relative_path }}"></label>
+          <label>External directory path<input name="target_path" required value="{{ mapping.target_path }}"></label>
+          <label>Allowed extensions<input name="allowed_extensions" value="{{ mapping.allowed_extensions }}"></label>
+          <button class="action-primary" name="action" value="save">Save / enable</button>
+          <button name="action" value="disable" formnovalidate>Disable</button>
+          <button class="action-danger" name="action" value="delete" formnovalidate>Remove</button>
+        </form>
+      </details>
+      {% endfor %}
+      <details class="privileges-reset">
+        <summary>Add external mapping</summary>
+        <form class="privileges-mode-form" method="post" action="/admin/privileges/{{ directory.name | urlencode }}/mapping">
+          <input type="hidden" name="settings_token" value="{{ settings_token }}">
+          <label>Relative directory<input name="relative_path" required placeholder="media"></label>
+          <label>External directory path<input name="target_path" required placeholder="/srv/archive"></label>
+          <label>Allowed extensions<input name="allowed_extensions" placeholder="jpg,png,mp4"></label>
+          <button class="action-primary" name="action" value="save">Save mapping</button>
+        </form>
+      </details>
+    </div>
+    <div class="privileges-section">
       <div class="privileges-section-head"><h3>Access requests <span class="privileges-count">{{ directory.requests | length }}</span></h3></div>
       {% if directory.requests %}
       <div class="privileges-table-wrap">

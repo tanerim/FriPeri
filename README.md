@@ -18,7 +18,7 @@ A streamlined browser-based workspace for content management, visual design, and
 | --- | --- | --- |
 | ![FriPeri dashboard with publishing metrics, page counts, and access statistics](docs/screenshots/dashboard.png) | ![FriPeri website design with color palettes, navigation and styling controls](docs/screenshots/website-design.png) | ![FriPeri homepage builder and visual page structure editor](docs/screenshots/homepage-builder.png) |
 
-Screenshots: November 2026. See the [recent features](docs/recent-features.md) for the latest administration, private directory access, and protected video archive capabilities.
+Screenshots: November 2026. See the [recent features](docs/recent-features.md) for the latest administration, private directory access, and external directory mapping capabilities.
 
 ## At a glance
 
@@ -27,7 +27,7 @@ Screenshots: November 2026. See the [recent features](docs/recent-features.md) f
 - **Organize:** nested navigation, category presentation controls, built-in social profile links, and contact messages.
 - **Translate:** English content with an optional secondary language and English fallback.
 - **Manage:** browser-based installation, role-based access for content creators, editors and administrators, media cropping, backups, and recovery.
-- **Protect:** private static directories with separate access accounts, administrator approvals, and protected video streaming.
+- **Protect:** private static directories with separate access accounts, administrator approvals, and protected external directory mappings and video streaming.
 - **Own your data:** content and settings are stored in SQLite; uploaded media stays on your server.
 
 For exact behavior, limitations, and examples, see the [full feature overview](docs/overview.md) and [administrator guide](docs/user-guide.md).
@@ -60,7 +60,7 @@ Everything you need to set up, manage, and extend FriPeri. Browse the [complete 
 - **[Administrator user guide](docs/user-guide.md)** — Publishing, pages, homepage design, and languages.
 - **[Users and permissions](docs/user-roles.md)** — Content creators, editors, administrators, and category assignments.
 - **[Recent features](docs/recent-features.md)** — Dashboard, homepage/design improvements, directory privileges, and video archive support.
-- **[Directory privileges](docs/PRIVILEGES.md)** — Controlled access, registration, approvals, Nginx and video symlinks.
+- **[Directory privileges](docs/PRIVILEGES.md)** — Controlled access, registration, approvals, Nginx and external directory mappings.
 
 ### Running your site
 
