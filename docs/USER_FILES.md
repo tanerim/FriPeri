@@ -17,3 +17,9 @@ The administrator can manage explicitly published files under Configuration → 
 For existing Google verification or app-ads files, upload them in the Root Files interface and publish. Files that previously existed at `static/app-ads.txt` are not automatically published.
 
 Nginx must forward root URL requests such as `/app-ads.txt` to FastAPI; a direct Nginx static alias would bypass publishing controls.
+
+## Upgrade warnings
+
+The old `/static/<folder>` entrypoints are compatibility redirects (307), not additional public file mounts. The system static mount explicitly blocks directories registered in the Privileges database. The proxy must forward **both** routes to FastAPI; `/user_files/` must never be configured with an Nginx `alias`.
+
+Before starting FriPeri, back up the site database and `static/gorsel_sorgu`, `static/video_sorgu` directories and external symlink targets independently. The existing backup ZIP intentionally covers the CMS database/uploads, not all external archive bytes.

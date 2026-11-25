@@ -92,6 +92,7 @@ async def lifespan(application: FastAPI):
     if is_initialized(DB_PATH):
         with get_db() as conn:
             install_root_file_schema(conn)
+            # Legacy app-ads.txt is deliberately NOT auto-published.
     application.state.initialized = is_initialized(DB_PATH)
     refresh_secret()
     yield
@@ -153,7 +154,33 @@ async def branded_public_not_found(request: Request, call_next):
     return response
 
 
-app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
+# Serve system JS/CSS and media only; user application folders are never
+# allowed through this mount, including before startup migration.
+class SystemStaticFiles(StaticFiles):
+    async def __call__(self, scope, receive, send):
+        path = scope.get("path", "")
+        relative = path.split("/static/", 1)[-1] if path.startswith("/static/") else ""
+        folder = relative.split("/", 1)[0]
+        if folder and DB_PATH.exists():
+            try:
+                with get_db() as conn:
+                    controlled = (
+                        conn.execute("SELECT 1 FROM privilege_directories WHERE folder=?", (folder,)).fetchone()
+                        or conn.execute("SELECT 1 FROM privilege_requests WHERE folder=? LIMIT 1", (folder,)).fetchone()
+                        or conn.execute("SELECT 1 FROM privilege_external_mappings WHERE folder=? LIMIT 1", (folder,)).fetchone()
+                    )
+            except sqlite3.Error:
+                response = Response(status_code=503)
+                await response(scope, receive, send)
+                return
+            if controlled:
+                response = Response(status_code=404)
+                await response(scope, receive, send)
+                return
+        return await super().__call__(scope, receive, send)
+
+
+app.mount("/static", SystemStaticFiles(directory=STATIC_DIR), name="static")
 app.mount("/user_files", ProtectedStaticFiles(
     directory=USER_FILES_DIR, db=lambda: get_db(), secret=lambda: SECRET_KEY,
     admin_check=lambda request: bool((actor(request) or {}).get("role") == "admin"),
