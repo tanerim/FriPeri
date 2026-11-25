@@ -273,7 +273,7 @@
   --block-edge-color: initial;
 }
 .section-content > .custom-block { width: 100%; min-width: 0; margin: 0; color: var(--text-color, inherit); }
-.section-content > .custom-block.tone-plain:not(.custom-section) { padding: 0; }
+.section-content > .custom-block.tone-plain:not(.custom-section):not(.custom-divider) { padding: 0; }
 .section-content > .custom-section.tone-plain { padding-block: min(var(--block-padding-y, 0px), 12vw); padding-inline: min(var(--block-padding-x, 0px), 8vw); }
 .section-content > .tone-dark { color: var(--text-color, #f8fafc); }
 .section-content > .tone-accent { color: var(--text-color, var(--color-feature-text,#1d0303)); }
