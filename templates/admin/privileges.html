@@ -1,84 +1,155 @@
 {% extends "admin/base.html" %}
 {% block extra_head %}
 <style>
-.privilege-page{max-width:1200px;margin:0 auto;padding:30px 24px 100px}
-.privilege-page>p{color:#596a82;max-width:930px}
-.privilege-directory{background:#fff;border:1px solid #dce5ef;border-radius:16px;padding:22px;margin:18px 0}
-.privilege-directory header{display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap}
-.privilege-directory h2{margin:0;font-size:21px;color:#192c46;overflow-wrap:anywhere}
-.privilege-directory header a{font-size:13px}
-.privilege-request{border-top:1px solid #e5ebf2;padding:14px 0}
-.privilege-request>strong{color:#1b304b}
-.privilege-request small{color:#64758b}
-.privilege-actions{display:flex;align-items:flex-end;flex-wrap:wrap;gap:10px;margin:12px 0}
-.privilege-actions form{display:flex;align-items:end;flex-wrap:wrap;gap:8px;margin:0}
-.privilege-page button{border:1px solid #c3d0df;background:#f3f6fb;border-radius:8px;padding:9px 13px;cursor:pointer;font-weight:600}
-.privilege-page button:focus-visible{outline:2px solid #5b58d5;outline-offset:2px}
-.privilege-page button:hover{background:#e9eef9}
-.privilege-page input,.privilege-page select{border:1px solid #c4d2e1;border-radius:7px;padding:8px;font:inherit}
-.privilege-page label{display:flex;align-items:center;flex-wrap:wrap;gap:8px;font-size:13px}
-.privilege-page .status{font-weight:600;font-size:12px;padding:4px 9px;border-radius:20px;background:#edf2fc}
-.privilege-page .status-approved{background:#e3f6e8;color:#17633f}
-.privilege-page .status-denied,.privilege-page .status-revoked{background:#fbeaea;color:#8c3333}
-.privilege-directory h3{font-size:15px;margin:22px 0 9px}
-.privilege-banner{padding:15px;border-radius:10px;background:#fff4dc;border:1px solid #f3d8a1;color:#593a19}
-.privilege-private{color:#a12e48}.privilege-public{color:#257455}
-@media(max-width:700px){.privilege-page{padding:20px 13px 90px}.privilege-directory{padding:16px}.privilege-actions{align-items:stretch}}
+.privilege-page{max-width:1160px;margin:0 auto;padding:32px 28px 100px;color:#20304a}
+.privilege-page *{box-sizing:border-box}
+.privilege-page h1{font-size:clamp(30px,3.4vw,42px);line-height:1.15;letter-spacing:-.025em;margin:0 0 12px;font-weight:750}
+.privilege-intro{color:#5f7089;max-width:840px;line-height:1.6;margin:0 0 26px}
+.privilege-directory{border:1px solid #d9e2ee;background:#fff;border-radius:16px;overflow:hidden;margin:18px 0 24px;box-shadow:0 5px 18px #1c345207}
+.privilege-directory-header{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;padding:22px 26px;border-bottom:1px solid #e7edf4}
+.privilege-directory-title{display:flex;align-items:center;gap:12px;flex-wrap:wrap;min-width:0}
+.privilege-directory-title h2{font-size:20px;line-height:1.3;letter-spacing:0;margin:0;color:#1d2c45;overflow-wrap:anywhere}
+.privilege-page a{color:#4c45ca;text-decoration:none}
+.privilege-page a:hover{text-decoration:underline}
+.privilege-open{font-size:13px;font-weight:650}
+.privilege-status{display:inline-flex;align-items:center;font-size:12px;font-weight:700;line-height:1.4;padding:5px 10px;border-radius:30px}
+.privilege-status-private,.privilege-status-revoked,.privilege-status-denied{color:#a32940;background:#fff0f2}
+.privilege-status-public,.privilege-status-approved{color:#1b714b;background:#e8f7ee}
+.privilege-status-pending{color:#8b5b12;background:#fff4de}
+.privilege-section{padding:24px 26px}
+.privilege-section+.privilege-section{border-top:1px solid #e7edf4}
+.privilege-section-head{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap;margin:0 0 16px}
+.privilege-section-head h3{font-size:16px;margin:0;line-height:1.4;color:#263854;font-weight:750}
+.privilege-note{font-size:12px;color:#667991;line-height:1.5;margin:6px 0 0}
+.privilege-mode{display:flex;gap:12px;align-items:end;flex-wrap:wrap}
+.privilege-mode label{display:grid;gap:7px;flex:1;min-width:180px;max-width:400px;font-size:13px;font-weight:650;color:#45566e}
+.privilege-page select,.privilege-page input{width:100%;font:inherit;color:#27364f;border:1px solid #cbd6e5;border-radius:9px;padding:10px 12px;min-height:43px;background:white}
+.privilege-page input:focus-visible,.privilege-page select:focus-visible,.privilege-page button:focus-visible,.privilege-page summary:focus-visible{outline:2px solid #6152e5;outline-offset:2px}
+.privilege-page button{font:inherit;font-size:13px;font-weight:700;min-height:42px;border:1px solid #cad3e5;background:#f6f8fd;color:#4742c4;border-radius:9px;padding:10px 15px;cursor:pointer;white-space:nowrap}
+.privilege-page button:hover{background:#eceefd}
+.privilege-page .primary-action{background:#5146d7;color:#fff;border-color:#5146d7}
+.privilege-page .primary-action:hover{background:#4239bb}
+.privilege-page .danger-action{color:#a12d42;background:#fff;border-color:#e8c3cb}
+.privilege-page .danger-action:hover{background:#fff1f3}
+.privilege-banner{padding:15px 17px;border-radius:10px;background:#fff5df;border:1px solid #f3dbaf;color:#684b1c;margin:18px 0}
+.privilege-caution{display:flex;gap:9px;align-items:flex-start;background:#fafbfe;color:#65738a;border:1px solid #e7edf4;border-radius:9px;padding:11px 13px;font-size:12px;line-height:1.5;margin:16px 0 0}
+.privilege-count{border:1px solid #dde5ee;color:#63718b;padding:3px 9px;border-radius:99px;font-size:12px;font-weight:700}
+.privilege-request-list{display:grid;gap:12px}
+.privilege-request{border:1px solid #e0e7f0;background:#fff;border-radius:12px;padding:18px}
+.privilege-request-top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap}
+.privilege-identity{min-width:0}
+.privilege-identity strong{display:block;font-size:15px;color:#1e304b;margin-bottom:3px}
+.privilege-identity a{font-size:13px;overflow-wrap:anywhere}
+.privilege-request-meta{display:flex;gap:9px;align-items:center;flex-wrap:wrap}
+.privilege-updated{font-size:12px;color:#74839a}
+.privilege-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:16px}
+.privilege-actions form{margin:0}
+.privilege-reset{border-top:1px solid #e9edf4;margin-top:16px;padding-top:14px}
+.privilege-reset summary{font-size:13px;color:#4b45c4;font-weight:650;cursor:pointer;list-style-position:inside}
+.privilege-reset form{display:flex;gap:9px;align-items:end;flex-wrap:wrap;margin-top:12px}
+.privilege-reset label{display:grid;gap:6px;flex:1;min-width:210px;max-width:360px;color:#465772;font-size:12px;font-weight:650}
+.privilege-empty{border:1px dashed #cbd7e6;border-radius:10px;padding:24px;text-align:center;background:#fafcff}
+.privilege-empty strong{display:block;color:#40536e;margin-bottom:4px}
+.privilege-empty p{font-size:13px;color:#718198;margin:0}
+@media(max-width:720px){
+ .privilege-page{padding:22px 13px 80px}
+ .privilege-directory-header,.privilege-section{padding:18px 16px}
+ .privilege-directory-title h2{font-size:17px}
+ .privilege-mode label{max-width:none}
+ .privilege-reset label{max-width:none}
+}
 </style>
 {% endblock %}
 {% block content %}
 <main id="admin-content" class="privilege-page">
   <h1>Privileges</h1>
-  <p>Manage access to top-level directories in <code>/static</code>. Public is the default; Private requires registration and administrator approval. Folder access also applies to its HTML, JavaScript, CSS, and media files.</p>
+  <p class="privilege-intro">Control access to individual directories under <code>/static</code>. Private directories require registration and administrator approval. Permissions cover every file in the directory, including HTML, CSS, JavaScript, and media.</p>
   {% if not proxy_confirmed %}
-  <p class="privilege-banner" role="alert"><strong>Security prerequisite:</strong> Verify Nginx forwards every <code>/static/</code> request to FastAPI. Then set <code>PRIVILEGES_STATIC_PROXY_CONFIRMED=1</code> in the service environment and restart FriPeri. Private mode is deliberately disabled until this is confirmed.</p>
+  <p class="privilege-banner" role="alert"><strong>Security prerequisite:</strong> Confirm that Nginx forwards all <code>/static/</code> requests to FastAPI, then set <code>PRIVILEGES_STATIC_PROXY_CONFIRMED=1</code> in the service environment and restart FriPeri. Private mode is disabled until confirmation.</p>
   {% endif %}
   {% for directory in directories %}
-  <section class="privilege-directory">
-    <header>
-      <h2>/static/{{ directory.name }}/ <small class="{{ 'privilege-private' if directory.private else 'privilege-public' }}">{{ 'Private' if directory.private else 'Public' }}</small></h2>
-      <a href="/static/{{ directory.name | urlencode }}/index.html" target="_blank" rel="noopener noreferrer">Open directory</a>
-    </header>
-    <form method="post" action="/admin/privileges/{{ directory.name | urlencode }}/mode">
-      <input type="hidden" name="settings_token" value="{{ settings_token }}">
-      <label>Visibility
-        <select name="mode" aria-label="Visibility for {{ directory.name }}">
-          <option value="public" {% if not directory.private %}selected{% endif %}>Public</option>
-          <option value="private" {% if directory.private %}selected{% endif %}>Private</option>
-        </select>
-        <button type="submit">Save visibility</button>
-      </label>
-    </form>
-    <p style="font-size:12px;color:#8b4b24">Registration email addresses are not automatically verified. Verify the applicant's identity before approving.</p>
-    <h3>Access requests ({{ directory.requests | length }})</h3>
-    {% for item in directory.requests %}
-    <article class="privilege-request">
-      <strong>{{ item.first_name }} {{ item.last_name }}</strong>
-      <span>&lt;{{ item.email }}&gt;</span>
-      <span class="status status-{{ item.status }}">{{ item.status | capitalize }}</span>
-      <small>Updated {{ item.updated_at }}</small>
-      <div class="privilege-actions">
-        {% for action,label in [('approve','Approve'),('deny','Deny'),('revoke','Revoke')] %}
-        <form method="post" action="/admin/privileges/{{ directory.name | urlencode }}/{{ item.account_id }}/{{ action }}">
-          <input type="hidden" name="settings_token" value="{{ settings_token }}">
-          <button type="submit">{{ label }}</button>
-        </form>
-        {% endfor %}
-        <form method="post" action="/admin/privileges/{{ directory.name | urlencode }}/{{ item.account_id }}/reset" onsubmit="return confirm('Reset this user password? Current sessions will be revoked.')">
-          <input type="hidden" name="settings_token" value="{{ settings_token }}">
-          <label>New password
-            <input name="password" type="password" required minlength="12" maxlength="128" autocomplete="new-password" placeholder="At least 12 characters">
-          </label>
-          <button type="submit">Reset password</button>
-        </form>
+  <section class="privilege-directory" aria-label="Access settings for {{ directory.name }}">
+    <header class="privilege-directory-header">
+      <div class="privilege-directory-title">
+        <h2>/static/{{ directory.name }}/</h2>
+        <span class="privilege-status {{ 'privilege-status-private' if directory.private else 'privilege-status-public' }}">{{ 'Private' if directory.private else 'Public' }}</span>
       </div>
-    </article>
-    {% else %}
-    <p>No access requests yet.</p>
-    {% endfor %}
+      <a class="privilege-open" href="/static/{{ directory.name | urlencode }}/index.html" target="_blank" rel="noopener noreferrer">Open directory ↗</a>
+    </header>
+    <div class="privilege-section">
+      <div class="privilege-section-head"><h3>Directory visibility</h3></div>
+      <form method="post" class="privilege-mode" action="/admin/privileges/{{ directory.name | urlencode }}/mode">
+        <input type="hidden" name="settings_token" value="{{ settings_token }}">
+        <label>Access mode
+          <select name="mode" aria-label="Visibility for {{ directory.name }}">
+            <option value="public" {% if not directory.private %}selected{% endif %}>Public — everyone</option>
+            <option value="private" {% if directory.private %}selected{% endif %}>Private — approved users only</option>
+          </select>
+        </label>
+        <button type="submit" class="primary-action">Save changes</button>
+      </form>
+      <p class="privilege-note">Changing from Public to Private also returns previously approved requests to Pending.</p>
+    </div>
+    <div class="privilege-section">
+      <div class="privilege-section-head">
+        <h3>Access requests <span class="privilege-count">{{ directory.requests | length }}</span></h3>
+      </div>
+      {% if directory.requests %}
+      <div class="privilege-request-list">
+        {% for item in directory.requests %}
+        <article class="privilege-request">
+          <div class="privilege-request-top">
+            <div class="privilege-identity">
+              <strong>{{ item.first_name }} {{ item.last_name }}</strong>
+              <a href="mailto:{{ item.email }}">{{ item.email }}</a>
+            </div>
+            <div class="privilege-request-meta">
+              <span class="privilege-status privilege-status-{{ item.status }}">{{ item.status | capitalize }}</span>
+              <time class="privilege-updated">Updated {{ item.updated_at }}</time>
+            </div>
+          </div>
+          <div class="privilege-actions">
+            {% if item.status != 'approved' %}
+            <form method="post" action="/admin/privileges/{{ directory.name | urlencode }}/{{ item.account_id }}/approve">
+              <input type="hidden" name="settings_token" value="{{ settings_token }}">
+              <button class="primary-action" type="submit">Approve</button>
+            </form>
+            {% endif %}
+            {% if item.status == 'pending' %}
+            <form method="post" action="/admin/privileges/{{ directory.name | urlencode }}/{{ item.account_id }}/deny">
+              <input type="hidden" name="settings_token" value="{{ settings_token }}">
+              <button class="danger-action" type="submit">Deny</button>
+            </form>
+            {% endif %}
+            {% if item.status == 'approved' %}
+            <form method="post" action="/admin/privileges/{{ directory.name | urlencode }}/{{ item.account_id }}/revoke" onsubmit="return confirm('Revoke access for this user?')">
+              <input type="hidden" name="settings_token" value="{{ settings_token }}">
+              <button class="danger-action" type="submit">Revoke access</button>
+            </form>
+            {% endif %}
+          </div>
+          <details class="privilege-reset">
+            <summary>Reset password</summary>
+            <form method="post" action="/admin/privileges/{{ directory.name | urlencode }}/{{ item.account_id }}/reset" onsubmit="return confirm('Reset this user password? Current sessions will be revoked.')">
+              <input type="hidden" name="settings_token" value="{{ settings_token }}">
+              <label>New password
+                <input name="password" type="password" required minlength="12" maxlength="128" autocomplete="new-password" placeholder="12–128 characters">
+              </label>
+              <button type="submit">Reset password</button>
+            </form>
+            <p class="privilege-note">Existing sessions will be invalidated. Share the new password securely with the user.</p>
+          </details>
+        </article>
+        {% endfor %}
+      </div>
+      {% else %}
+      <div class="privilege-empty"><strong>No access requests yet</strong><p>New registration requests for this directory will appear here.</p></div>
+      {% endif %}
+      <p class="privilege-caution">Registration email addresses are not automatically verified. Confirm the applicant's identity before approving access.</p>
+    </div>
   </section>
   {% else %}
-  <p>No eligible directories found under /static.</p>
+  <div class="privilege-empty"><strong>No eligible directories found</strong><p>Add a directory under <code>/static</code> to configure its access.</p></div>
   {% endfor %}
 </main>
 {% endblock %}
