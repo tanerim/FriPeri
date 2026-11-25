@@ -26,6 +26,7 @@ SESSION_AGE = 7 * 24 * 3600
 HEADERS = {"Cache-Control": "no-store", "Referrer-Policy": "no-referrer",
            "X-Content-Type-Options": "nosniff"}
 EMAIL_RE = re.compile(r"^[^@\s]{1,64}@[^@\s]{1,190}\.[^@\s]{2,}$")
+EXCLUDED_FOLDERS = frozenset({"images", "uploads"})
 FOLDER_RE = re.compile(r"^[^/\\\\\x00-\x1f]{1,120}$")
 
 
@@ -63,6 +64,7 @@ def folders(static_dir: Path):
     """Top-level directories only; no symlinks or dot-prefixed system entries."""
     return sorted((p.name for p in static_dir.iterdir()
                    if p.is_dir() and not p.is_symlink() and not p.name.startswith(".")
+                   and p.name.casefold() not in EXCLUDED_FOLDERS
                    and FOLDER_RE.fullmatch(p.name)), key=str.casefold)
 
 
@@ -213,17 +215,28 @@ def create_router(*, db, static_dir: Path, secret, secure_cookie: bool,
                             status_code=status, headers=HEADERS)
 
     def valid_public_form(request, form):
-        # Origin must match the public Host received from the proxy. This is
-        # independent of the ASGI request URL's internal HTTP scheme.
+        # Keep same-origin protection while supporting proxies that send the
+        # external host in X-Forwarded-Host rather than Host. Fetch Metadata
+        # explicitly rejects cross-site browser requests, regardless of headers.
+        if request.headers.get("sec-fetch-site", "").lower() == "cross-site":
+            return False
         origin = request.headers.get("origin", "")
         if origin:
             parsed = urlsplit(origin)
-            host = request.headers.get("host", "").lower().rstrip(".")
+            external = parsed.netloc.lower().rstrip(".")
+            hosts = {request.headers.get("host", "").lower().rstrip(".")}
+            forwarded = request.headers.get("x-forwarded-host", "")
+            if forwarded and "," not in forwarded:
+                hosts.add(forwarded.lower().rstrip("."))
+            configured = os.getenv("FRIPERI_PUBLIC_ORIGIN", "").strip()
+            if configured:
+                configured_url = urlsplit(configured)
+                if configured_url.scheme not in ("http", "https") or not configured_url.netloc:
+                    return False
+                hosts.add(configured_url.netloc.lower().rstrip("."))
             if (parsed.scheme not in ("http", "https")
-                    or not host or parsed.netloc.lower().rstrip(".") != host):
+                    or not external or external not in hosts):
                 return False
-        elif request.headers.get("sec-fetch-site", "") == "cross-site":
-            return False
 
         supplied = str(form.get("csrf", ""))
         parts = supplied.split(":")
@@ -252,15 +265,41 @@ def create_router(*, db, static_dir: Path, secret, secure_cookie: bool,
     def shell(title, folder, body, next_path=""):
         from html import escape as e
         f = e(folder)
-        return ("""<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+        return ("""<!doctype html><html lang="en"><head><meta charset="utf-8">
+        <meta name="viewport" content="width=device-width,initial-scale=1">
         <meta name="robots" content="noindex,nofollow"><title>""" + e(title) + """ · FriPeri</title>
-        <style>body{font:16px/1.6 system-ui;background:#f4f7fb;color:#17263b;min-height:100vh;display:grid;place-items:center;margin:0}
-        main{box-sizing:border-box;width:min(500px,calc(100% - 32px));background:white;padding:36px;border:1px solid #dce5ed;border-radius:18px;box-shadow:0 16px 45px #10273a10}
-        h1{margin:0 0 8px}p{color:#53647a}label{display:grid;gap:5px;margin:14px 0;font-weight:600;font-size:14px}
-        input{padding:12px;border:1px solid #ccd8e5;border-radius:8px;font:inherit}button{background:#20435b;color:white;border:0;border-radius:9px;padding:12px 18px;cursor:pointer;font:inherit}
-        a{color:#205b7a}nav{display:flex;gap:14px;flex-wrap:wrap;margin-top:20px}</style></head><body><main>
-        <p>FriPeri · Controlled Access</p><h1>""" + e(title) + """</h1><p>Directory: <strong>""" + f + """</strong></p>""" +
-        body + """<nav><a href="/access/""" + quote(folder, safe="") + """">Access</a><a href="/">Home</a></nav></main></body></html>""")
+        <style>
+        *{box-sizing:border-box}
+        body{margin:0;min-height:100vh;padding:30px 16px;font:15px/1.5 system-ui,-apple-system,sans-serif;
+             background:linear-gradient(145deg,#edf2f8,#f8fafc);color:#1b2b43;display:grid;place-items:center}
+        main{width:min(520px,100%);background:#fff;border:1px solid #dce5ee;border-radius:18px;
+             padding:clamp(22px,5vw,38px);box-shadow:0 18px 52px #17314b13}
+        .brand{margin:0 0 18px;color:#516b88;font-weight:650;letter-spacing:.02em;font-size:13px}
+        h1{margin:0 0 10px;font-size:clamp(24px,4vw,30px);line-height:1.2;letter-spacing:-.02em}
+        p{color:#536780;margin:12px 0}.folder{background:#f1f5f9;border-radius:9px;padding:11px 14px;
+             overflow-wrap:anywhere;margin:18px 0 24px;color:#405673}
+        .folder strong{color:#1b3452}
+        label{display:grid;gap:7px;margin:15px 0;font-weight:600;font-size:13px;color:#30435e}
+        input{width:100%;padding:12px 13px;border:1px solid #c9d5e2;border-radius:9px;font:inherit;
+              background:white;min-height:44px}
+        input:focus-visible,summary:focus-visible,a:focus-visible,button:focus-visible{
+              outline:2px solid #3174aa;outline-offset:3px}
+        button{width:100%;background:#204c6c;color:white;border:0;border-radius:9px;
+               padding:12px 18px;min-height:46px;cursor:pointer;font:inherit;font-weight:650;margin-top:9px}
+        button:hover{background:#173b57}a{color:#17618b}
+        .helper{font-size:12px;color:#677b92;margin:8px 0 0}
+        .register{border-top:1px solid #e3eaf1;margin-top:24px;padding-top:20px}
+        summary{cursor:pointer;font-weight:650;color:#205477;padding:6px 0}
+        nav{display:flex;gap:18px;flex-wrap:wrap;margin-top:25px;padding-top:17px;
+            border-top:1px solid #e3eaf1;font-size:13px}
+        [role=alert]{border-left:3px solid #c44d4d;background:#fff5f5;padding:10px 12px;border-radius:5px}
+        .name-fields{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+        @media(max-width:460px){.name-fields{grid-template-columns:1fr}}
+        </style></head><body><main>
+        <p class="brand">FriPeri · Controlled Access</p><h1>""" + e(title) + """</h1>
+        <div class="folder">Directory: <strong>""" + f + """</strong></div>""" +
+        body + """<nav><a href="/access/""" + quote(folder, safe="") +
+        """">Access page</a><a href="/">Home</a></nav></main></body></html>""")
 
     def page(request, folder, error="", next_path=""):
         from html import escape as e
@@ -289,12 +328,17 @@ def create_router(*, db, static_dir: Path, secret, secure_cookie: bool,
                  '<label>Email<input name="email" type="email" required autocomplete="username"></label>'
                  '<label>Password<input name="password" type="password" required autocomplete="current-password"></label>'
                  + next_input + '<input type="hidden" name="csrf" value="{{CSRF}}"><button type="submit">Sign in</button></form>')
-        register = (f'<details><summary>New user? Register for access</summary><form method="post" action="/access/{quote(folder,safe="")}/register">'
-                    '<label>First name<input name="first_name" required maxlength="80"></label>'
-                    '<label>Last name<input name="last_name" required maxlength="80"></label>'
-                    '<label>Email<input name="email" type="email" required autocomplete="email"></label>'
-                    '<label>Password (12–128 characters)<input name="password" type="password" required minlength="12" maxlength="128" autocomplete="new-password"></label>'
-                    '<input type="hidden" name="csrf" value="{{CSRF}}"><button type="submit">Register and request access</button></form></details>')
+        register = (f'<details class="register"><summary>New user? Request access</summary>'
+                    f'<form method="post" action="/access/{quote(folder,safe="")}/register">'
+                    '<div class="name-fields">'
+                    '<label>First name<input name="first_name" required maxlength="80" autocomplete="given-name"></label>'
+                    '<label>Last name<input name="last_name" required maxlength="80" autocomplete="family-name"></label>'
+                    '</div>'
+                    '<label>Email address<input name="email" type="email" required autocomplete="email"></label>'
+                    '<label>Create password<input name="password" type="password" required minlength="12" maxlength="128" autocomplete="new-password"></label>'
+                    '<p class="helper">Use 12–128 characters. Access is granted only after administrator approval.</p>'
+                    '<input type="hidden" name="csrf" value="{{CSRF}}">'
+                    '<button type="submit">Register and request access</button></form></details>')
         msg = f'<p role="alert">{e(error)}</p>' if error else ""
         return csrf_page(request, shell("Restricted directory", folder, msg+login+register))
 
