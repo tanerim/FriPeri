@@ -816,3 +816,69 @@
 .hyperui-admin .blocked-senders>summary{font-weight:700;cursor:pointer}
 .hyperui-admin .blocked-sender-row{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:10px 0;border-top:1px solid #e3e8f0;overflow-wrap:anywhere}
 .hyperui-admin .blocked-sender-row form{flex-shrink:0}
+
+
+/* Compact, scroll-safe admin navigation and dashboard analytics. */
+.hyperui-admin .admin-sidebar{height:100dvh;max-height:100dvh;min-height:0;overflow:hidden}
+.hyperui-admin .admin-sidebar-header{flex:0 0 auto;min-height:0}
+.hyperui-admin .admin-sidebar-header .admin-brand{padding:10px 16px;min-height:0;flex:0 0 auto}
+.hyperui-admin .admin-sidebar-header .admin-brand-logo{
+  display:block;width:100%;height:clamp(62px,11vh,108px);max-height:108px;
+  object-fit:contain;object-position:center;background:transparent
+}
+.hyperui-admin .admin-sidebar .admin-navigation{
+  flex:1 1 auto;min-height:0;overflow-y:auto;overscroll-behavior:contain;
+  scrollbar-width:thin;scrollbar-color:#53647f transparent
+}
+.hyperui-admin .admin-sidebar-footer{flex:0 0 auto}
+.hyperui-admin .admin-sidebar-header .admin-sidebar-toggle{
+  display:flex;align-items:center;justify-content:center;
+  min-height:42px;background:#2b3c62;color:#fff;
+  border-bottom:1px solid #52648a;font-weight:800
+}
+.hyperui-admin .admin-sidebar-header .admin-sidebar-toggle:hover{background:#3a4d79}
+.hyperui-admin .admin-sidebar-header .admin-sidebar-toggle svg{
+  width:22px;height:22px;stroke-width:2.6;color:#fff
+}
+.hyperui-admin .dashboard-extended-stats{
+  display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px;margin:0 0 20px
+}
+.hyperui-admin .dashboard-extra-stat{
+  display:flex;flex-direction:column;gap:7px;min-width:0;
+  background:#fff;border:1px solid #dce4f1;border-radius:12px;padding:17px 16px;
+  color:#263751;text-decoration:none
+}
+.hyperui-admin .dashboard-extra-stat:hover{border-color:#aaa7e8;background:#fafaff}
+.hyperui-admin .dashboard-extra-stat span{font-size:12px;color:#65758e;font-weight:650}
+.hyperui-admin .dashboard-extra-stat strong{font-size:29px;font-weight:800;line-height:1}
+.hyperui-admin .dashboard-extra-stat small{font-size:11px;color:#8190a5;line-height:1.4}
+.hyperui-admin .dashboard-analytics{padding:22px 24px;margin-bottom:20px}
+.hyperui-admin .dashboard-analytics-head{border-bottom:1px solid #e7ebf3;padding-bottom:15px;margin-bottom:18px}
+.hyperui-admin .dashboard-analytics h2{font-size:16px;font-weight:800;margin:0 0 4px;color:#263654}
+.hyperui-admin .dashboard-analytics-head p,.hyperui-admin .dashboard-chart-caption{font-size:12px;color:#75849b;margin:0}
+.hyperui-admin .dashboard-analytics-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:28px}
+.hyperui-admin .dashboard-chart{min-width:0;padding:5px 0 4px}
+.hyperui-admin .dashboard-chart h3{font-size:13px;font-weight:750;color:#33445f;margin:0 0 5px}
+.hyperui-admin .dashboard-stacked-bar{height:15px;background:#e9edf5;border-radius:20px;overflow:hidden;display:flex;margin:23px 0 15px}
+.hyperui-admin .dashboard-stacked-bar span{height:100%;display:block}
+.hyperui-admin .dashboard-bar-published{background:#3f9f89}
+.hyperui-admin .dashboard-bar-draft{background:#b2a0e5}
+.hyperui-admin .dashboard-legend{display:flex;gap:16px;flex-wrap:wrap;color:#596984;font-size:12px}
+.hyperui-admin .dashboard-legend span{display:inline-flex;align-items:center;gap:6px}
+.hyperui-admin .dashboard-legend i{width:9px;height:9px;border-radius:50%;display:inline-block}
+.hyperui-admin .dashboard-legend .legend-published{background:#3f9f89}
+.hyperui-admin .dashboard-legend .legend-draft{background:#b2a0e5}
+.hyperui-admin .dashboard-legend b{color:#223352}
+@media(max-width:1200px){
+ .hyperui-admin .dashboard-extended-stats{grid-template-columns:repeat(3,minmax(0,1fr))}
+}
+@media(max-width:760px){
+ .hyperui-admin .dashboard-extended-stats{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .hyperui-admin .dashboard-analytics-grid{grid-template-columns:1fr;gap:18px}
+ .hyperui-admin .dashboard-analytics{padding:17px}
+ .hyperui-admin .admin-sidebar-header .admin-brand-logo{height:64px}
+}
+@media(max-height:680px){
+ .hyperui-admin .admin-sidebar-header .admin-brand-logo{height:54px}
+ .hyperui-admin .admin-sidebar-header .admin-brand{padding:6px 12px}
+}
