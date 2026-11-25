@@ -16,6 +16,7 @@ import secrets
 import time
 from pathlib import Path
 from urllib.parse import quote, urlsplit
+import shutil
 
 from fastapi import APIRouter, Request
 from fastapi.responses import HTMLResponse, RedirectResponse, Response
@@ -68,6 +69,44 @@ def install_schema(conn):
         account_id INTEGER,
         created_at TEXT NOT NULL
     )""")
+
+
+def migrate_user_folders(static_dir: Path, user_dir: Path, conn) -> list[str]:
+    """Move legacy Privileges folders without altering account/grant records.
+
+    Only folders already recorded in the Privileges database are migrated.
+    A conflicting destination aborts startup rather than merging or exposing
+    content. Never follow a top-level symlink.
+    """
+    user_dir.mkdir(parents=True, exist_ok=True)
+    if user_dir.is_symlink() or user_dir.resolve().is_relative_to(static_dir.resolve()):
+        raise RuntimeError("USER_FILES_DIR must be separate from static")
+    existing = {row[0] for row in conn.execute("SELECT folder FROM privilege_directories")}
+    existing.update(row[0] for row in conn.execute("SELECT DISTINCT folder FROM privilege_external_mappings"))
+    existing.update(row[0] for row in conn.execute("SELECT DISTINCT folder FROM privilege_requests"))
+    moved = []
+    for name in sorted(existing):
+        if (not FOLDER_RE.fullmatch(name) or name in (".", "..")
+                or name.startswith(".") or name.casefold() in EXCLUDED_FOLDERS):
+            continue
+        src, dst = static_dir / name, user_dir / name
+        if dst.exists():
+            if src.exists():
+                raise RuntimeError(f"Conflicting user folder: {name}")
+            continue
+        if src.is_symlink():
+            raise RuntimeError(f"Unsafe legacy folder: {name}")
+        if src.is_dir():
+            src.rename(dst)
+            moved.append(name)
+    return moved
+
+
+def migrate_mapping_links(user_dir: Path, conn):
+    """Mapped links move with their enclosing directory; no DB key changes."""
+    # The existing mapping records are intentionally preserved unchanged:
+    # ProtectedStaticFiles checks each symlink relative to user_dir at request time.
+    return None
 
 
 def folders(static_dir: Path):
@@ -144,7 +183,10 @@ def allowed(request: Request, conn, folder: str, secret: str, admin_check=None) 
 
 
 def safe_target(value: str, folder: str):
-    prefix = "/static/" + folder + "/"
+    prefix = "/user_files/" + folder + "/"
+    legacy = "/static/" + folder + "/"
+    if value.startswith(legacy):
+        value = prefix + value[len(legacy):]
     # Avoid protocol-relative URLs, backslashes, CRLF, traversal, and redirects.
     if (not value.startswith(prefix) or "\\" in value or any(c in value for c in "\r\n")
             or ".." in value.split("/") or "%" in value):
@@ -162,10 +204,12 @@ class ProtectedStaticFiles(StaticFiles):
 
     StaticFiles continues to handle safe path resolution and symlink protection.
     """
-    def __init__(self, *, directory, db, secret, admin_check=None, first_run=None):
+    def __init__(self, *, directory, db, secret, admin_check=None, first_run=None,
+                 mount_prefix="/static"):
         super().__init__(directory=directory, html=False, check_dir=True, follow_symlink=False)
         self._db, self._secret, self._admin = db, secret, admin_check
         self._first_run = first_run
+        self._mount_prefix = mount_prefix.rstrip("/")
 
     def lookup_path(self, path: str):
         parts = Path(path).parts
@@ -214,7 +258,8 @@ class ProtectedStaticFiles(StaticFiles):
 
     async def __call__(self, scope, receive, send):
         path = scope.get("path", "")
-        relative = path.split("/static/", 1)[-1] if "/static/" in path else ""
+        prefix = self._mount_prefix + "/"
+        relative = path[len(prefix):] if path.startswith(prefix) else ""
         folder = relative.split("/", 1)[0]
         if scope["type"] == "http" and folder and FOLDER_RE.fullmatch(folder):
             try:
@@ -417,7 +462,7 @@ def create_router(*, db, static_dir: Path, secret, secure_cookie: bool,
             return Response(status_code=404)
         with db() as conn:
             if not private_folder(conn, folder):
-                return RedirectResponse("/static/" + quote(folder, safe="") + "/index.html", status_code=303)
+                return RedirectResponse("/user_files/" + quote(folder, safe="") + "/index.html", status_code=303)
             account = current_account(request, conn, secret())
             if account:
                 status = conn.execute("SELECT status FROM privilege_requests WHERE account_id=? AND folder=?",
@@ -626,10 +671,12 @@ def create_router(*, db, static_dir: Path, secret, secure_cookie: bool,
                 try:
                     root = Path(target)
                     static_root = static_dir.resolve()
+                    core_static = static_dir.parent / "static"
                     link = static_dir.joinpath(folder, *parts)
                     prefix = (folder, *parts)
                     if (not root.is_absolute() or root.resolve()!=root or not root.is_dir()
                             or root.is_relative_to(static_root) or static_root.is_relative_to(root)
+                            or root.is_relative_to(core_static.resolve()) or core_static.resolve().is_relative_to(root)
                             or any(static_dir.joinpath(*prefix[:i]).is_symlink() for i in range(1,len(prefix)))
                             or not link.is_symlink() or link.resolve()!=root):
                         return Response("Mapping requires an existing symlink to the exact external directory", status_code=400)

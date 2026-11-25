@@ -41,7 +41,8 @@ from backup_security import (BackupError, MAX_UPLOAD_BYTES, create_backup as wri
                              restore_backup as restore_secure_backup, validate_backup, safe_backup_path)
 from login_security import blocked as login_blocked, failed as login_failed, succeeded as login_succeeded
 from documentation import list_documents, render_document
-from privileges import ProtectedStaticFiles, create_router, private_folder, allowed as privilege_allowed
+from privileges import (ProtectedStaticFiles, create_router, private_folder, allowed as privilege_allowed,
+                        migrate_user_folders)
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
@@ -64,6 +65,7 @@ def project_path(value: str) -> Path:
 
 DB_PATH = project_path(os.getenv("SITE_DB_PATH", "db/site.db"))
 STATIC_DIR = project_path(os.getenv("SITE_STATIC_DIR", "static"))
+USER_FILES_DIR = project_path(os.getenv("SITE_USER_FILES_DIR", "user_files"))
 SITEMAP_PATH = STATIC_DIR / "sitemap.xml"
 TEMPLATES_DIR = project_path(os.getenv("SITE_TEMPLATES_DIR", "templates"))
 UPLOAD_DIR = project_path(os.getenv("SITE_UPLOAD_DIR", "static/uploads"))
@@ -78,6 +80,12 @@ ALLOWED_IMAGE_TYPES = {"image/jpeg": ".jpg", "image/png": ".png", "image/webp": 
 async def lifespan(application: FastAPI):
     """Initialize an existing installation and load the persistent signing key."""
     init_db()
+    if is_initialized(DB_PATH):
+        with get_db() as conn:
+            moved = migrate_user_folders(STATIC_DIR, USER_FILES_DIR, conn)
+        if moved:
+            logging.getLogger(__name__).info("Migrated Privileges directories to user_files: %s", moved)
+    USER_FILES_DIR.mkdir(parents=True, exist_ok=True)
     application.state.initialized = is_initialized(DB_PATH)
     refresh_secret()
     yield
@@ -131,7 +139,7 @@ async def branded_public_not_found(request: Request, call_next):
     accepts_html = "text/html" in request.headers.get("accept", "")
     if (response.status_code == 404 and request.method in {"GET", "HEAD"}
             and accepts_html
-            and not path.startswith(("/admin", "/static", "/api", "/docs", "/redoc", "/openapi.json"))
+            and not path.startswith(("/admin", "/static", "/user_files", "/api", "/docs", "/redoc", "/openapi.json"))
             and path not in {"/sitemap.xml", "/app-ads.txt", "/robots.txt"}
             and response.headers.get("content-type", "").split(";")[0] != "application/json"):
         return FileResponse(TEMPLATES_DIR / "404.html", status_code=404,
@@ -139,11 +147,32 @@ async def branded_public_not_found(request: Request, call_next):
     return response
 
 
-app.mount("/static", ProtectedStaticFiles(
-    directory=STATIC_DIR, db=lambda: get_db(), secret=lambda: SECRET_KEY,
+app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
+app.mount("/user_files", ProtectedStaticFiles(
+    directory=USER_FILES_DIR, db=lambda: get_db(), secret=lambda: SECRET_KEY,
     admin_check=lambda request: bool((actor(request) or {}).get("role") == "admin"),
-    first_run=lambda: not DB_PATH.exists(),
-), name="static")
+    first_run=lambda: not DB_PATH.exists(), mount_prefix="/user_files",
+), name="user_files")
+
+@app.api_route("/static/{legacy_folder}/{legacy_path:path}", methods=["GET", "HEAD"], include_in_schema=False)
+async def legacy_privilege_asset(legacy_folder: str, legacy_path: str):
+    # This route is registered after the static mount; the middleware below
+    # handles legacy URLs before static can serve anything.
+    return Response(status_code=404)
+
+@app.middleware("http")
+async def legacy_privilege_urls(request: Request, call_next):
+    path = request.url.path
+    if path.startswith("/static/"):
+        parts = path[len("/static/"):].split("/", 1)
+        if len(parts) == 2 and parts[0] in {p.name for p in USER_FILES_DIR.iterdir()
+                                            if p.is_dir() and not p.is_symlink()}:
+            url = "/user_files/" + parts[0] + "/" + parts[1]
+            if request.url.query:
+                url += "?" + request.url.query
+            return RedirectResponse(url, status_code=307, headers={"Cache-Control": "no-store"})
+    return await call_next(request)
+
 
 @app.api_route("/sitemap.xml", methods=["GET", "HEAD"], include_in_schema=False)
 async def sitemap(request: Request) -> Response:
@@ -3178,7 +3207,7 @@ async def first_run_gate(request: Request, call_next):
     if path.rstrip('/') == '/first-run':
         if initialized:
             return RedirectResponse('/', status_code=303) if request.method in ('GET', 'HEAD') else HTMLResponse('FriPeri is already initialized.', status_code=409)
-    elif not initialized and not path.startswith('/static/'):
+    elif not initialized and not path.startswith(('/static/', '/user_files/')):
         return RedirectResponse('/first-run', status_code=303)
     return await call_next(request)
 
@@ -3427,7 +3456,7 @@ def privilege_site_name():
 # Directory-scoped privileges are deliberately isolated from CMS users.
 app.include_router(create_router(
     db=get_db,
-    static_dir=STATIC_DIR,
+    static_dir=USER_FILES_DIR,
     secret=lambda: SECRET_KEY,
     secure_cookie=SESSION_COOKIE_SECURE,
     password_hash=hash_password,

@@ -78,18 +78,18 @@
     </div>
   </header>
   {% if not proxy_confirmed %}
-  <div class="privilege-banner" role="alert"><strong>Proxy protection required.</strong> Confirm that Nginx forwards all <code>/static/</code> requests to FastAPI, set <code>PRIVILEGES_STATIC_PROXY_CONFIRMED=1</code>, then restart FriPeri. Private mode stays disabled until confirmed.</div>
+  <div class="privilege-banner" role="alert"><strong>Proxy protection required.</strong> Confirm that Nginx forwards all <code>/user_files/</code> requests to FastAPI, set <code>PRIVILEGES_STATIC_PROXY_CONFIRMED=1</code>, then restart FriPeri. Private mode stays disabled until confirmed.</div>
   {% endif %}
   {% for directory in directories %}
   <section class="privileges-card" aria-label="Access settings for {{ directory.name }}">
     <header class="privileges-directory-header">
       <div>
-        <div class="privileges-dir-title"><h2>/static/{{ directory.name }}/</h2>
+        <div class="privileges-dir-title"><h2>/user_files/{{ directory.name }}/</h2>
           <span class="privileges-pill {{ 'privileges-pill-private' if directory.private else 'privileges-pill-public' }}">{{ 'Private' if directory.private else 'Public' }}</span>
         </div>
         <p class="privileges-dir-sub">Directory-level access policy</p>
       </div>
-      <a class="privileges-open" href="/static/{{ directory.name | urlencode }}/index.html" target="_blank" rel="noopener noreferrer">Open directory ↗</a>
+      <a class="privileges-open" href="/user_files/{{ directory.name | urlencode }}/index.html" target="_blank" rel="noopener noreferrer">Open directory ↗</a>
     </header>
     <div class="privileges-section">
       <div class="privileges-section-head"><h3>Access policy</h3></div>

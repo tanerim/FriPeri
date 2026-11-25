@@ -65,3 +65,6 @@ Thumbs.db
 .agents
 .aws
 .codex
+# User applications protected by Privileges
+/user_files/*
+!/user_files/.gitkeep
