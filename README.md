@@ -10,6 +10,16 @@ FriPeri lets you build and publish a personal website, blog, portfolio, or proje
 
 Built with **Python · FastAPI · SQLite · Jinja2**. No external database server, Node.js runtime, hosted editor account, or frontend build is required to run the distributed application.
 
+## Admin interface
+
+A streamlined browser-based workspace for content management, visual design, and access control.
+
+| Dashboard | Website Design | Homepage builder |
+| --- | --- | --- |
+| ![FriPeri dashboard with publishing metrics, page counts, and access statistics](docs/screenshots/dashboard.png) | ![FriPeri website design with color palettes, navigation and styling controls](docs/screenshots/website-design.png) | ![FriPeri homepage builder and visual page structure editor](docs/screenshots/homepage-builder.png) |
+
+Screenshots: November 2026. See the [recent features](docs/recent-features.md) for the latest administration, private directory access, and protected video archive capabilities.
+
 ## At a glance
 
 - **Publish:** articles, notes, categories, tags, custom pages, and an About page using a visual block editor.
@@ -17,6 +27,7 @@ Built with **Python · FastAPI · SQLite · Jinja2**. No external database serve
 - **Organize:** nested navigation, category presentation controls, built-in social profile links, and contact messages.
 - **Translate:** English content with an optional secondary language and English fallback.
 - **Manage:** browser-based installation, role-based access for content creators, editors and administrators, media cropping, backups, and recovery.
+- **Protect:** private static directories with separate access accounts, administrator approvals, and protected video streaming.
 - **Own your data:** content and settings are stored in SQLite; uploaded media stays on your server.
 
 For exact behavior, limitations, and examples, see the [full feature overview](docs/overview.md) and [administrator guide](docs/user-guide.md).
@@ -48,6 +59,8 @@ Everything you need to set up, manage, and extend FriPeri. Browse the [complete 
 - **[Installation and setup](docs/installation.md)** — Requirements, first-run setup, and CLI installation.
 - **[Administrator user guide](docs/user-guide.md)** — Publishing, pages, homepage design, and languages.
 - **[Users and permissions](docs/user-roles.md)** — Content creators, editors, administrators, and category assignments.
+- **[Recent features](docs/recent-features.md)** — Dashboard, homepage/design improvements, directory privileges, and video archive support.
+- **[Directory privileges](docs/PRIVILEGES.md)** — Controlled access, registration, approvals, Nginx and video symlinks.
 
 ### Running your site
 
