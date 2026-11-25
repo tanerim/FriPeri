@@ -1507,8 +1507,8 @@ async def admin(request: Request) -> Response:
     if account and account["role"] == "admin":
         with get_db() as conn:
             dashboard_extra = {
-                "published_pages": conn.execute("SELECT COUNT(*) FROM pages WHERE published=1").fetchone()[0],
-                "total_pages": conn.execute("SELECT COUNT(*) FROM pages").fetchone()[0],
+                "published_pages": conn.execute("SELECT COUNT(*) FROM custom_pages WHERE published=1").fetchone()[0],
+                "total_pages": conn.execute("SELECT COUNT(*) FROM custom_pages").fetchone()[0],
                 "users": conn.execute("SELECT COUNT(*) FROM users").fetchone()[0],
                 "private_directories": conn.execute(
                     "SELECT COUNT(*) FROM privilege_directories WHERE is_private=1 AND lower(folder) NOT IN ('images','uploads')").fetchone()[0],
