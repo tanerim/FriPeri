@@ -1308,7 +1308,7 @@
     addControls.append(addLabel);
     // Section nesting is supported by the validator to a maximum depth of three.
     if (depth < 2) {
-      const addSection = button('+ '+t('section_add_section'),()=>{
+      const addSection = button('+ Add nested section',()=>{
         if (blockCount(blocks()) >= 80) return message(t('limit'),true);
         mutate(()=>block.children.push(newBlock('section')));
       },'builder-section-add-button');
