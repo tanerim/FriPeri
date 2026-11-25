@@ -68,3 +68,7 @@ Thumbs.db
 # User applications protected by Privileges
 /user_files/*
 !/user_files/.gitkeep
+
+# Root verification files managed by the application
+/root_files/*
+!/root_files/.gitkeep

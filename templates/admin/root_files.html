@@ -1,0 +1,40 @@
+{% extends "admin/base.html" %}
+{% block content %}
+<main id="admin-content" class="privileges-app" style="max-width:1000px;margin:35px auto;padding:20px">
+  <header style="margin-bottom:24px">
+    <p style="font-size:12px;color:#5144b7;font-weight:700">Configuration</p>
+    <h1>Root Files</h1>
+    <p>Publish verification files directly at your domain root. Only approved names are accepted: ads.txt, app-ads.txt, and Google verification HTML files. Uploading a replacement disables publication until it is explicitly enabled again.</p>
+  </header>
+  <section style="padding:24px;border:1px solid #dde3ee;border-radius:14px;margin-bottom:25px">
+    <h2>Upload verification file</h2>
+    <form action="/admin/root-files" method="post" enctype="multipart/form-data">
+      <input type="hidden" name="settings_token" value="{{ settings_token }}">
+      <p><label>Exact file name <input name="name" required placeholder="app-ads.txt" maxlength="120"></label></p>
+      <p><label>UTF-8 text or Google verification HTML <input type="file" name="file" required accept=".txt,.html"></label></p>
+      <button type="submit" name="action" value="upload">Upload (unpublished)</button>
+    </form>
+  </section>
+  <section style="padding:24px;border:1px solid #dde3ee;border-radius:14px">
+    <h2>Managed files</h2>
+    {% for entry in root_files %}
+      <div style="padding:15px 0;border-bottom:1px solid #e5e9f2;display:flex;align-items:center;gap:15px;justify-content:space-between;flex-wrap:wrap">
+        <div><strong>{{ entry.name }}</strong><br><span>{{ 'Published' if entry.published else 'Disabled' }}</span>
+        {% if entry.published %}<a href="/{{ entry.name }}" target="_blank" rel="noopener">Open file</a>{% endif %}</div>
+        <form action="/admin/root-files" method="post" style="display:flex;gap:8px">
+          <input type="hidden" name="settings_token" value="{{ settings_token }}">
+          <input type="hidden" name="name" value="{{ entry.name }}">
+          {% if entry.published %}
+            <button name="action" value="disable">Disable</button>
+          {% else %}
+            <button name="action" value="publish">Publish</button>
+          {% endif %}
+          <button name="action" value="delete" onclick="return confirm('Delete this file?')">Delete</button>
+        </form>
+      </div>
+    {% else %}
+      <p>No root files uploaded.</p>
+    {% endfor %}
+  </section>
+</main>
+{% endblock %}

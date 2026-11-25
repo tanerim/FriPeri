@@ -30,6 +30,7 @@ from language_migration import (backup_before_language_migration, migrate_langua
 
 from dotenv import load_dotenv
 from fastapi import FastAPI, Request, UploadFile, Form
+from root_files import install_schema as install_root_file_schema, root_filename, safe_root_file, ROOT_FILE_TYPES
 from fastapi.responses import HTMLResponse, RedirectResponse, Response, JSONResponse, FileResponse
 from section_svg_design import render_svg
 from custom_home import (validate_document, read_document, render_blocks, clean_html,
@@ -66,6 +67,7 @@ def project_path(value: str) -> Path:
 DB_PATH = project_path(os.getenv("SITE_DB_PATH", "db/site.db"))
 STATIC_DIR = project_path(os.getenv("SITE_STATIC_DIR", "static"))
 USER_FILES_DIR = project_path(os.getenv("SITE_USER_FILES_DIR", "user_files"))
+ROOT_FILES_DIR = project_path(os.getenv("SITE_ROOT_FILES_DIR", "root_files"))
 SITEMAP_PATH = STATIC_DIR / "sitemap.xml"
 TEMPLATES_DIR = project_path(os.getenv("SITE_TEMPLATES_DIR", "templates"))
 UPLOAD_DIR = project_path(os.getenv("SITE_UPLOAD_DIR", "static/uploads"))
@@ -86,6 +88,10 @@ async def lifespan(application: FastAPI):
         if moved:
             logging.getLogger(__name__).info("Migrated Privileges directories to user_files: %s", moved)
     USER_FILES_DIR.mkdir(parents=True, exist_ok=True)
+    ROOT_FILES_DIR.mkdir(parents=True, exist_ok=True)
+    if is_initialized(DB_PATH):
+        with get_db() as conn:
+            install_root_file_schema(conn)
     application.state.initialized = is_initialized(DB_PATH)
     refresh_secret()
     yield
@@ -188,11 +194,6 @@ async def sitemap(request: Request) -> Response:
     if not SITEMAP_PATH.is_file():
         return Response(status_code=404)
     return FileResponse(SITEMAP_PATH, media_type="application/xml")
-
-@app.get("/app-ads.txt", include_in_schema=False)
-async def app_ads_txt():
-    ads_path = STATIC_DIR / "app-ads.txt"
-    return FileResponse(ads_path, media_type="text/plain") if ads_path.is_file() else Response(status_code=404)
 
 templates = Jinja2Templates(directory=TEMPLATES_DIR)
 
@@ -3468,3 +3469,103 @@ app.include_router(create_router(
     render_admin=lambda request, template, title, context, username:
         render_template(request, template, title, context, username),
 ))
+
+
+# Root Files: explicitly published, administrator-managed root-level documents.
+@app.api_route("/{root_name}", methods=["GET", "HEAD"], include_in_schema=False)
+async def published_root_file(request: Request, root_name: str) -> Response:
+    if not root_filename(root_name):
+        return Response(status_code=404)
+    try:
+        with get_db() as conn:
+            row = conn.execute(
+                "SELECT published FROM root_files WHERE name=?", (root_name,)).fetchone()
+    except sqlite3.Error:
+        return Response(status_code=503, headers={"Cache-Control": "no-store"})
+    if not row or not row["published"]:
+        return Response(status_code=404)
+    path = safe_root_file(ROOT_FILES_DIR, root_name)
+    if not path or not path.is_file():
+        return Response(status_code=404)
+    return FileResponse(path, media_type=ROOT_FILE_TYPES[path.suffix.lower()],
+                        headers={"Cache-Control": "public, max-age=300",
+                                 "X-Content-Type-Options": "nosniff"})
+
+
+@app.get("/admin/root-files", response_class=HTMLResponse)
+async def admin_root_files(request: Request) -> Response:
+    account = actor(request)
+    if not account:
+        return RedirectResponse("/login", status_code=303)
+    if account["role"] != "admin":
+        return Response(status_code=403)
+    with get_db() as conn:
+        records = [dict(row) for row in conn.execute(
+            "SELECT name,published,updated_at FROM root_files ORDER BY name")]
+    return render_template(request, "admin/root_files.html", "Root Files", {
+        "active_admin": "root_files", "root_files": records,
+        "settings_token": settings_form_token(request, account["username"]),
+    }, account["username"])
+
+
+@app.post("/admin/root-files")
+async def admin_root_files_action(request: Request) -> Response:
+    account = actor(request)
+    if not account or account["role"] != "admin":
+        return Response(status_code=403)
+    form = await request.form()
+    token = str(form.get("settings_token", ""))
+    if not hmac.compare_digest(token, settings_form_token(request, account["username"])):
+        return Response(status_code=403)
+    name = str(form.get("name", "")).strip()
+    action = str(form.get("action", ""))
+    if not root_filename(name) or action not in {"upload", "publish", "disable", "delete"}:
+        return Response(status_code=400)
+    path = safe_root_file(ROOT_FILES_DIR, name)
+    if path is None:
+        return Response(status_code=400)
+    if action == "upload":
+        upload = form.get("file")
+        if not isinstance(upload, UploadFile):
+            return Response("Select a file", status_code=400)
+        if upload.filename != name:
+            return Response("File name must match the publishing name", status_code=400)
+        data = await upload.read(1024 * 1024 + 1)
+        if not data or len(data) > 1024 * 1024 or b"\x00" in data:
+            return Response("Invalid file (max 1 MB, plain text)", status_code=400)
+        try:
+            data.decode("utf-8")
+        except UnicodeDecodeError:
+            return Response("UTF-8 text required", status_code=400)
+        ROOT_FILES_DIR.mkdir(parents=True, exist_ok=True)
+        temp = ROOT_FILES_DIR / (".upload-" + secrets.token_hex(16))
+        try:
+            with temp.open("xb") as stream:
+                stream.write(data)
+            os.chmod(temp, 0o600)
+            if path.is_symlink():
+                return Response(status_code=400)
+            os.replace(temp, path)
+        finally:
+            temp.unlink(missing_ok=True)
+        with get_db() as conn:
+            conn.execute("""INSERT INTO root_files(name,published,updated_at) VALUES(?,0,?)
+                ON CONFLICT(name) DO UPDATE SET published=0,updated_at=excluded.updated_at""",
+                         (name, now_iso()))
+    else:
+        with get_db() as conn:
+            row = conn.execute("SELECT 1 FROM root_files WHERE name=?", (name,)).fetchone()
+            if not row:
+                return Response(status_code=404)
+            if action == "publish":
+                if not path.is_file():
+                    return Response(status_code=404)
+                conn.execute("UPDATE root_files SET published=1,updated_at=? WHERE name=?",
+                             (now_iso(), name))
+            elif action == "disable":
+                conn.execute("UPDATE root_files SET published=0,updated_at=? WHERE name=?",
+                             (now_iso(), name))
+            else:
+                conn.execute("DELETE FROM root_files WHERE name=?", (name,))
+                path.unlink(missing_ok=True)
+    return RedirectResponse("/admin/root-files", status_code=303)
