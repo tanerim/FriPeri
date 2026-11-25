@@ -947,7 +947,20 @@
       const teamLabels={title_size:'Title font size',title_color:'Title text color',title_weight:'Title font weight',title_style:'Title font style',title_font:'Title font family',direction:'Team direction',style:'Team style',columns:'Team columns',photo_width:'Photo width',gap:'Card gap',card_padding:'Card padding',radius:'Card corner radius',accent_color:'Accent color',card_background:'Card background',shadow:'Card shadow'};
       const iconLabels={icon_size:'Icon size',icon_color:'Icon color',background_mode:'Icon background',
         frame_size:'Frame size',frame_color:'Frame color',radius:'Corner radius',shadow:'Shadow',hover_effect:'Hover effect'};
-      const labelText=block.type==='team'?(teamLabels[key]||t(key)):
+      const explicitColorLabels={
+        background_color:'Background color',overlay_color:'Overlay color',
+        edge_color:'Section edge color',accent_color:'Highlight color',
+        cell_background:'Cell background',cell_color:'Cell text color',
+        header_background:'Table header background',header_color:'Table header text color',
+        button_background:'Button background',button_text:'Button text color',
+        button_hover:'Button hover background',button_hover_text:'Button hover text color',
+        border_color:'Border color',frame_background:'Frame background color',
+        icon_color:'Icon color',frame_color:'Icon frame color',
+        title_color:'Title text color',body_color:'Body text color',
+        line_color:'Divider color',text_color:'Text color'
+      };
+      const labelText=kind==='color'?(explicitColorLabels[key]||key.replaceAll('_',' ').replace(/^./,c=>c.toUpperCase())):
+        block.type==='team'?(teamLabels[key]||t(key)):
         ['icon','button'].includes(block.type)?(iconLabels[key]||t(key)):
         block.type==='image'?(imageLabels[key]||key):(key==='landing_style'?'Landing appearance':t(key));
       label.append(el('span','',labelText+(typeof kind === 'number' && key !== 'columns' ? (key.endsWith('_opacity') ? ' (%)' : ' (px)') : '')));
@@ -1268,6 +1281,9 @@
     mediaFields.append(urlField,uploadField);
     background.append(mediaFields);
     const generator = bindPanelState(block,'section:svg',sectionSvgGenerator(block,body));
+    layout.classList.add('builder-section-layout-panel');
+    background.classList.add('builder-section-background-panel');
+    generator.classList.add('builder-section-svg-panel');
     tools.append(layout,background,generator);
     if (hero) card.append(editHero(hero));
     card.append(tools);
@@ -1278,7 +1294,7 @@
     addLabel.append(el('span','',t('section_add')));
     const add = el('select','builder-section-add-select');
     add.setAttribute('aria-label',t('section_add'));
-    add.add(new Option(t('section_add_placeholder'),''));
+    add.add(new Option('Choose a block to add…',''));
     for (const kind of Object.keys(symbols)) {
       if (kind !== 'section') add.add(new Option(t(kind),kind));
     }
@@ -1957,6 +1973,10 @@
     const layout=canvas.closest('.builder-layout');
     const active=layout.classList.toggle('is-focus-mode');
     focusButton.textContent=active?'Show block palette':'Focus canvas';
+    // Recalculate the layout immediately after the grid column changes.
+    // Avoid persisting focus mode across editor routes.
+    layout.style.minWidth='0';
+    layout.querySelector('.builder-workspace')?.style.setProperty('min-width','0');
     focusButton.setAttribute('aria-pressed',String(active));
   });
   document.getElementById('builder-language').addEventListener('change',event=>{checkpoint();language=event.target.value;selected=-1;document.querySelectorAll('[data-builder-language-fields]').forEach(node=>{node.hidden=node.dataset.builderLanguageFields!==language;});render();});
