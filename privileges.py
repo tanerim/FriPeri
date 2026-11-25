@@ -69,6 +69,8 @@ def folders(static_dir: Path):
 
 
 def private_folder(conn, folder: str) -> bool:
+    if folder.casefold() in EXCLUDED_FOLDERS:
+        return False
     row = conn.execute("SELECT is_private FROM privilege_directories WHERE folder=?", (folder,)).fetchone()
     return bool(row and row["is_private"])
 
