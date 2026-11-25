@@ -1529,11 +1529,11 @@
         }
       // Text/color picker — always available for any block type
       if(block.type!=='divider'){
-        const textColorPicker = field(t('color_selection'),block.foreground||'#17243b',v=>{block.foreground=v;card.querySelector('.custom-block').style.setProperty('--text-color',v);},'color');
+        const textColorPicker = field('Text color',block.foreground||'#17243b',v=>{block.foreground=v;card.querySelector('.custom-block').style.setProperty('--text-color',v);},'color');
         styles.append(textColorPicker);
       }
       if(block.tone==='custom') {
-        const bgColor = field(t('color_selection'),block.background || '#ffffff',v=>{block.background=v;card.querySelector('.custom-block').style.backgroundColor=v;},'color');
+        const bgColor = field('Block background color',block.background || '#ffffff',v=>{block.background=v;card.querySelector('.custom-block').style.backgroundColor=v;},'color');
         styles.append(bgColor);
       }
       if(block.type==='heading')styles.append(select(t('heading'),block.level,[['h1','H1'],['h2','H2'],['h3','H3']],v=>{block.level=v;}));
