@@ -276,3 +276,107 @@
   .hyperui-admin #homepage-custom-panel.page-builder-refresh .builder-section-add-button{width:100%}
   .hyperui-admin #homepage-custom-panel.page-builder-refresh #builder-canvas .custom-section > .builder-section-content{width:100%}
 }
+
+
+/* Section structure (editor-only): distinct configuration row, clean add toolbar,
+   separators, and Sunlit Horizon nested block labels. */
+.hyperui-admin #homepage-custom-panel.page-builder-refresh #builder-canvas > .builder-block[data-editor-section=true] > .builder-section-settings{
+  order:0;
+  background:#e4edf7;
+  border-bottom:2px solid #9aaec8;
+  padding:14px 16px;
+  gap:12px;
+  position:relative;
+  z-index:2;
+}
+.hyperui-admin #homepage-custom-panel.page-builder-refresh #builder-canvas > .builder-block[data-editor-section=true] > .builder-section-settings > .builder-section-panel{
+  background:#ffffff;
+  border:1px solid #b6c9dd;
+}
+.hyperui-admin #homepage-custom-panel.page-builder-refresh #builder-canvas > .builder-block[data-editor-section=true] > .builder-section-settings > .builder-section-panel > summary{
+  color:#173b61;font-weight:800;
+}
+/* Only between top-level sections; do not draw lines between child blocks. */
+.hyperui-admin #homepage-custom-panel.page-builder-refresh #builder-canvas > .builder-block[data-editor-section=true] ~ .builder-block[data-editor-section=true]{
+  border-top:5px solid #000;
+  margin-top:20px;
+  padding-top:0;
+}
+.hyperui-admin #homepage-custom-panel.page-builder-refresh #builder-canvas > .builder-block[data-editor-section=true] > .builder-section-add-controls{
+  display:grid;
+  grid-template-columns:minmax(220px,1fr) minmax(220px,2fr) auto auto;
+  align-items:center;
+  gap:12px;
+  width:100%;
+  min-width:0;
+  margin:0;
+  padding:18px 16px;
+  border:0;
+  border-top:2px solid #c9d7ec;
+  border-radius:0;
+  background:#f1f5fb;
+  position:relative;
+  z-index:2;
+}
+.hyperui-admin #homepage-custom-panel.page-builder-refresh #builder-canvas > .builder-block[data-editor-section=true] > .builder-section-add-controls > .builder-section-add-label{
+  display:contents;
+}
+.hyperui-admin #homepage-custom-panel.page-builder-refresh #builder-canvas > .builder-block[data-editor-section=true] > .builder-section-add-controls > .builder-section-add-label > span{
+  font-size:16px;
+  line-height:1.25;
+  font-weight:850;
+  color:#102d50;
+  white-space:normal;
+}
+.hyperui-admin #homepage-custom-panel.page-builder-refresh #builder-canvas > .builder-block[data-editor-section=true] > .builder-section-add-controls .builder-section-add-select{
+  height:45px;
+  width:100%;
+  min-width:0;
+  border-color:#acbdd5;
+  font-size:14px;
+  font-weight:600;
+}
+.hyperui-admin #homepage-custom-panel.page-builder-refresh #builder-canvas > .builder-block[data-editor-section=true] > .builder-section-add-controls .builder-section-add-button{
+  height:45px;
+  min-height:45px;
+  margin:0;
+  align-self:center;
+  padding-inline:16px;
+}
+.hyperui-admin #homepage-custom-panel.page-builder-refresh #builder-canvas > .builder-block[data-editor-section=true] > .builder-section-add-controls .builder-add-selected-button{
+  background:#0d3b66;
+  border-color:#0d3b66;
+  color:#fff;
+}
+.hyperui-admin #homepage-custom-panel.page-builder-refresh #builder-canvas > .builder-block[data-editor-section=true] > .builder-section-add-controls .builder-add-selected-button:hover{
+  background:#092b49;
+}
+.hyperui-admin #homepage-custom-panel.page-builder-refresh #builder-canvas .builder-section-content > .builder-block[data-sunlit-child=true] > .builder-block-header{
+  background:color-mix(in srgb,var(--sunlit-child-color) 26%,white);
+  border-left:5px solid var(--sunlit-child-color);
+  border-bottom:1px solid color-mix(in srgb,var(--sunlit-child-color) 55%,white);
+}
+.hyperui-admin #homepage-custom-panel.page-builder-refresh #builder-canvas .builder-section-content > .builder-block[data-sunlit-child=true] > .builder-block-header .builder-block-name{
+  color:#12283f;
+  font-size:12px;
+  font-weight:850;
+}
+@media(max-width:1000px){
+  .hyperui-admin #homepage-custom-panel.page-builder-refresh #builder-canvas > .builder-block[data-editor-section=true] > .builder-section-add-controls{
+    grid-template-columns:minmax(0,1fr) auto auto;
+  }
+  .hyperui-admin #homepage-custom-panel.page-builder-refresh #builder-canvas > .builder-block[data-editor-section=true] > .builder-section-add-controls > .builder-section-add-label > span{
+    grid-column:1/-1;
+  }
+}
+@media(max-width:670px){
+  .hyperui-admin #homepage-custom-panel.page-builder-refresh #builder-canvas > .builder-block[data-editor-section=true] > .builder-section-add-controls{
+    grid-template-columns:minmax(0,1fr);
+  }
+  .hyperui-admin #homepage-custom-panel.page-builder-refresh #builder-canvas > .builder-block[data-editor-section=true] > .builder-section-add-controls > .builder-section-add-label > span{
+    grid-column:1;
+  }
+  .hyperui-admin #homepage-custom-panel.page-builder-refresh #builder-canvas > .builder-block[data-editor-section=true] > .builder-section-add-controls .builder-section-add-button{
+    width:100%;
+  }
+}
