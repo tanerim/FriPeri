@@ -187,10 +187,18 @@ def test_dashboard_extended_admin_metrics_and_charts(site):
 
 
 def test_creator_dashboard_hides_admin_only_metrics(site):
-    from test_roles import _make_user, _as
+    from initialization import hash_password
     client, db = site
-    _make_user(db, "dashboard_creator", "cc")
-    _as(client, "dashboard_creator")
+    salt, digest = hash_password("creator-password-2026")
+    with sqlite3.connect(db) as conn:
+        conn.execute(
+            "INSERT INTO users(username,password_salt,password_hash,role,created_at) "
+            "VALUES(?,?,?,?,?)",
+            ("dashboard_creator", salt, digest, "cc", "2026-11-25"))
+    client.cookies.clear()
+    login = client.post("/login", data={
+        "username": "dashboard_creator", "password": "creator-password-2026"})
+    assert login.status_code == 303
     response = client.get("/admin")
     assert response.status_code == 200
     assert "Published pages" not in response.text
