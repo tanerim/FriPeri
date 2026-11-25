@@ -2085,17 +2085,7 @@
           block.line_color=colorInput.value;draw();change();
         });colorLabel.append(colorInput);
         settings.append(widthControl,styleLabel,colorLabel);
-        const spacing=el('div','builder-divider-spacing');
-        const topInput=makeNumber('Padding top (px)',block.appearance?.padding_top??36,0,240,value=>{
-          block.appearance={...block.appearance,padding_top:value};
-          applyAppearance(block,body);
-        });
-        const bottomInput=makeNumber('Padding bottom (px)',block.appearance?.padding_bottom??36,0,240,value=>{
-          block.appearance={...block.appearance,padding_bottom:value};
-          applyAppearance(block,body);
-        });
-        spacing.append(topInput,bottomInput);
-        body.append(settings,spacing,visual);
+        body.append(settings,visual);
         draw();
       }
       applyAppearance(block,body);
