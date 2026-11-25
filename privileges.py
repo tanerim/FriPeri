@@ -8,6 +8,7 @@ from __future__ import annotations
 import hashlib
 import hmac
 import logging
+import stat
 import os
 import re
 import sqlite3
@@ -158,6 +159,41 @@ class ProtectedStaticFiles(StaticFiles):
         super().__init__(directory=directory, html=False, check_dir=True, follow_symlink=False)
         self._db, self._secret, self._admin = db, secret, admin_check
         self._first_run = first_run
+
+    def lookup_path(self, path: str):
+        # Allow only the explicitly configured video archive link, keeping the
+        # default symlink protections for all other static assets.
+        if not path or path.startswith(("/", "\\\\")):
+            return super().lookup_path(path)
+        parts = Path(path).parts
+        if (len(parts) < 3 or parts[:2] != ("video_sorgu", "videos")
+                or any(part in ("", ".", "..") for part in parts)
+                or "\\\\" in path):
+            return super().lookup_path(path)
+
+        link = Path(self.directory) / "video_sorgu" / "videos"
+        trusted = Path(os.getenv("PRIVILEGES_VIDEO_ARCHIVE_DIR",
+                                "/home/taner/6feb_data/videos")).resolve()
+        # The symlink must resolve to exactly the intended archive; pointing
+        # to an arbitrary location inside /home is not sufficient.
+        if not link.is_symlink() or link.resolve() != trusted or not trusted.is_dir():
+            return "", None
+        relative = Path(*parts[2:])
+        candidate = trusted / relative
+        # Do not expose nested symlinks in the external archive.
+        if any((trusted / Path(*relative.parts[:i])).is_symlink()
+               for i in range(1, len(relative.parts) + 1)):
+            return "", None
+        resolved = candidate.resolve()
+        if not resolved.is_relative_to(trusted) or resolved == trusted:
+            return "", None
+        try:
+            info = os.stat(resolved)
+        except (FileNotFoundError, NotADirectoryError):
+            return "", None
+        if not stat.S_ISREG(info.st_mode):
+            return "", None
+        return str(resolved), info
 
     async def __call__(self, scope, receive, send):
         path = scope.get("path", "")
