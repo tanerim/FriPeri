@@ -352,7 +352,7 @@ def create_router(*, db, static_dir: Path, secret, secure_cookie: bool,
         login = (f'<div class="login-panel"><form method="post" action="/access/{quote(folder,safe="")}/login">'
                  '<label>Email<input name="email" type="email" required autocomplete="username"></label>'
                  '<label>Password<input name="password" type="password" required autocomplete="current-password"></label>'
-                 + next_input + '<input type="hidden" name="csrf" value="{{CSRF}}"><button type="submit">Sign in</button></form>')
+                 + next_input + '<input type="hidden" name="csrf" value="{{CSRF}}"><button type="submit">Sign in</button></form></div>')
         register = (f'<details class="register"><summary><span class="register-closed">New user? Request access</span><span class="register-open">Already registered? Back to sign in</span></summary>'
                     f'<form method="post" action="/access/{quote(folder,safe="")}/register">'
                     '<div class="name-fields">'
