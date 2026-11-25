@@ -6,7 +6,7 @@ Sign in at `/login`, then open `/admin`. Available screens depend on your accoun
 
 | Group | Screen | Purpose |
 | --- | --- | --- |
-| Overview | Dashboard | Review recent content, publication totals, and category counts. |
+| Overview | Dashboard | Review recent content, publication totals, category counts, publishing-status charts, and administrator-only site/access metrics. |
 | Overview | Messages | Read submissions from the contact form. |
 | Content | Content list | Create, edit, and delete posts and notes. |
 | Content | Categories | Create and delete content categories. |
@@ -17,6 +17,7 @@ Sign in at `/login`, then open `/admin`. Available screens depend on your accoun
 | Website | CMS Design | Independently style each category archive (columns, card surface and color palette). |
 | Website | Menu | Configure category navigation and custom links. |
 | Configuration | Settings | Edit site identity, welcome text, built-in link visibility, and category card options. |
+| Configuration | Privileges | Control Public/Private access to eligible static folders and approve, deny, revoke, or reset directory-access accounts. |
 | Configuration | Social Links | Configure social profile URLs and visibility. |
 | Configuration | Language | Configure the secondary language and custom interface translations. |
 | Configuration | Contact Details | Configure contact-page text and the optional contact email address. |
@@ -256,3 +257,12 @@ On desktop, a **left-pointing arrow** at the top of the sidebar collapses the me
 ---
 
 [Documentation index](index.md) · [Project README](../README.md)
+
+
+### Dashboard analytics and directory access (November 2026)
+
+The Dashboard now includes **published pages**, **CMS users**, **private directories**, **directory-access accounts**, and **pending requests** for administrator accounts. Lightweight stacked bars show published/draft posts and published/unpublished pages. These metrics are computed from stored records, not estimates. CMS users and directory-access accounts are deliberately counted separately. The fixed sidebar keeps its logo compact and lets its navigation scroll on short displays.
+
+Under **Configuration → Privileges**, select an eligible top-level static directory and save its Public or Private access policy. Private access requires registration and administrator approval. Users can request access from the site-branded access screen; the administrator then reviews Pending requests. Approved users can access protected files, while denied or revoked users cannot. Password resets invalidate earlier sessions. Email addresses are not automatically verified.
+
+For security requirements, Nginx configuration, supported video archive symlinks, and tests, see [Privileges](PRIVILEGES.md). For a consolidated list of recently added capabilities, see [Recent features](recent-features.md).
