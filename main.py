@@ -3534,7 +3534,7 @@ async def published_root_file(request: Request, root_name: str) -> Response:
 
 
 @app.get("/admin/root-files", response_class=HTMLResponse)
-async def admin_root_files(request: Request) -> Response:
+async def admin_root_files(request: Request, edit: str = "") -> Response:
     account = actor(request)
     if not account:
         return RedirectResponse("/login", status_code=303)
@@ -3543,7 +3543,16 @@ async def admin_root_files(request: Request) -> Response:
     with get_db() as conn:
         records = [dict(row) for row in conn.execute(
             "SELECT name,published,updated_at FROM root_files ORDER BY name")]
+    editing = None
+    if edit:
+        path = safe_root_file(ROOT_FILES_DIR, edit)
+        if not edit.endswith(".txt") or not path or not path.is_file() or not any(r["name"] == edit for r in records):
+            return Response(status_code=404)
+        if path.stat().st_size > 1024 * 1024:
+            return Response(status_code=400)
+        editing = {"name": edit, "content": path.read_text(encoding="utf-8")}
     return render_template(request, "admin/root_files.html", "Root Files", {
+        "editing": editing,
         "active_admin": "root_files", "root_files": records,
         "settings_token": settings_form_token(request, account["username"]),
     }, account["username"])
@@ -3560,18 +3569,29 @@ async def admin_root_files_action(request: Request) -> Response:
         return Response(status_code=403)
     name = str(form.get("name", "")).strip()
     action = str(form.get("action", ""))
-    if not root_filename(name) or action not in {"upload", "publish", "disable", "delete"}:
+    if not root_filename(name) or action not in {"upload", "create", "edit", "publish", "disable", "delete"}:
         return Response(status_code=400)
     path = safe_root_file(ROOT_FILES_DIR, name)
     if path is None:
         return Response(status_code=400)
-    if action == "upload":
-        upload = form.get("file")
-        if not isinstance(upload, StarletteUploadFile):
-            return Response("Select a file", status_code=400)
-        if upload.filename != name:
-            return Response("File name must match the publishing name", status_code=400)
-        data = await upload.read(1024 * 1024 + 1)
+    if action in {"upload", "create", "edit"}:
+        if action == "upload":
+            upload = form.get("file")
+            if not isinstance(upload, StarletteUploadFile):
+                return Response("Select a file", status_code=400)
+            if upload.filename != name:
+                return Response("File name must match the publishing name", status_code=400)
+            data = await upload.read(1024 * 1024 + 1)
+        else:
+            if not name.endswith(".txt"):
+                return Response("Only .txt files can be created or edited", status_code=400)
+            with get_db() as conn:
+                exists = conn.execute("SELECT 1 FROM root_files WHERE name=?", (name,)).fetchone()
+            if action == "create" and (exists or path.exists()):
+                return Response("File already exists; use Edit", status_code=409)
+            if action == "edit" and (not exists or not path.is_file()):
+                return Response(status_code=404)
+            data = str(form.get("content", "")).encode("utf-8")
         if not data or len(data) > 1024 * 1024 or b"\x00" in data:
             return Response("Invalid file (max 1 MB, plain text)", status_code=400)
         try:

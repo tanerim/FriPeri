@@ -15,6 +15,16 @@
       <button type="submit" name="action" value="upload">Upload (unpublished)</button>
     </form>
   </section>
+  <section style="padding:24px;border:1px solid #dde3ee;border-radius:14px;margin-bottom:25px">
+    <h2>{{ 'Edit Text File' if editing else 'Create Text File' }}</h2>
+    <form action="/admin/root-files" method="post">
+      <input type="hidden" name="settings_token" value="{{ settings_token }}">
+      <p><label>File name <input name="name" required maxlength="120" placeholder="test.txt" value="{{ editing.name if editing else '' }}" {% if editing %}readonly{% endif %}></label></p>
+      <p><label>File content <textarea name="content" rows="10" required style="width:100%;font-family:monospace">{{ editing.content if editing else '' }}</textarea></label></p>
+      <button type="submit" name="action" value="{{ 'edit' if editing else 'create' }}">{{ 'Save (unpublished)' if editing else 'Create (unpublished)' }}</button>
+      {% if editing %}<a href="/admin/root-files">Cancel</a>{% endif %}
+    </form>
+  </section>
   <section style="padding:24px;border:1px solid #dde3ee;border-radius:14px">
     <h2>Managed files</h2>
     {% for entry in root_files %}
@@ -29,6 +39,7 @@
           {% else %}
             <button name="action" value="publish">Publish</button>
           {% endif %}
+          {% if entry.name.endswith('.txt') %}<a href="/admin/root-files?edit={{ entry.name }}">Edit</a>{% endif %}
           <button name="action" value="delete" onclick="return confirm('Delete this file?')">Delete</button>
         </form>
       </div>
