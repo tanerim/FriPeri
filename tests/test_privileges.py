@@ -165,8 +165,8 @@ def test_registration_csrf_required(app_site):
 
 def test_target_rejects_open_redirects():
     assert safe_target("https://evil.test/", "video_sorgu")=="/user_files/video_sorgu/index.html"
-    assert safe_target("/static/video_sorgu/../secret", "video_sorgu")=="/static/video_sorgu/index.html"
-    assert safe_target("/static/other/secret", "video_sorgu")=="/static/video_sorgu/index.html"
+    assert safe_target("/static/video_sorgu/../secret", "video_sorgu")=="/user_files/video_sorgu/index.html"
+    assert safe_target("/static/other/secret", "video_sorgu")=="/user_files/video_sorgu/index.html"
 
 
 def test_privilege_password_hashes_are_salted_and_versioned():
