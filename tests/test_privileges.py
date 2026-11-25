@@ -3,6 +3,7 @@
 Run: python -m pytest -q tests/test_privileges.py
 """
 import sqlite3
+import re
 from pathlib import Path
 
 import pytest
@@ -55,8 +56,9 @@ def app_site(tmp_path, monkeypatch):
 def csrf(client):
     page=client.get("/access/video_sorgu")
     assert page.status_code==200
-    assert client.cookies.get("friperi_privilege_csrf")
-    return client.cookies.get("friperi_privilege_csrf")
+    match=re.search(r'name="csrf" value="([^"]+)"',page.text)
+    assert match, "Access form must contain a signed CSRF token"
+    return match.group(1)
 
 
 def set_private(client):
@@ -216,3 +218,34 @@ def test_cross_site_registration_rejected_even_with_csrf_cookie(app_site):
     assert response.status_code == 403
     with db() as conn:
         assert conn.execute("SELECT COUNT(*) FROM privilege_accounts").fetchone()[0] == 0
+
+
+def test_registration_without_csrf_cookie(app_site):
+    client, db, _ = app_site
+    set_private(client)
+    token = csrf(client)
+    # Privacy-sensitive browsers may suppress cookies entirely on this form.
+    client.cookies.clear()
+    result=client.post("/access/video_sorgu/register",
+        headers={"Origin":"https://testserver","Host":"testserver"},
+        data={"csrf":token,"first_name":"Una","last_name":"Researcher",
+              "email":"no-cookie@example.org","password":"long-test-password-2026"})
+    assert result.status_code==303
+    with db() as conn:
+        assert conn.execute("SELECT status FROM privilege_requests").fetchone()["status"]=="pending"
+
+
+def test_tampered_and_expired_tokens_are_rejected(app_site):
+    import time
+    client, db, _ = app_site
+    set_private(client)
+    token = csrf(client)
+    pieces=token.split(":")
+    tampered=":".join([pieces[0],pieces[1],"0"*64])
+    for invalid in (tampered,"0:aaaa:"+pieces[-1], ""):
+        response=client.post("/access/video_sorgu/register",data={
+           "csrf":invalid,"first_name":"Una","last_name":"Researcher",
+           "email":"bad-token@example.org","password":"long-test-password-2026"})
+        assert response.status_code==403
+    with db() as conn:
+        assert conn.execute("SELECT count(*) FROM privilege_accounts").fetchone()[0]==0
