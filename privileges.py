@@ -231,7 +231,15 @@ def create_router(*, db, static_dir: Path, secret, secure_cookie: bool,
         if request.headers.get("sec-fetch-site", "").lower() == "cross-site":
             return reject("cross_site")
         origin = request.headers.get("origin", "")
-        if origin:
+        fetch_site = request.headers.get("sec-fetch-site", "").lower()
+        # Privacy-focused browsers may send Origin: null even for a
+        # same-origin form submission. Accept this only when Fetch Metadata
+        # explicitly confirms same-origin; the signed CSRF token below is
+        # still mandatory. Never accept null for cross-site or unknown context.
+        if origin == "null":
+            if fetch_site != "same-origin":
+                return reject("opaque_origin_not_same_origin")
+        elif origin:
             parsed = urlsplit(origin)
             if parsed.scheme not in ("http", "https") or not parsed.netloc:
                 return reject("invalid_origin")
@@ -300,6 +308,12 @@ def create_router(*, db, static_dir: Path, secret, secure_cookie: bool,
         button:hover{background:#173b57}a{color:#17618b}
         .helper{font-size:12px;color:#677b92;margin:8px 0 0}
         .register{border-top:1px solid #e3eaf1;margin-top:24px;padding-top:20px}
+        main:has(.register[open]) .login-panel{display:none}
+        .register[open]{border-top:0;margin-top:0;padding-top:0}
+        .register .register-open{display:none}
+        .register[open] .register-closed{display:none}
+        .register[open] .register-open{display:inline}
+        .register[open] summary{margin-bottom:18px}
         summary{cursor:pointer;font-weight:650;color:#205477;padding:6px 0}
         nav{display:flex;gap:18px;flex-wrap:wrap;margin-top:25px;padding-top:17px;
             border-top:1px solid #e3eaf1;font-size:13px}
@@ -335,11 +349,11 @@ def create_router(*, db, static_dir: Path, secret, secure_cookie: bool,
                          '<button type="submit">Sign out</button></form>')
                 return csrf_page(request, shell("Access status", folder, form))
         next_input = f'<input type="hidden" name="next" value="{e(safe_target(next_path,folder))}">'
-        login = (f'<form method="post" action="/access/{quote(folder,safe="")}/login">'
+        login = (f'<div class="login-panel"><form method="post" action="/access/{quote(folder,safe="")}/login">'
                  '<label>Email<input name="email" type="email" required autocomplete="username"></label>'
                  '<label>Password<input name="password" type="password" required autocomplete="current-password"></label>'
                  + next_input + '<input type="hidden" name="csrf" value="{{CSRF}}"><button type="submit">Sign in</button></form>')
-        register = (f'<details class="register"><summary>New user? Request access</summary>'
+        register = (f'<details class="register"><summary><span class="register-closed">New user? Request access</span><span class="register-open">Already registered? Back to sign in</span></summary>'
                     f'<form method="post" action="/access/{quote(folder,safe="")}/register">'
                     '<div class="name-fields">'
                     '<label>First name<input name="first_name" required maxlength="80" autocomplete="given-name"></label>'
