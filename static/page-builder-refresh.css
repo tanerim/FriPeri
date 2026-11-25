@@ -380,3 +380,9 @@
     width:100%;
   }
 }
+
+/* WordPress-style draggable page structure */
+.hyperui-admin .page-builder-refresh .builder-tree-workspace{display:grid;grid-template-columns: minmax(210px,260px) minmax(0,1fr);gap:12px;align-items:start}
+.hyperui-admin .page-builder-refresh .builder-tree-workspace .builder-section-map{display:block;position:sticky;top:12px;max-height:85vh;overflow:auto;padding:10px;background:#f5f7fa;border:1px solid #d6e0ed;border-radius:8px;min-width:0}
+.builder-tree-title{font-size:13px;color:#24364b}.builder-tree-help{font-size:11px;color:#526278;margin:5px 0 12px}.builder-tree-list{min-height:40px;padding-bottom:20px}.builder-tree-row{display:flex;align-items:center;gap:6px;width:auto;max-width:100%;min-height:27px;margin-bottom:4px;padding:4px 7px;border:1px solid #cbd5e1;border-radius:3px;background:#fff;color:#24364b;font-size:11px;text-align:left;cursor:grab;box-sizing:border-box}.builder-tree-row[data-section=true]{background:#dce8e6;font-weight:700}.builder-tree-row.is-dragging{opacity:.35}.builder-tree-label{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.builder-tree-grip{color:#64748b}.builder-tree-marker{height:4px;background:#5144c7;margin-bottom:4px;pointer-events:none}.builder-tree-row:hover{border-color:#5144c7}
+@media(max-width:800px){.hyperui-admin .page-builder-refresh .builder-tree-workspace{grid-template-columns:1fr}.hyperui-admin .page-builder-refresh .builder-tree-workspace .builder-section-map{position:static;max-height:45vh}}

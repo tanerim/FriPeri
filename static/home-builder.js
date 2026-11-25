@@ -1381,34 +1381,96 @@
     return colors[(index+depth*2)%colors.length];
   };
 
+  const structureCards=new WeakMap();
+  let structureDrag=null;
   function renderStructureMap(){
     const nav=document.getElementById('builder-section-map');
     const count=document.getElementById('builder-structure-count');
-    if(!nav && !count)return;
-    const top=blocks().filter(block=>block.type==='section');
-    const all=allBlocks(blocks());
-    if(count)count.textContent=top.length+' sections · '+all.length+' blocks';
+    if(count)count.textContent=blocks().filter(b=>b.type==='section').length+' sections · '+blockCount(blocks())+' blocks';
     if(!nav)return;
-    nav.replaceChildren();
-    const entries=Array.from(canvas.children);
-    blocks().forEach((block,index)=>{
-      if(block.type!=='section')return;
-      const chip=button('',()=>{
-        const target=entries[index];
-        if(!target)return;
-        selected=index;
-        entries.forEach((element,i)=>element.classList.toggle('is-selected',i===index));
-        target.scrollIntoView({behavior:'smooth',block:'start'});
-        const toggle=target.querySelector(':scope > .builder-block-header .builder-block-toggle');
-        if(toggle && collapsedBlocks.has(block))toggle.click();
-      },'builder-section-jump');
-      const dot=el('span','builder-section-dot');dot.setAttribute('aria-hidden','true');
-      dot.style.background=sectionColor(index,0);
-      const label=el('span','',String(index+1).padStart(2,'0')+' · '+(block.editor_name||'Section'));
-      chip.append(dot,label);chip.title='Jump to '+(block.editor_name||'Section '+(index+1));
-      nav.append(chip);
+    if(!nav.parentElement.classList.contains('builder-tree-workspace')){
+      const shell=el('div','builder-tree-workspace');
+      nav.before(shell);shell.append(nav,canvas);
+    }
+    nav.replaceChildren(el('strong','builder-tree-title','Page Structure'),
+      el('p','builder-tree-help','Drag to reorder. Move right to nest, left to unnest.'));
+    const rows=[];
+    function flatten(items,depth=0,parents=[]){
+      items.forEach((block,index)=>{
+        rows.push({block,items,index,depth,parents});
+        if(block.type==='section')flatten(block.children,depth+1,[...parents,block]);
+      });
+    }
+    flatten(blocks());
+    const list=el('div','builder-tree-list');nav.append(list);
+    const marker=el('div','builder-tree-marker');
+    const sectionHeight=b=>b.type==='section'?1+Math.max(0,...b.children.map(sectionHeight)):0;
+    function destination(event){
+      if(!structureDrag)return null;
+      const source=structureDrag.row;
+      const visible=rows.filter(r=>r.block!==source.block&&!r.parents.includes(source.block));
+      const elements=visible.map(r=>r.node);
+      let slot=elements.findIndex(node=>event.clientY<node.getBoundingClientRect().top+node.getBoundingClientRect().height/2);
+      if(slot<0)slot=visible.length;
+      const prev=visible[slot-1],next=visible[slot];
+      const desired=Math.max(0,Math.round((event.clientX-list.getBoundingClientRect().left-12)/18));
+      const max=prev?prev.depth+(prev.block.type==='section'?1:0):0;
+      const depth=Math.min(desired,max,3-sectionHeight(source.block));
+      // Do not split an existing subtree by inserting above its deeper child.
+      if(next&&next.depth>depth)return null;
+      let items=blocks(),index=items.length,parents=[];
+      if(depth){
+        const parent=prev&&[...prev.parents,prev.block].filter(b=>b.type==='section')[depth-1];
+        if(!parent||parent===source.block)return null;
+        items=parent.children;
+        parents=prev.parents.slice(0,depth-1).concat(parent);
+        index=items.length;
+      }
+      if(next&&next.items===items)index=items.indexOf(next.block);
+      return {items,index,parents,depth,next};
+    }
+    rows.forEach(row=>{
+      const block=row.block;
+      const name=block.editor_name||(block.type==='section'?'Section':t(block.type));
+      const node=button('',()=>{
+        row.parents.forEach(b=>collapsedBlocks.delete(b));
+        collapsedBlocks.delete(block);
+        selected=blocks().indexOf(row.parents[0]||block);
+        render();
+        const target=structureCards.get(block);
+        if(target)target.scrollIntoView({behavior:'smooth',block:'start'});
+      },'builder-tree-row');
+      row.node=node;node.draggable=true;node.style.marginLeft=(row.depth*18)+'px';
+      node.dataset.section=String(block.type==='section');
+      node.append(el('span','builder-tree-grip','⠿'),el('span','builder-tree-label',String(row.index+1).padStart(2,'0')+' · '+name));
+      node.title=name;
+      node.addEventListener('dragstart',event=>{
+        structureDrag={row};event.dataTransfer.effectAllowed='move';
+        event.dataTransfer.setData('text/plain',name);node.classList.add('is-dragging');
+      });
+      node.addEventListener('dragend',()=>{structureDrag=null;marker.remove();node.classList.remove('is-dragging');});
+      list.append(node);
     });
-    if(!top.length)nav.append(el('span','builder-map-empty','Add a Section to navigate your page here.'));
+    list.addEventListener('dragover',event=>{
+      if(!structureDrag)return;
+      event.preventDefault();const dest=destination(event);
+      marker.remove();event.dataTransfer.dropEffect=dest?'move':'none';
+      if(dest){marker.style.marginLeft=(dest.depth*18)+'px';list.insertBefore(marker,dest.next?.node||null);}
+    });
+    list.addEventListener('drop',event=>{
+      if(!structureDrag)return;
+      event.preventDefault();const dest=destination(event),source=structureDrag.row;
+      structureDrag=null;marker.remove();source.node.classList.remove('is-dragging');
+      if(!dest)return;
+      mutate(()=>{
+        const old=source.items.indexOf(source.block);
+        if(old<0)return;
+        source.items.splice(old,1);
+        dest.items.splice(dest.index-(dest.items===source.items&&old<dest.index?1:0),0,source.block);
+        dest.parents.forEach(b=>collapsedBlocks.delete(b));
+        selected=blocks().indexOf(dest.parents[0]||source.block);
+      });
+    });
   }
 
   function render() {
@@ -1472,6 +1534,7 @@
   function renderBlocks(items, container, depth) {
     items.forEach((block,index) => {
       const card = el('section','builder-block'+(!depth && selected===index?' is-selected':''));
+      structureCards.set(block,card);
       if(depth>0 && block.type!=='section') {
         // Fixed Sunlit Horizon sequence for editor-only child block headers.
         const colors=['#0d3b66','#f4d35e','#ee964b','#f95738','#faf0ca'];
