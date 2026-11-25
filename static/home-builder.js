@@ -1382,6 +1382,17 @@
   };
 
   const structureCards=new WeakMap();
+  const structureRows=new WeakMap();
+  let activeStructureBlock=null;
+  function highlightStructure(block){
+    activeStructureBlock=block;
+    canvas.querySelectorAll('.is-structure-selected').forEach(node=>node.classList.remove('is-structure-selected'));
+    document.querySelectorAll('#builder-section-map .is-active').forEach(node=>{node.classList.remove('is-active');node.setAttribute('aria-pressed','false');});
+    if(!block)return;
+    structureCards.get(block)?.classList.add('is-structure-selected');
+    const row=structureRows.get(block);
+    if(row){row.classList.add('is-active');row.setAttribute('aria-pressed','true');}
+  }
   let structureDrag=null;
   function renderStructureMap(){
     const nav=document.getElementById('builder-section-map');
@@ -1436,10 +1447,12 @@
         row.parents.forEach(b=>collapsedBlocks.delete(b));
         collapsedBlocks.delete(block);
         selected=blocks().indexOf(row.parents[0]||block);
+        activeStructureBlock=block;
         render();
         const target=structureCards.get(block);
         if(target)target.scrollIntoView({behavior:'smooth',block:'start'});
       },'builder-tree-row');
+      structureRows.set(block,node);node.setAttribute('aria-pressed','false');
       row.node=node;node.draggable=true;node.style.marginLeft=(row.depth*18)+'px';
       node.dataset.section=String(block.type==='section');
       node.append(el('span','builder-tree-grip','⠿'),el('span','builder-tree-label',String(row.index+1).padStart(2,'0')+' · '+name));
@@ -1451,6 +1464,8 @@
       node.addEventListener('dragend',()=>{structureDrag=null;marker.remove();node.classList.remove('is-dragging');});
       list.append(node);
     });
+    if(!rows.some(row=>row.block===activeStructureBlock))activeStructureBlock=blocks()[selected]||null;
+    highlightStructure(activeStructureBlock);
     list.addEventListener('dragover',event=>{
       if(!structureDrag)return;
       event.preventDefault();const dest=destination(event);
@@ -1469,6 +1484,7 @@
         dest.items.splice(dest.index-(dest.items===source.items&&old<dest.index?1:0),0,source.block);
         dest.parents.forEach(b=>collapsedBlocks.delete(b));
         selected=blocks().indexOf(dest.parents[0]||source.block);
+        activeStructureBlock=source.block;
       });
     });
   }
@@ -1524,6 +1540,7 @@
         destination.items.push(block);
         destination.ancestors.forEach(item=>collapsedBlocks.delete(item));
         selected=destination.ancestors.length?blocks().indexOf(destination.ancestors[0]):blocks().indexOf(block);
+        activeStructureBlock=block;
       });
     }));
     form.append(picker,controls);dialog.append(form);
@@ -1535,6 +1552,12 @@
     items.forEach((block,index) => {
       const card = el('section','builder-block'+(!depth && selected===index?' is-selected':''));
       structureCards.set(block,card);
+      const selectCard=event=>{
+        if(event.target.closest('.builder-block')!==card)return;
+        highlightStructure(block);
+      };
+      card.addEventListener('click',selectCard);
+      card.addEventListener('focusin',selectCard);
       if(depth>0 && block.type!=='section') {
         // Fixed Sunlit Horizon sequence for editor-only child block headers.
         const colors=['#0d3b66','#f4d35e','#ee964b','#f95738','#faf0ca'];
