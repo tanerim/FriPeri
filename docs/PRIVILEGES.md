@@ -98,3 +98,14 @@ authorization layer.
 ```sh
 python -m pytest -q tests/test_privilege_video_archive.py
 ```
+
+
+## User interface and form protection
+
+The access screen displays the configured CMS site name followed by **Controlled Access**. Login and registration occupy mutually exclusive views. Internal directory paths and redundant Home/Access links are not displayed on the public form.
+
+Registration requests require a signed, time-limited CSRF token. A browser-supplied `Origin: null` is accepted **only** with `Sec-Fetch-Site: same-origin` and a valid signed token; otherwise the submission is rejected. A normal non-null Origin must match the server's Host or explicitly configured `FRIPERI_PUBLIC_ORIGIN`. This setting should be an HTTPS origin such as `https://example.org`. Do not trust unvalidated client-supplied forwarding headers as proof of origin.
+
+The administrator's Privileges dashboard separates the visibility policy from access requests. Request actions depend on status (Approve, Deny, Revoke). Password reset is intentionally collapsed until requested. CMS administrative users and privilege accounts remain independent.
+
+For a summary of all newly added administration features, see [Recent features](recent-features.md).
