@@ -12,6 +12,7 @@ import stat
 import tempfile
 import zipfile
 from pathlib import Path, PurePosixPath
+from root_files import root_filename
 
 MAX_UPLOAD_BYTES = 256 * 1024 * 1024
 MAX_UNPACKED_BYTES = 512 * 1024 * 1024
@@ -43,6 +44,8 @@ def _allowed_member(name: str) -> bool:
         return False
     if name in {"db/site.db", "env/.env"}:
         return True
+    if len(p.parts) == 2 and p.parts[0] == "root_files":
+        return root_filename(p.parts[1])
     if len(p.parts) < 3 or p.parts[:2] not in (("static", "uploads"), ("static", "images")):
         return False
     return p.suffix.lower() in _IMAGE_SUFFIXES | {".mp4", ".webm"} if p.parts[1] == "uploads" else p.suffix.lower() in _IMAGE_SUFFIXES
@@ -101,7 +104,8 @@ def _sqlite_snapshot(db_path: Path, destination: Path) -> None:
         source.backup(target)
 
 
-def create_backup(destination: Path, db_path: Path, static_dir: Path, upload_dir: Path, env_path: Path) -> None:
+def create_backup(destination: Path, db_path: Path, static_dir: Path, upload_dir: Path, env_path: Path,
+                  root_dir: Path | None = None) -> None:
     """Write to an exclusive destination; capture SQLite through its backup API."""
     destination.parent.mkdir(parents=True, exist_ok=True)
     with tempfile.TemporaryDirectory(prefix=".backup-stage-", dir=destination.parent) as temp:
@@ -125,6 +129,15 @@ def create_backup(destination: Path, db_path: Path, static_dir: Path, upload_dir
                             archive_name = "static/images/" + path.relative_to(folder).as_posix()
                         if _allowed_member(archive_name):
                             zf.write(path, archive_name)
+                if root_dir is not None and root_dir.is_dir():
+                    if root_dir.is_symlink():
+                        raise BackupError("Unsafe root files directory")
+                    for item in sorted(root_dir.iterdir()):
+                        if not item.is_file() or item.is_symlink() or not root_filename(item.name):
+                            continue
+                        if item.stat().st_size > 1024 * 1024:
+                            raise BackupError("Root file exceeds 1 MB limit")
+                        zf.write(item, "root_files/" + item.name)
                 if env_path.is_file() and not env_path.is_symlink():
                     zf.write(env_path, "env/.env")
 
@@ -138,7 +151,8 @@ def validate_backup(path: Path) -> None:
             raise BackupError("Corrupt archive member")
 
 
-def restore_backup(path: Path, db_path: Path, static_dir: Path, upload_dir: Path, env_path: Path) -> None:
+def restore_backup(path: Path, db_path: Path, static_dir: Path, upload_dir: Path, env_path: Path,
+                   root_dir: Path | None = None) -> None:
     """Validate and stage every member before touching the running installation."""
     validate_backup(path)
     with tempfile.TemporaryDirectory(prefix=".restore-stage-", dir=path.parent) as temp:
@@ -150,6 +164,12 @@ def restore_backup(path: Path, db_path: Path, static_dir: Path, upload_dir: Path
                 staged_file.parent.mkdir(parents=True, exist_ok=True)
                 with archive.open(member) as source, staged_file.open("xb") as target:
                     _copy_limited(source, target, min(member.file_size, MAX_MEMBER_BYTES))
+        if any(m.filename.startswith("root_files/") for m in members):
+            if root_dir is None or root_dir.is_symlink():
+                raise BackupError("Root Files restore requires a safe root directory")
+            if any((root_dir / PurePosixPath(m.filename).name).is_symlink()
+                   for m in members if m.filename.startswith("root_files/")):
+                raise BackupError("Unsafe root file restore destination")
         staged_db = staging / "db" / "site.db"
         with sqlite3.connect(str(staged_db)) as incoming:
             if incoming.execute("PRAGMA quick_check").fetchone()[0] != "ok":
@@ -165,10 +185,12 @@ def restore_backup(path: Path, db_path: Path, static_dir: Path, upload_dir: Path
             source.backup(target)
 
         for member in members:
-            if not member.filename.startswith("static/"):
+            if not (member.filename.startswith("static/") or member.filename.startswith("root_files/")):
                 continue
             rel = PurePosixPath(member.filename)
-            if rel.parts[1] == "uploads":
+            if rel.parts[0] == "root_files":
+                target = root_dir / rel.parts[1]
+            elif rel.parts[1] == "uploads":
                 target = upload_dir.joinpath(*rel.parts[2:])
             else:
                 target = static_dir.joinpath(*rel.parts[1:])

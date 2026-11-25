@@ -23,3 +23,5 @@ Nginx must forward root URL requests such as `/app-ads.txt` to FastAPI; a direct
 The old `/static/<folder>` entrypoints are compatibility redirects (307), not additional public file mounts. The system static mount explicitly blocks directories registered in the Privileges database. The proxy must forward **both** routes to FastAPI; `/user_files/` must never be configured with an Nginx `alias`.
 
 Before starting FriPeri, back up the site database and `static/gorsel_sorgu`, `static/video_sorgu` directories and external symlink targets independently. The existing backup ZIP intentionally covers the CMS database/uploads, not all external archive bytes.
+
+CMS ZIP backups now include registered Root Files payloads (non-symlink UTF-8 text files) along with their database publication metadata. Backups do **not** copy external symlink targets or the large application datasets under `user_files/`; archive these separately according to your storage/retention policy.

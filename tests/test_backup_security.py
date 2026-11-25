@@ -94,3 +94,28 @@ def test_corrupt_restore_does_not_replace_running_database(tmp_path):
     with pytest.raises((BackupError, sqlite3.DatabaseError)):
         restore_backup(archive, db, tmp_path / "static", tmp_path / "uploads", tmp_path / ".env")
     assert read_user(db) == "safe"
+
+def test_root_file_is_backed_up_and_restored(tmp_path):
+    from root_files import install_schema
+    db = tmp_path / "db" / "site.db"
+    make_db(db)
+    with sqlite3.connect(db) as conn:
+        install_schema(conn)
+        conn.execute("INSERT INTO root_files(name,published,updated_at) VALUES('app-ads.txt',1,'now')")
+    static = tmp_path / "static"
+    images = static / "images"
+    images.mkdir(parents=True)
+    uploads = static / "uploads"
+    uploads.mkdir(parents=True)
+    root = tmp_path / "root_files"
+    root.mkdir()
+    (root / "app-ads.txt").write_text("google.com, publisher, DIRECT, relationship")
+    archive = tmp_path / "backup.zip"
+    create_backup(archive, db, static, uploads, tmp_path / ".env", root)
+    with zipfile.ZipFile(archive) as zip_file:
+        assert "root_files/app-ads.txt" in zip_file.namelist()
+    (root / "app-ads.txt").unlink()
+    restore_backup(archive, db, static, uploads, tmp_path / ".env", root)
+    assert (root / "app-ads.txt").is_file()
+    with sqlite3.connect(db) as conn:
+        assert conn.execute("SELECT published FROM root_files WHERE name='app-ads.txt'").fetchone()[0] == 1

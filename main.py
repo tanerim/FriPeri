@@ -1248,7 +1248,7 @@ async def backup_create(request: Request) -> Response:
     filename = "backup-" + datetime.now(timezone.utc).strftime("%Y-%m-%d_%H-%M-%S") + "-" + secrets.token_hex(4) + ".zip"
     path = safe_backup_path(BACKUP_DIR, filename)
     try:
-        write_secure_backup(path, DB_PATH, STATIC_DIR, UPLOAD_DIR, BASE_DIR / ".env")
+        write_secure_backup(path, DB_PATH, STATIC_DIR, UPLOAD_DIR, BASE_DIR / ".env", ROOT_FILES_DIR)
         validate_backup(path)
     except (BackupError, OSError, sqlite3.Error, zipfile.BadZipFile):
         path.unlink(missing_ok=True)
@@ -1304,7 +1304,7 @@ async def backup_restore(request: Request, backup_name: str) -> Response:
         path = safe_backup_path(BACKUP_DIR, backup_name)
         if not path.is_file():
             return _backup_redirect(t(lang, "admin.backup_not_found"))
-        restore_secure_backup(path, DB_PATH, STATIC_DIR, UPLOAD_DIR, BASE_DIR / ".env")
+        restore_secure_backup(path, DB_PATH, STATIC_DIR, UPLOAD_DIR, BASE_DIR / ".env", ROOT_FILES_DIR)
         refresh_secret()
     except (BackupError, OSError, sqlite3.Error, zipfile.BadZipFile):
         logging.getLogger(__name__).exception("Backup restore failed")
