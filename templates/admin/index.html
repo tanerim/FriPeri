@@ -42,6 +42,57 @@
       {% endfor %}
     </div>
 
+    {% if dashboard_extra %}
+    <div class="dashboard-extended-stats" aria-label="Site and access metrics">
+      {% for title, value, destination, note in [
+        ('Published pages',dashboard_extra.published_pages,'/admin/pages','of ' ~ dashboard_extra.total_pages ~ ' total pages'),
+        ('CMS users',dashboard_extra.users,'/admin/users','Site management accounts'),
+        ('Private directories',dashboard_extra.private_directories,'/admin/privileges','Protected static folders'),
+        ('Access accounts',dashboard_extra.access_accounts,'/admin/privileges','Separate from CMS users'),
+        ('Pending requests',dashboard_extra.pending_requests,'/admin/privileges','Awaiting approval')
+      ] %}
+      <a class="dashboard-extra-stat" href="{{ destination }}">
+        <span>{{ title }}</span><strong>{{ value }}</strong><small>{{ note }}</small>
+      </a>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    <section class="admin-card dashboard-analytics" aria-label="Content analytics">
+      <div class="dashboard-analytics-head">
+        <div><h2>Content overview</h2><p>Live counts from your content and access records.</p></div>
+      </div>
+      <div class="dashboard-analytics-grid">
+        <div class="dashboard-chart">
+          <h3>Post publishing status</h3>
+          <p class="dashboard-chart-caption">{{ counts.total }} posts total</p>
+          {% set post_total = counts.total or 1 %}
+          <div class="dashboard-stacked-bar" role="img" aria-label="{{ counts.published }} published posts and {{ counts.drafts }} draft posts">
+            <span class="dashboard-bar-published" style="width:{{ (counts.published / post_total * 100) | round(2) }}%"></span>
+            <span class="dashboard-bar-draft" style="width:{{ (counts.drafts / post_total * 100) | round(2) }}%"></span>
+          </div>
+          <div class="dashboard-legend"><span><i class="legend-published"></i>Published <b>{{ counts.published }}</b></span><span><i class="legend-draft"></i>Drafts <b>{{ counts.drafts }}</b></span></div>
+        </div>
+        {% if dashboard_extra %}
+        <div class="dashboard-chart">
+          <h3>Page publishing status</h3>
+          <p class="dashboard-chart-caption">{{ dashboard_extra.total_pages }} pages total</p>
+          {% set page_total = dashboard_extra.total_pages or 1 %}
+          <div class="dashboard-stacked-bar" role="img" aria-label="{{ dashboard_extra.published_pages }} published and {{ dashboard_extra.total_pages - dashboard_extra.published_pages }} unpublished pages">
+            <span class="dashboard-bar-published" style="width:{{ (dashboard_extra.published_pages / page_total * 100) | round(2) }}%"></span>
+            <span class="dashboard-bar-draft" style="width:{{ ((dashboard_extra.total_pages - dashboard_extra.published_pages) / page_total * 100) | round(2) }}%"></span>
+          </div>
+          <div class="dashboard-legend"><span><i class="legend-published"></i>Published <b>{{ dashboard_extra.published_pages }}</b></span><span><i class="legend-draft"></i>Unpublished <b>{{ dashboard_extra.total_pages - dashboard_extra.published_pages }}</b></span></div>
+        </div>
+        {% else %}
+        <div class="dashboard-chart">
+          <h3>Categories</h3><p class="dashboard-chart-caption">{{ category_counts | length }} available categories</p>
+          <div class="dashboard-legend"><span>Posts are shown by category below.</span></div>
+        </div>
+        {% endif %}
+      </div>
+    </section>
+
     {# 2-column layout: posts left, categories right #}
     <div class="dashboard-columns">
       <section class="admin-card dashboard-panel">
