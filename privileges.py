@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import hashlib
 import hmac
+import logging
 import os
 import re
 import sqlite3
@@ -20,6 +21,7 @@ from fastapi.responses import HTMLResponse, RedirectResponse, Response
 from fastapi.staticfiles import StaticFiles
 from login_security import blocked as login_blocked, failed as login_failed, succeeded as login_succeeded
 
+logger = logging.getLogger("friperi.privileges")
 COOKIE = "friperi_privilege_session"
 CSRF_COOKIE = "friperi_privilege_csrf"
 SESSION_AGE = 7 * 24 * 3600
@@ -217,45 +219,52 @@ def create_router(*, db, static_dir: Path, secret, secure_cookie: bool,
                             status_code=status, headers=HEADERS)
 
     def valid_public_form(request, form):
-        # Keep same-origin protection while supporting proxies that send the
-        # external host in X-Forwarded-Host rather than Host. Fetch Metadata
-        # explicitly rejects cross-site browser requests, regardless of headers.
-        if request.headers.get("sec-fetch-site", "").lower() == "cross-site":
+        # Never log passwords, session cookies, or CSRF tokens.
+        def reject(reason):
+            logger.warning("Privilege form rejected: reason=%s path=%s host=%r origin=%r fetch_site=%r",
+                           reason, request.url.path,
+                           request.headers.get("host", ""),
+                           request.headers.get("origin", ""),
+                           request.headers.get("sec-fetch-site", ""))
             return False
+
+        if request.headers.get("sec-fetch-site", "").lower() == "cross-site":
+            return reject("cross_site")
         origin = request.headers.get("origin", "")
         if origin:
             parsed = urlsplit(origin)
-            external = parsed.netloc.lower().rstrip(".")
-            hosts = {request.headers.get("host", "").lower().rstrip(".")}
-            forwarded = request.headers.get("x-forwarded-host", "")
-            if forwarded and "," not in forwarded:
-                hosts.add(forwarded.lower().rstrip("."))
+            if parsed.scheme not in ("http", "https") or not parsed.netloc:
+                return reject("invalid_origin")
+            host = request.headers.get("host", "").lower().rstrip(".")
             configured = os.getenv("FRIPERI_PUBLIC_ORIGIN", "").strip()
+            allowed_hosts = {host} if host else set()
             if configured:
                 configured_url = urlsplit(configured)
                 if configured_url.scheme not in ("http", "https") or not configured_url.netloc:
-                    return False
-                hosts.add(configured_url.netloc.lower().rstrip("."))
-            if (parsed.scheme not in ("http", "https")
-                    or not external or external not in hosts):
-                return False
-
+                    return reject("invalid_public_origin_config")
+                # Explicitly configured public origin is trusted. Do not trust
+                # client-controlled X-Forwarded-Host without proxy validation.
+                allowed_hosts.add(configured_url.netloc.lower().rstrip("."))
+            if parsed.netloc.lower().rstrip(".") not in allowed_hosts:
+                return reject("origin_host_mismatch")
         supplied = str(form.get("csrf", ""))
         parts = supplied.split(":")
         if len(parts) != 3:
-            return False
+            return reject("missing_or_malformed_csrf")
         expiry, nonce, signature = parts
         if (not expiry.isdecimal() or not re.fullmatch(r"[0-9a-f]{32}", nonce)
                 or not re.fullmatch(r"[0-9a-f]{64}", signature)):
-            return False
+            return reject("invalid_csrf_format")
         now_time = int(time.time())
         if not now_time <= int(expiry) <= now_time + 3600:
-            return False
+            return reject("expired_or_future_csrf")
         payload = f"{expiry}:{nonce}"
         expected = hmac.new(secret().encode(),
                             ("privilege-csrf:" + payload).encode(),
                             hashlib.sha256).hexdigest()
-        return hmac.compare_digest(signature, expected)
+        if not hmac.compare_digest(signature, expected):
+            return reject("csrf_signature_mismatch")
+        return True
 
     def rejected_public_form(request, folder):
         # Keep CSRF protection while explaining the recovery action.
