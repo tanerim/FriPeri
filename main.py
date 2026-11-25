@@ -3405,6 +3405,11 @@ async def delete_account(account_id: int, request: Request) -> Response:
     return RedirectResponse("/admin/users", status_code=303)
 
 
+def privilege_site_name():
+    with get_db() as conn:
+        return get_site_settings(conn).get("site_name", "FriPeri")
+
+
 # Directory-scoped privileges are deliberately isolated from CMS users.
 app.include_router(create_router(
     db=get_db,
@@ -3416,6 +3421,7 @@ app.include_router(create_router(
     admin_account=actor,
     admin_token=lambda request, username: settings_form_token(request, username),
     now=now_iso,
+    site_name=privilege_site_name,
     render_admin=lambda request, template, title, context, username:
         render_template(request, template, title, context, username),
 ))
