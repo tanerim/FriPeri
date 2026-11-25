@@ -204,13 +204,27 @@ def create_router(*, db, static_dir: Path, secret, secure_cookie: bool,
         return response
 
     def valid_public_form(request, form):
-        # SameSite protects cross-site cookie use, Origin check adds protection.
-        origin = request.headers.get("origin")
-        if origin and urlsplit(origin).netloc != urlsplit(str(request.url)).netloc:
+        # Compare the submitted Origin to the actual forwarded Host. A TLS
+        # terminator may create request.url from an internal HTTP upstream.
+        origin = request.headers.get("origin", "")
+        if origin:
+            parsed = urlsplit(origin)
+            host = request.headers.get("host", "").lower().rstrip(".")
+            if (parsed.scheme not in ("http", "https")
+                    or not host or parsed.netloc.lower().rstrip(".") != host):
+                return False
+        elif request.headers.get("sec-fetch-site", "") == "cross-site":
             return False
         supplied = str(form.get("csrf", ""))
         cookie = request.cookies.get(CSRF_COOKIE, "")
         return bool(supplied and cookie and hmac.compare_digest(supplied, cookie))
+
+    def rejected_public_form(request, folder):
+        # Keep the CSRF protection and show a recoverable error, not a blank 403.
+        body = ('<p role="alert">Your form could not be verified. Please reload '
+                'the access page and try again. Enable cookies for this site.</p>'
+                f'<p><a href="{access_url(folder)}">Return to access page</a></p>')
+        return csrf_page(request, shell("Form verification failed", folder, body), status=403)
 
     def shell(title, folder, body, next_path=""):
         from html import escape as e
@@ -271,7 +285,7 @@ def create_router(*, db, static_dir: Path, secret, secure_cookie: bool,
             return Response(status_code=404)
         form = await request.form()
         if not valid_public_form(request, form):
-            return Response(status_code=403)
+            return rejected_public_form(request, folder)
         ip = request.client.host if request.client else "unknown"
         registration_key = "privilege-registration:" + ip
         if login_blocked(ip, registration_key):
@@ -307,7 +321,7 @@ def create_router(*, db, static_dir: Path, secret, secure_cookie: bool,
             return Response(status_code=404)
         form = await request.form()
         if not valid_public_form(request,form):
-            return Response(status_code=403)
+            return rejected_public_form(request, folder)
         email, password = str(form.get("email","")).strip().lower(),str(form.get("password",""))
         key="priv:"+email
         ip=request.client.host if request.client else "unknown"
@@ -330,7 +344,7 @@ def create_router(*, db, static_dir: Path, secret, secure_cookie: bool,
             return Response(status_code=404)
         form=await request.form()
         if not valid_public_form(request,form):
-            return Response(status_code=403)
+            return rejected_public_form(request, folder)
         with db() as conn:
             account=current_account(request,conn,secret())
             if not account:return Response(status_code=401)
