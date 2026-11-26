@@ -104,6 +104,9 @@ app = FastAPI(
     description=os.getenv("SITE_DESCRIPTION", "Personal publishing system"),
     version="2.0.0",
     lifespan=lifespan,
+    docs_url=None,
+    redoc_url=None,
+    openapi_url=None,
 )
 @app.api_route("/static/images/friperi-section-{digest}.svg", methods=["GET", "HEAD"], include_in_schema=False)
 async def section_svg(digest: str, request: Request) -> Response:
